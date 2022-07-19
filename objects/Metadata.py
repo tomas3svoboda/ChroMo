@@ -1,0 +1,4 @@
+
+class Metadata:
+    date = ""
+    description = ""
