@@ -7,7 +7,7 @@ Contains:
     feed_volume (float) - volume of feed
     flow_rate (float) - flow rate
 """
-class Experiment_condition:
+class ExperimentCondition:
     column_diameter = 0.0
     column_length = 0.0
     feed_volume = 0.0

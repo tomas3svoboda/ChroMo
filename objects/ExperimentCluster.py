@@ -6,6 +6,6 @@ Contains:
     cluster (list(Experiment_component)) - cluster of components
     metadata - additional information
 """
-class Experiment_cluster:
+class ExperimentCluster:
     cluster = list()
     metadata = Metadata()

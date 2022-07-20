@@ -6,6 +6,6 @@ Contains:
     metadata (Metadata) - additional information
     experiments (set(Experiment)) - set of experiments
 """
-class Experiment_set:
+class ExperimentSet:
     metadata = Metadata()
     experiments = set()

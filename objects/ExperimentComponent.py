@@ -8,7 +8,7 @@ Contains:
     name (string) - name of component
     experiment (Experiment) - reference to experiment
 """
-class Experiment_component:
+class ExperimentComponent:
     concentration_time = pd.DataFrame()
     feed_concentration = 0.0
     name = ""

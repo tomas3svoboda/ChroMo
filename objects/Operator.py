@@ -1,9 +1,9 @@
 import pandas as pd
 from os import walk
-from objects.Experiment_set import Experiment_set
-from objects.Experiment_component import Experiment_component
+from objects.ExperimentSet import ExperimentSet
+from objects.ExperimentComponent import ExperimentComponent
 from objects.Experiment import Experiment
-from objects.Experiment_cluster import Experiment_cluster
+from objects.ExperimentCluster import ExperimentCluster
 import datetime
 
 """
@@ -44,7 +44,7 @@ class Operator:
         return par1, par2, par3, par4
 
     def Load_experiment_set(self, path):
-        experiment_set = Experiment_set()
+        experiment_set = ExperimentSet()
         filenames = next(walk(path), (None, None, []))[2]
         for file in filenames:
             df = pd.read_excel(path + "\\" + file)
@@ -66,7 +66,7 @@ class Operator:
             experiment.experiment_condition.column_diameter = column_diameter
             experiment.experiment_condition.flow_rate = flow_rate
             for index in range(columnNames[1:].size):
-                experiment_component = Experiment_component()
+                experiment_component = ExperimentComponent()
                 experiment_component.concentration_time = df.iloc[:, [0, 1+index]]
                 experiment_component.name = columnNames[1+index]
                 experiment_component.feed_concentration = feed_concentrations[index]
@@ -86,7 +86,7 @@ class Operator:
                     component_dict[component.name].append(component)
         clusters = list()
         for key, value in component_dict.items():
-            cluster = Experiment_cluster()
+            cluster = ExperimentCluster()
             cluster.cluster = value
             cluster.metadata.description = "Cluser by component " + key
             clusters.append(cluster)

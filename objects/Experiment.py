@@ -1,6 +1,6 @@
 from Metadata import Metadata
-from objects.Experiment_condition import Experiment_condition
-from objects.Experiment_component import Experiment_component
+from objects.ExperimentCondition import ExperimentCondition
+from objects.ExperimentComponent import ExperimentComponent
 
 """
 Class representing experiments
@@ -11,5 +11,5 @@ Contains:
 """
 class Experiment:
     metadata = Metadata()
-    experiment_condition = Experiment_condition()
+    experiment_condition = ExperimentCondition()
     experiment_components = list()
