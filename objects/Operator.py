@@ -1,12 +1,15 @@
 import pandas as pd
 from os import walk
-from Experiment_set import Experiment_set
-from Experiment_component import Experiment_component
-from Experiment import Experiment
+from objects.Experiment_set import Experiment_set
+from objects.Experiment_component import Experiment_component
+from objects.Experiment import Experiment
+from objects.Experiment_cluster import Experiment_cluster
+import datetime
 
-
+"""
+Main class orchestrating program functions and user interface
+"""
 class Operator:
-    expSet = Experiment_set()
     def Start(self):
         """
         par1, par2, par3, par4 = self.Setting_parameters()
@@ -14,7 +17,7 @@ class Operator:
         path = input('Enter path to Experiment set: ')
         """
         path = "C:\\Users\\Adam\\ChoMo\\docu\\TestExperimentSet1"
-        self.Load_experiment_set(path)
+        experiment_set = self.Load_experiment_set(path)
         """
         n = 3
         print(len(self.expSet.experiments))
@@ -29,17 +32,19 @@ class Operator:
         print(self.expSet.experiments[0].experiment_components[n].experiment)
         print(self.expSet.experiments[0])
         """
-        component_clusters = self.Cluster_by_component()
-        print(component_clusters)
+        component_clusters = self.Cluster_by_component(experiment_set)
+        print(component_clusters[0].cluster)
+        print(component_clusters[0].metadata.description)
 
     def Setting_parameters(self):
-        par1 = input('Enter parameter 1: ')
-        par2 = input('Enter parameter 2: ')
-        par3 = input('Enter parameter 3: ')
-        par4 = input('Enter parameter 4: ')
+        par1 = float(input('Enter parameter 1: '))
+        par2 = float(input('Enter parameter 2: '))
+        par3 = float(input('Enter parameter 3: '))
+        par4 = float(input('Enter parameter 4: '))
         return par1, par2, par3, par4
 
     def Load_experiment_set(self, path):
+        experiment_set = Experiment_set()
         filenames = next(walk(path), (None, None, []))[2]
         for file in filenames:
             df = pd.read_excel(path + "\\" + file)
@@ -67,16 +72,23 @@ class Operator:
                 experiment_component.feed_concentration = feed_concentrations[index]
                 experiment_component.experiment = experiment
                 experiment.experiment_components.append(experiment_component)
-            self.expSet.experiments.append(experiment)
+            experiment_set.experiments.add(experiment)
+            return experiment_set
 
-    def Cluster_by_component(self):
+    def Cluster_by_component(self, experiment_set):
         component_dict = {}
-        for experiment in self.expSet.experiments:
+        for experiment in experiment_set.experiments:
             for component in experiment.experiment_components:
                 if component.name in component_dict:
                     component_dict[component.name].append(component)
                 else:
                     component_dict[component.name] = list()
                     component_dict[component.name].append(component)
-        return component_dict
+        clusters = list()
+        for key, value in component_dict.items():
+            cluster = Experiment_cluster()
+            cluster.cluster = value
+            cluster.metadata.description = "Cluser by component " + key
+            clusters.append(cluster)
+        return clusters
 
