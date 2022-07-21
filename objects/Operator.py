@@ -17,7 +17,7 @@ class Operator:
         path = input('Enter path to Experiment set: ')
         """
         path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
-        experimentSet = self.Load_experiment_set(path)
+        experimentSet = self.Load_Experiment_Set(path)
         """
         n = 3
         print(len(self.expSet.experiments))
@@ -37,7 +37,7 @@ class Operator:
         print(component_clusters[0].clusters)
         print(component_clusters[0].metadata.description)
         """
-        condition_cluster = self.Cluster_by_conditions(experimentSet)
+        condition_cluster = self.Cluster_By_Conditions(experimentSet)
         for key, values in condition_cluster.clusters.items():
             print(key, ":")
             for value in values:
@@ -45,14 +45,14 @@ class Operator:
                       value.experiment.experimentCondition.columnDiameter, value.experiment.experimentCondition.columnLength,
                       value.experiment.experimentCondition.flowRate)
 
-    def Setting_parameters(self):
+    def Setting_Parameters(self):
         par1 = float(input('Enter parameter 1: '))
         par2 = float(input('Enter parameter 2: '))
         par3 = float(input('Enter parameter 3: '))
         par4 = float(input('Enter parameter 4: '))
         return par1, par2, par3, par4
 
-    def Load_experiment_set(self, path):
+    def Load_Experiment_Set(self, path):
         experimentSet = ExperimentSet()
         filenames = next(walk(path), (None, None, []))[2]
         for file in filenames:
@@ -85,7 +85,7 @@ class Operator:
             experimentSet.experiments.append(experiment)
         return experimentSet
 
-    def Cluster_by_component(self, experiment_set):
+    def Cluster_By_Component(self, experiment_set):
         component_dict = {}
         for experiment in experiment_set.experiments:
             for component in experiment.experimentComponents:
@@ -99,25 +99,25 @@ class Operator:
         clusters.metadata.description = "Clusters by component"
         return clusters
 
-    def Cluster_by_conditions(self, experiment_set):
+    def Cluster_By_Conditions(self, experiment_set):
         clusterByCondition = ExperimentClusters()
         for experiment in experiment_set.experiments:
             for component in experiment.experimentComponents:
                 foundFlag = False
                 for key, value in clusterByCondition.clusters.items():
-                    if self.Cluster_match(value[0], component):
+                    if self.Cluster_Match(value[0], component):
                         value.append(component)
                         foundFlag = True
                 if not foundFlag:
-                    clusterByCondition.clusters[self.Create_key(component)] = list()
-                    clusterByCondition.clusters[self.Create_key(component)].append(component)
+                    clusterByCondition.clusters[self.Create_Key(component)] = list()
+                    clusterByCondition.clusters[self.Create_Key(component)].append(component)
         return clusterByCondition
 
 
     """
     Calculates if comp2 is close to comp1 with tolerance(default 0.05)
     """
-    def Cluster_match(self, comp1, comp2, tolerance = 0.05):
+    def Cluster_Match(self, comp1, comp2, tolerance = 0.05):
         cond1 = comp1.experiment.experimentCondition
         cond2 = comp2.experiment.experimentCondition
         if(comp1.name == comp2.name and
@@ -132,7 +132,7 @@ class Operator:
     """
     Creates key for cluster dictionary from component
     """
-    def Create_key(self, comp):
+    def Create_Key(self, comp):
         name = comp.name
         feedConc = str(comp.feedConcentration)
         colDia = str(comp.experiment.experimentCondition.columnDiameter)
