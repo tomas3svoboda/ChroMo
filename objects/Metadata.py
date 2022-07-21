@@ -6,5 +6,6 @@ Contains:
     description (string) - description
 """
 class Metadata:
-    date = ""
-    description = ""
+    def __init__(self):
+        self.date = ""
+        self.description = ""

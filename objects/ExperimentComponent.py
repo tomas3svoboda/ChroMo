@@ -9,7 +9,8 @@ Contains:
     experiment (Experiment) - reference to experiment
 """
 class ExperimentComponent:
-    concentration_time = pd.DataFrame()
-    feed_concentration = 0.0
-    name = ""
-    experiment = 0
+    def __init__(self):
+        self.concentrationTime = pd.DataFrame()
+        self.feedConcentration = 0.0
+        self.name = ""
+        self.experiment = 0

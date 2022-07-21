@@ -1,11 +1,12 @@
 from Metadata import Metadata
 
 """
-Cluster of components
+List of clusters of components
 Contains:
     cluster (list(Experiment_component)) - cluster of components
     metadata - additional information
 """
-class ExperimentCluster:
-    cluster = list()
-    metadata = Metadata()
+class ExperimentClusters:
+    def __init__(self):
+        self.clusters = dict()
+        self.metadata = Metadata()

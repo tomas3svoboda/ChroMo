@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/ChoMo.iml" filepath="$PROJECT_DIR$/.idea/ChoMo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ChroMo.iml" filepath="$PROJECT_DIR$/.idea/ChroMo.iml" />
     </modules>
   </component>
 </project>

@@ -10,6 +10,7 @@ Contains:
     experiment_components (list(Experiment_component)) - list of components and their concentration in time
 """
 class Experiment:
-    metadata = Metadata()
-    experiment_condition = ExperimentCondition()
-    experiment_components = list()
+    def __init__(self):
+        self.metadata = Metadata()
+        self.experimentCondition = ExperimentCondition()
+        self.experimentComponents = list()

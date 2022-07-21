@@ -7,5 +7,6 @@ Contains:
     experiments (set(Experiment)) - set of experiments
 """
 class ExperimentSet:
-    metadata = Metadata()
-    experiments = set()
+    def __init__(self):
+        self.metadata = Metadata()
+        self.experiments = list()
