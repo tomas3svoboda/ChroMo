@@ -5,7 +5,7 @@ from objects.ExperimentComponent import ExperimentComponent
 from objects.Experiment import Experiment
 from objects.ExperimentClusters import ExperimentClusters
 import datetime
-
+from functions.Fit_Gauss import Fit_Gauss
 """
 Main class orchestrating program functions and user interface
 """
@@ -16,8 +16,10 @@ class Operator:
         print(par1, par2, par3, par4)
         path = input('Enter path to Experiment set: ')
         """
-        path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
+        path = "C:\\Users\\z004d8nt\\ChoMo\\docu\\TestExperimentSet1"
         experimentSet = self.Load_Experiment_Set(path)
+        fitGauss = Fit_Gauss(experimentSet)
+        print(fitGauss.experiments[0].conponent[0].concentrationTime)
         """
         n = 3
         print(len(self.expSet.experiments))
