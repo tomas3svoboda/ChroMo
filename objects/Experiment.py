@@ -1,4 +1,4 @@
-from Metadata import Metadata
+from objects.Metadata import Metadata
 from objects.ExperimentCondition import ExperimentCondition
 from objects.ExperimentComponent import ExperimentComponent
 

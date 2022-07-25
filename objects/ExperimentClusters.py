@@ -1,4 +1,4 @@
-from Metadata import Metadata
+from objects.Metadata import Metadata
 
 """
 List of clusters of components
