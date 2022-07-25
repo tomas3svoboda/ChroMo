@@ -37,8 +37,8 @@ class Operator:
         print(component_clusters[0].clusters)
         print(component_clusters[0].metadata.description)
         """
-        condition_cluster = self.Cluster_By_Conditions(experimentSet)
-        for key, values in condition_cluster.clusters.items():
+        experimentClusterCompCond = self.Cluster_By_Condition2(experimentSet)
+        for key, values in experimentClusterCompCond.clusters.items():
             print(key, ":")
             for value in values:
                 print("   ", value.name,value.feedConcentration, value.experiment.experimentCondition.feedVolume,
@@ -81,27 +81,26 @@ class Operator:
                 experimentComponent.feedConcentration = float(feedConcentrations[index].replace(',', '.'))
                 experimentComponent.experiment = experiment
                 experiment.experimentComponents.append(experimentComponent)
-                print(len(experiment.experimentComponents))
             experimentSet.experiments.append(experiment)
         return experimentSet
 
-    def Cluster_By_Component(self, experiment_set):
-        component_dict = {}
-        for experiment in experiment_set.experiments:
+    def Cluster_By_Component(self, experimentSet):
+        componentDict = {}
+        for experiment in experimentSet.experiments:
             for component in experiment.experimentComponents:
-                if component.name in component_dict:
-                    component_dict[component.name].append(component)
+                if component.name in componentDict:
+                    componentDict[component.name].append(component)
                 else:
-                    component_dict[component.name] = list()
-                    component_dict[component.name].append(component)
+                    componentDict[component.name] = list()
+                    componentDict[component.name].append(component)
         clusters = ExperimentClusters()
-        clusters.clusters = component_dict
+        clusters.clusters = componentDict
         clusters.metadata.description = "Clusters by component"
         return clusters
 
-    def Cluster_By_Conditions(self, experiment_set):
+    def Cluster_By_Condition(self, experimentSet):
         clusterByCondition = ExperimentClusters()
-        for experiment in experiment_set.experiments:
+        for experiment in experimentSet.experiments:
             for component in experiment.experimentComponents:
                 foundFlag = False
                 for key, value in clusterByCondition.clusters.items():
@@ -111,6 +110,27 @@ class Operator:
                 if not foundFlag:
                     clusterByCondition.clusters[self.Create_Key(component)] = list()
                     clusterByCondition.clusters[self.Create_Key(component)].append(component)
+        return clusterByCondition
+
+    def Cluster_By_Condition2(self, experimentSet):
+        clusterByCondition = ExperimentClusters()
+        tmpCompList = list()
+        for experiment in experimentSet.experiments:
+            tmpCompList = tmpCompList + experiment.experimentComponents
+        while len(tmpCompList) > 0:
+            maxCount = 0
+            maxCluster = list()
+            for experimentComp in tmpCompList:
+                tmpCluster = list()
+                tmpCluster.append(experimentComp)
+                for experimentComp2 in tmpCompList:
+                    if experimentComp != experimentComp2 and self.Cluster_Match(experimentComp, experimentComp2):
+                        tmpCluster.append(experimentComp2)
+                if len(tmpCluster) > maxCount:
+                    maxCount = len(tmpCluster)
+                    maxCluster = tmpCluster
+            clusterByCondition.clusters[self.Create_Key(maxCluster[0])] = maxCluster
+            tmpCompList = [x for x in tmpCompList if x not in maxCluster]
         return clusterByCondition
 
 
