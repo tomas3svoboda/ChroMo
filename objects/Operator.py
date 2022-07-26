@@ -6,6 +6,8 @@ from objects.Experiment import Experiment
 from objects.ExperimentClusters import ExperimentClusters
 import datetime
 from functions.Fit_Gauss import Fit_Gauss
+from functions.Ret_Time_Cor import Ret_Time_Cor
+from functions.Remote_DP_Elim import Remote_DP_Elim
 """
 Main class orchestrating program functions and user interface
 """
@@ -16,10 +18,9 @@ class Operator:
         print(par1, par2, par3, par4)
         path = input('Enter path to Experiment set: ')
         """
-        path = "C:\\Users\\z004d8nt\\ChoMo\\docu\\TestExperimentSet1"
+        path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
         experimentSet = self.Load_Experiment_Set(path)
-        fitGauss = Fit_Gauss(experimentSet)
-        print(fitGauss.experiments[0].conponent[0].concentrationTime)
+        print(experimentSet.experiments[0].experimentComponents[0].concentrationTime)
         """
         n = 3
         print(len(self.expSet.experiments))
@@ -46,6 +47,11 @@ class Operator:
                 print("   ", value.name,value.feedConcentration, value.experiment.experimentCondition.feedVolume,
                       value.experiment.experimentCondition.columnDiameter, value.experiment.experimentCondition.columnLength,
                       value.experiment.experimentCondition.flowRate)
+        tmp = self.Deep_Copy_ExperimentSet(experimentSet)
+        tmp2 = Ret_Time_Cor(experimentSet, experimentClusterCompCond)
+        experimentSet = tmp
+        print(tmp2.experiments[0].experimentComponents[0].concentrationTime)
+        print(experimentSet.experiments[0].experimentComponents[0].concentrationTime)
 
     def Setting_Parameters(self):
         par1 = float(input('Enter parameter 1: '))
@@ -58,7 +64,7 @@ class Operator:
         experimentSet = ExperimentSet()
         filenames = next(walk(path), (None, None, []))[2]
         for file in filenames:
-            df = pd.read_excel(path + "\\" + file)
+            df = pd.read_excel(path + "\\" + file, decimal=',')
             description = df.iat[0, 3]
             date = df.iat[2, 3]
             columnLength = df.iat[0, 1]
@@ -79,12 +85,33 @@ class Operator:
             for index in range(columnNames[1:].size):
                 experimentComponent = ExperimentComponent()
                 experimentComponent.concentrationTime = df.iloc[:, [0, 1 + index]]
+                experimentComponent.concentrationTime.reset_index(inplace=True, drop=True)
                 experimentComponent.name = columnNames[1+index]
-                experimentComponent.feedConcentration = float(feedConcentrations[index].replace(',', '.'))
+                experimentComponent.feedConcentration = float(feedConcentrations[index])
                 experimentComponent.experiment = experiment
                 experiment.experimentComponents.append(experimentComponent)
             experimentSet.experiments.append(experiment)
         return experimentSet
+
+    def Deep_Copy_ExperimentSet(self, experimentSet):
+        newExperimentSet = ExperimentSet()
+        for experiment in experimentSet.experiments:
+            newExperiment = Experiment()
+            newExperiment.metadata.date = experiment.metadata.date
+            newExperiment.metadata.description = experiment.metadata.description
+            newExperiment.experimentCondition.feedVolume = experiment.experimentCondition.feedVolume
+            newExperiment.experimentCondition.columnLength = experiment.experimentCondition.columnLength
+            newExperiment.experimentCondition.columnDiameter = experiment.experimentCondition.columnDiameter
+            newExperiment.experimentCondition.flowRate = experiment.experimentCondition.flowRate
+            for experimentComponent in experiment.experimentComponents:
+                newExperimentComponent = ExperimentComponent()
+                newExperimentComponent.concentrationTime = experimentComponent.concentrationTime.copy(deep=True)
+                newExperimentComponent.name = experimentComponent.name
+                newExperimentComponent.feedConcentration = experimentComponent.feedConcentration
+                newExperimentComponent.experiment = newExperiment
+                newExperiment.experimentComponents.append(newExperimentComponent)
+            newExperimentSet.experiments.append(newExperiment)
+        return newExperimentSet
 
     def Cluster_By_Component(self, experimentSet):
         componentDict = {}
