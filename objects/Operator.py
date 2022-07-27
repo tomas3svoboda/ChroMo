@@ -8,6 +8,7 @@ import datetime
 from functions.Fit_Gauss import Fit_Gauss
 from functions.Ret_Time_Cor import Ret_Time_Cor
 from functions.Remote_DP_Elim import Remote_DP_Elim
+from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 """
 Main class orchestrating program functions and user interface
 """
@@ -47,7 +48,7 @@ class Operator:
                 print("   ", value.name,value.feedConcentration, value.experiment.experimentCondition.feedVolume,
                       value.experiment.experimentCondition.columnDiameter, value.experiment.experimentCondition.columnLength,
                       value.experiment.experimentCondition.flowRate)
-        tmp = self.Deep_Copy_ExperimentSet(experimentSet)
+        tmp = Deep_Copy_ExperimentSet(experimentSet)
         tmp2 = Ret_Time_Cor(experimentSet, experimentClusterCompCond)
         experimentSet = tmp
         print(tmp2.experiments[0].experimentComponents[0].concentrationTime)
@@ -92,26 +93,6 @@ class Operator:
                 experiment.experimentComponents.append(experimentComponent)
             experimentSet.experiments.append(experiment)
         return experimentSet
-
-    def Deep_Copy_ExperimentSet(self, experimentSet):
-        newExperimentSet = ExperimentSet()
-        for experiment in experimentSet.experiments:
-            newExperiment = Experiment()
-            newExperiment.metadata.date = experiment.metadata.date
-            newExperiment.metadata.description = experiment.metadata.description
-            newExperiment.experimentCondition.feedVolume = experiment.experimentCondition.feedVolume
-            newExperiment.experimentCondition.columnLength = experiment.experimentCondition.columnLength
-            newExperiment.experimentCondition.columnDiameter = experiment.experimentCondition.columnDiameter
-            newExperiment.experimentCondition.flowRate = experiment.experimentCondition.flowRate
-            for experimentComponent in experiment.experimentComponents:
-                newExperimentComponent = ExperimentComponent()
-                newExperimentComponent.concentrationTime = experimentComponent.concentrationTime.copy(deep=True)
-                newExperimentComponent.name = experimentComponent.name
-                newExperimentComponent.feedConcentration = experimentComponent.feedConcentration
-                newExperimentComponent.experiment = newExperiment
-                newExperiment.experimentComponents.append(newExperimentComponent)
-            newExperimentSet.experiments.append(newExperiment)
-        return newExperimentSet
 
     def Cluster_By_Component(self, experimentSet):
         componentDict = {}
