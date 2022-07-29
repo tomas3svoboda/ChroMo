@@ -3,8 +3,9 @@ import numpy as np
 from scipy.integrate import quad
 from scipy.optimize import leastsq
 from scipy.special import erf
+from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 
-def Fit_Gauss(experimentSetCor1):
+def Fit_Gauss(experimentSet):
 
     # defines a typical gaussian function, of independent variable x,
     # amplitude a, position b, width parameter c, and erf parameter d.
@@ -24,7 +25,9 @@ def Fit_Gauss(experimentSetCor1):
     def residuals(p, y, x, n):
         return y - GaussSum(x, p, n)
 
-    for experiment in experimentSetCor1.experiments:
+    experimentSetGauss = Deep_Copy_ExperimentSet(experimentSet)
+
+    for experiment in experimentSetGauss.experiments:
         for component in experiment.experimentComponents:
             initials = [[6.5, 13.0, 1.0, 0.0]]
             n_value = len(initials)
@@ -45,7 +48,6 @@ def Fit_Gauss(experimentSetCor1):
             result.loc[:, 1] = GaussSum(result[:, 0], const, n_value)
             component.concentrationTime = result
 
-    experimentSetGauss = experimentSetCor1
     return experimentSetGauss
 
 
