@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 from os import walk
 from objects.ExperimentSet import ExperimentSet
 from objects.ExperimentComponent import ExperimentComponent
@@ -9,6 +10,7 @@ from functions.Fit_Gauss import Fit_Gauss
 from functions.Ret_Time_Cor import Ret_Time_Cor
 from functions.Remote_DP_Elim import Remote_DP_Elim
 from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
+from functions.Compare_ExperimentSets import Compare_ExperimentSets
 """
 Main class orchestrating program functions and user interface
 """
@@ -21,38 +23,10 @@ class Operator:
         """
         path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
         experimentSet = self.Load_Experiment_Set(path)
-        print(experimentSet.experiments[0].experimentComponents[0].concentrationTime)
-        """
-        n = 3
-        print(len(self.expSet.experiments))
-        print(self.expSet.experiments[0].metadata.date)
-        print(self.expSet.experiments[0].metadata.description)
-        print(self.expSet.experiments[0].experiment_condition.column_length)
-        print(self.expSet.experiments[0].experiment_condition.column_diameter)
-        print(self.expSet.experiments[0].experiment_condition.feed_volume)
-        print(self.expSet.experiments[0].experiment_components[n].name)
-        print(self.expSet.experiments[0].experiment_components[n].feed_concentration)
-        print(self.expSet.experiments[0].experiment_components[n].concentration_time)
-        print(self.expSet.experiments[0].experiment_components[n].experiment)
-        print(self.expSet.experiments[0])
-        """
-        """
-        component_clusters = self.Cluster_by_component(experimentSet)
-        print(component_clusters[0].clusters)
-        print(component_clusters[0].metadata.description)
-        """
-        experimentClusterCompCond = self.Cluster_By_Condition2(experimentSet)
-        for key, values in experimentClusterCompCond.clusters.items():
-            print(key, ":")
-            for value in values:
-                print("   ", value.name,value.feedConcentration, value.experiment.experimentCondition.feedVolume,
-                      value.experiment.experimentCondition.columnDiameter, value.experiment.experimentCondition.columnLength,
-                      value.experiment.experimentCondition.flowRate)
-        tmp = Deep_Copy_ExperimentSet(experimentSet)
-        tmp2 = Ret_Time_Cor(experimentSet, experimentClusterCompCond)
-        experimentSet = tmp
-        print(tmp2.experiments[0].experimentComponents[0].concentrationTime)
-        print(experimentSet.experiments[0].experimentComponents[0].concentrationTime)
+        experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
+        experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
+        Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
+        Compare_ExperimentSets(experimentSet, experimentSetCopy)
 
     def Setting_Parameters(self):
         par1 = float(input('Enter parameter 1: '))
@@ -85,7 +59,7 @@ class Operator:
             experiment.experimentCondition.flowRate = float(flowRate)
             for index in range(columnNames[1:].size):
                 experimentComponent = ExperimentComponent()
-                experimentComponent.concentrationTime = df.iloc[:, [0, 1 + index]]
+                experimentComponent.concentrationTime = df.iloc[:, [0, 1 + index]].astype(float)
                 experimentComponent.concentrationTime.reset_index(inplace=True, drop=True)
                 experimentComponent.name = columnNames[1+index]
                 experimentComponent.feedConcentration = float(feedConcentrations[index])
@@ -170,3 +144,7 @@ class Operator:
         feedVol = str(comp.experiment.experimentCondition.feedVolume)
         flowRate = str(comp.experiment.experimentCondition.flowRate)
         return ":".join([name, feedConc, colDia, colLen, feedVol, flowRate])
+
+    def Print_Component_Graph(self, experimentComponent):
+        experimentComponent.concentrationTime.plot.line(x='Time')
+        plt.show()
