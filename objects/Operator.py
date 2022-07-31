@@ -11,6 +11,7 @@ from functions.Ret_Time_Cor import Ret_Time_Cor
 from functions.Remote_DP_Elim import Remote_DP_Elim
 from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 from functions.Compare_ExperimentSets import Compare_ExperimentSets
+from functions.Mass_Balance_Cor import Mass_Balance_Cor
 """
 Main class orchestrating program functions and user interface
 """

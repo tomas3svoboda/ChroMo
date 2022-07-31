@@ -10,6 +10,6 @@ Contains:
 class ExperimentCondition:
     def __init__(self):
         self.columnDiameter = 0.0
-        self.olumnLength = 0.0
+        self.columnLength = 0.0
         self.feedVolume = 0.0
         self.flowRate = 0.0

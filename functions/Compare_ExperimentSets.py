@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+import pandas as pd
+
 
 def Compare_ExperimentSets(experimentSet1, experimentSet2):
     flag = True
@@ -19,12 +21,19 @@ def Compare_ExperimentSets(experimentSet1, experimentSet2):
                 while True:
                     i = input("Print?[Y - yes, N - no, E - exit]")
                     if i == "Y":
-                        tmpDF = comp1.concentrationTime.copy()
-                        tmpDF['Time_2'] = comp2.concentrationTime.loc[:, 'Time']
-                        tmpDF[comp2.name + '_2'] = comp2.concentrationTime.loc[:, comp2.name]
-                        print(tmpDF)
-                        comp1.concentrationTime.plot.line(x='Time')
-                        comp2.concentrationTime.plot.line(x='Time')
+                        """
+                        if len(comp1.concentrationTime.index) > len(comp2.concentrationTime.index):
+                            tmp1 = comp1
+                            tmp2 = comp2
+                        else:
+                            tmp1 = comp2
+                            tmp1 = comp1
+                        """
+                        newDF = pd.concat([comp1.concentrationTime, comp2.concentrationTime], axis=1)
+                        pd.set_option('display.max_rows', None)
+                        print(newDF)
+                        comp1.concentrationTime.plot.line(x=0)
+                        comp2.concentrationTime.plot.line(x=0)
                         plt.show()
                         break
                     if i == "N":

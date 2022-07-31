@@ -43,7 +43,7 @@ def Fit_Gauss(experimentSet):
 
             result = pd.DataFrame()
             result.loc[:, 0] = np.linspace(0, max(data_set[:, 0]), 200)
-            result.loc[:, 1] = GaussSum(result[:, 0], const, n_value)
+            result.loc[:, 1] = GaussSum(result.iloc[:, 0], const, n_value)
             component.concentrationTime = result
 
     return experimentSet
