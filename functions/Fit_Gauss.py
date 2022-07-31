@@ -25,9 +25,7 @@ def Fit_Gauss(experimentSet):
     def residuals(p, y, x, n):
         return y - GaussSum(x, p, n)
 
-    experimentSetGauss = Deep_Copy_ExperimentSet(experimentSet)
-
-    for experiment in experimentSetGauss.experiments:
+    for experiment in experimentSet.experiments:
         for component in experiment.experimentComponents:
             initials = [[6.5, 13.0, 1.0, 0.0]]
             n_value = len(initials)
@@ -48,6 +46,6 @@ def Fit_Gauss(experimentSet):
             result.loc[:, 1] = GaussSum(result[:, 0], const, n_value)
             component.concentrationTime = result
 
-    return experimentSetGauss
+    return experimentSet
 
 

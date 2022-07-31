@@ -24,8 +24,9 @@ class Operator:
         path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
         experimentSet = self.Load_Experiment_Set(path)
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
-        experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
-        Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
+        #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
+        #Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
+        experimentSetCopy = Fit_Gauss(experimentSetCopy)
         Compare_ExperimentSets(experimentSet, experimentSetCopy)
 
     def Setting_Parameters(self):
