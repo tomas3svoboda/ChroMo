@@ -8,10 +8,10 @@ def Deep_Copy_ExperimentSet(experimentSet):
         newExperiment = Experiment()
         newExperiment.metadata.date = experiment.metadata.date
         newExperiment.metadata.description = experiment.metadata.description
+        newExperiment.experimentCondition.flowRate = experiment.experimentCondition.flowRate
         newExperiment.experimentCondition.feedVolume = experiment.experimentCondition.feedVolume
         newExperiment.experimentCondition.columnLength = experiment.experimentCondition.columnLength
         newExperiment.experimentCondition.columnDiameter = experiment.experimentCondition.columnDiameter
-        newExperiment.experimentCondition.flowRate = experiment.experimentCondition.flowRate
         for experimentComponent in experiment.experimentComponents:
             newExperimentComponent = ExperimentComponent()
             newExperimentComponent.concentrationTime = experimentComponent.concentrationTime.copy(deep=True)

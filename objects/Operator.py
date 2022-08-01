@@ -25,10 +25,13 @@ class Operator:
         path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
         experimentSet = self.Load_Experiment_Set(path)
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
+        experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
+        print(experimentSet.experiments[0].experimentCondition.feedTime)
+        print(experimentSetCor1.experiments[0].experimentCondition.feedTime)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
-        experimentSetCopy = Fit_Gauss(experimentSetCopy)
-        Compare_ExperimentSets(experimentSet, experimentSetCopy)
+        #experimentSetCopy = Fit_Gauss(experimentSetCopy)
+        #Compare_ExperimentSets(experimentSet, experimentSetCopy)
 
     def Setting_Parameters(self):
         par1 = float(input('Enter parameter 1: '))
@@ -55,10 +58,10 @@ class Operator:
             experiment = Experiment()
             experiment.metadata.date = date
             experiment.metadata.description = description
+            experiment.experimentCondition.flowRate = float(flowRate)
             experiment.experimentCondition.feedVolume = float(feedVolume)
             experiment.experimentCondition.columnLength = float(columnLength)
             experiment.experimentCondition.columnDiameter = float(columnDiameter)
-            experiment.experimentCondition.flowRate = float(flowRate)
             for index in range(columnNames[1:].size):
                 experimentComponent = ExperimentComponent()
                 experimentComponent.concentrationTime = df.iloc[:, [0, 1 + index]].astype(float)
