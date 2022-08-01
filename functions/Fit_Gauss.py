@@ -5,8 +5,8 @@ from scipy.optimize import leastsq
 from scipy.special import erf
 from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 
-def Fit_Gauss(experimentSet):
-
+def Fit_Gauss(experimentSetGauss):
+    print('Fitting Gauss started!')
     # defines a typical gaussian function, of independent variable x,
     # amplitude a, position b, width parameter c, and erf parameter d.
     def gaussian(x, a, b, c, d):
@@ -24,12 +24,19 @@ def Fit_Gauss(experimentSet):
     # between the data and the function
     def residuals(p, y, x, n):
         return y - GaussSum(x, p, n)
+    print('Fitting Gauss started!')
+    for exp in experimentSetGauss.experiments:
+        print('For Loop Started')
+        for comp in exp.experimentComponents:
+            print(comp.concentrationTime)
+            data_set = comp.concentrationTime.to_numpy()
+            print(data_set)
+            max_time = data_set[-1, 0]
+            max_conc = max(data_set[:, 1])
+            max_conc_index = data_set[:, 1].index(max_conc)
 
-    for experiment in experimentSet.experiments:
-        for component in experiment.experimentComponents:
-            initials = [[6.5, 13.0, 1.0, 0.0]]
+            initials = [[max_conc, data_set[max_conc_index, 0], 1.0, 0.0]]
             n_value = len(initials)
-            data_set = component.concentrationTime.to_numpy()
 
             # executes least-squares regression analysis to optimize initial parameters
             const = leastsq(residuals, initials, args=(data_set[:, 1], data_set[:, 0], n_value))[0]
@@ -40,12 +47,11 @@ def Fit_Gauss(experimentSet):
             areas = dict()
             for i in range(n_value):
                 areas[i] = quad(gaussian, data_set[0, 0], data_set[-1, 0], args=(const[4*i], const[4*i+1], const[4*i+2], const[4*i+3]))[0]
+            time = np.linspace(0, max_time, 200)
+            result = pd.DataFrame({'time': time, comp.name: GaussSum(time, const, n_value)})
+            comp.concentrationTime = result
+            print(result)
 
-            result = pd.DataFrame()
-            result.loc[:, 0] = np.linspace(0, max(data_set[:, 0]), 200)
-            result.loc[:, 1] = GaussSum(result.iloc[:, 0], const, n_value)
-            component.concentrationTime = result
-
-    return experimentSet
+    return experimentSetGauss
 
 
