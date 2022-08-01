@@ -24,16 +24,14 @@ def Fit_Gauss(experimentSetGauss):
     # between the data and the function
     def residuals(p, y, x, n):
         return y - GaussSum(x, p, n)
-    print('Fitting Gauss started!')
     for exp in experimentSetGauss.experiments:
-        print('For Loop Started')
         for comp in exp.experimentComponents:
             print(comp.concentrationTime)
             data_set = comp.concentrationTime.to_numpy()
             print(data_set)
             max_time = data_set[-1, 0]
             max_conc = max(data_set[:, 1])
-            max_conc_index = data_set[:, 1].index(max_conc)
+            max_conc_index = data_set[:, 1].tolist().index(max_conc)
 
             initials = [[max_conc, data_set[max_conc_index, 0], 1.0, 0.0]]
             n_value = len(initials)

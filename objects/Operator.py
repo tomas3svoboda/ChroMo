@@ -22,7 +22,8 @@ class Operator:
         print(par1, par2, par3, par4)
         path = input('Enter path to Experiment set: ')
         """
-        path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
+        #path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
+        path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
         experimentSet = self.Load_Experiment_Set(path)
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
         experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
@@ -30,8 +31,8 @@ class Operator:
         print(experimentSetCor1.experiments[0].experimentCondition.feedTime)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
-        #experimentSetCopy = Fit_Gauss(experimentSetCopy)
-        #Compare_ExperimentSets(experimentSet, experimentSetCopy)
+        experimentSetCopy = Fit_Gauss(experimentSetCopy)
+        Compare_ExperimentSets(experimentSet, experimentSetCopy)
 
     def Setting_Parameters(self):
         par1 = float(input('Enter parameter 1: '))
