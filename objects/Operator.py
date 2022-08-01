@@ -25,7 +25,7 @@ class Operator:
         path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
         experimentSet = self.Load_Experiment_Set(path)
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
-        experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSetCopy)
+        experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
         print(experimentSet.experiments[0].experimentCondition.feedTime)
         print(experimentSetCor1.experiments[0].experimentCondition.feedTime)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
