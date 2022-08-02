@@ -21,14 +21,6 @@ def Compare_ExperimentSets(experimentSet1, experimentSet2):
                 while True:
                     i = input("Print?[Y - yes, N - no, E - exit]")
                     if i == "Y":
-                        """
-                        if len(comp1.concentrationTime.index) > len(comp2.concentrationTime.index):
-                            tmp1 = comp1
-                            tmp2 = comp2
-                        else:
-                            tmp1 = comp2
-                            tmp1 = comp1
-                        """
                         newDF = pd.concat([comp1.concentrationTime, comp2.concentrationTime], axis=1)
                         pd.set_option('display.max_rows', None)
                         print(newDF)

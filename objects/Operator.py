@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 from os import walk
 from objects.ExperimentSet import ExperimentSet
 from objects.ExperimentComponent import ExperimentComponent
@@ -12,6 +13,7 @@ from functions.Remote_DP_Elim import Remote_DP_Elim
 from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 from functions.Compare_ExperimentSets import Compare_ExperimentSets
 from functions.Mass_Balance_Cor import Mass_Balance_Cor
+from functions.Select_Iso_Exp import Select_Iso_Exp
 """
 Main class orchestrating program functions and user interface
 """
@@ -22,17 +24,20 @@ class Operator:
         print(par1, par2, par3, par4)
         path = input('Enter path to Experiment set: ')
         """
-        #path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
-        path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
+        path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
+        #path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
         experimentSet = self.Load_Experiment_Set(path)
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
-        experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
-        print(experimentSet.experiments[0].experimentCondition.feedTime)
-        print(experimentSetCor1.experiments[0].experimentCondition.feedTime)
+        experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
+        expIso = Select_Iso_Exp(experimentSetCopy, experimentClusterComp)
+        print(expIso.clusters)
+        #experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
-        experimentSetCopy = Fit_Gauss(experimentSetCopy)
-        Compare_ExperimentSets(experimentSet, experimentSetCopy)
+        #experimentSetCopy = Fit_Gauss(experimentSetCopy)
+        #Compare_ExperimentSets(experimentSet, experimentSetCopy)
+
+
 
     def Setting_Parameters(self):
         par1 = float(input('Enter parameter 1: '))
@@ -45,17 +50,18 @@ class Operator:
         experimentSet = ExperimentSet()
         filenames = next(walk(path), (None, None, []))[2]
         for file in filenames:
-            df = pd.read_excel(path + "\\" + file, decimal=',')
+            df = pd.read_excel(path + "\\" + file)
             description = df.iat[0, 3]
             date = df.iat[2, 3]
-            columnLength = df.iat[0, 1]
-            columnDiameter = df.iat[1, 1]
-            flowRate = df.iat[2, 1]
-            feedVolume = df.iat[3, 1]
+            columnLength = float(df.iat[0, 1])
+            columnDiameter = float(df.iat[1, 1])
+            flowRate = float(df.iat[2, 1])
+            feedVolume = float(df.iat[3, 1])
             columnNames = df.iloc[[7]].to_numpy()[0]
-            feedConcentrations = df.iloc[[6]].to_numpy()[0][1:]
+            feedConcentrations = df.iloc[[6]].replace(',','.', regex=True).to_numpy()[0][1:]
             df.drop([0, 1, 2, 3, 4, 5, 6, 7], axis=0, inplace=True)
             df.columns = columnNames
+            df = df.replace(',','.', regex=True).astype(float)
             experiment = Experiment()
             experiment.metadata.date = date
             experiment.metadata.description = description
