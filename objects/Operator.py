@@ -24,8 +24,8 @@ class Operator:
         print(par1, par2, par3, par4)
         path = input('Enter path to Experiment set: ')
         """
-        path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
-        #path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
+        #path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
+        path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
         experimentSet = self.Load_Experiment_Set(path)
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
         experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
@@ -34,8 +34,8 @@ class Operator:
         #experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
-        #experimentSetCopy = Fit_Gauss(experimentSetCopy)
-        #Compare_ExperimentSets(experimentSet, experimentSetCopy)
+        experimentSetCopy = Fit_Gauss(experimentSetCopy)
+        Compare_ExperimentSets(experimentSet, experimentSetCopy)
 
 
 
