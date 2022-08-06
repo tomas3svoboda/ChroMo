@@ -19,25 +19,41 @@ Main class orchestrating program functions and user interface
 """
 class Operator:
     def Start(self):
-        """
         par1, par2, par3, par4 = self.Setting_parameters()
-        print(par1, par2, par3, par4)
         path = input('Enter path to Experiment set: ')
-        """
+        experimentSet = self.Load_Experiment_Set(path)
+        experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
+        experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
+        experimentSetCor1 = Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
+        experimentSetGauss = Fit_Gauss(experimentSetCor1)
+        while True:
+            dpElimInput = input("Use fitted Gauss curve directly as a corrected datapoints?[Y, N]")
+            if dpElimInput == "Y":
+                experimentSetCor2 = Remote_DP_Elim(experimentSetCor1, experimentSetGauss)
+                break
+            if dpElimInput == "N":
+                experimentSetCor2 = experimentSetGauss
+                break
+            else:
+                print("Wrong input.")
+        experimentSetCor3 = Mass_Balance_Cor(experimentSetCor2, experimentSetGauss)
+        experimentClusterComp = self.Cluster_By_Component(experimentSetCor3)
+        expIso = Select_Iso_Exp(experimentSetCor3, experimentClusterComp)
+        # TODO Continue
+
+    #Start for testing purposes
+    def Start_For_Testing(self):
         path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
         #path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
         experimentSet = self.Load_Experiment_Set(path)
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
         experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
         expIso = Select_Iso_Exp(experimentSetCopy, experimentClusterComp)
-        print(expIso.clusters)
-        #experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
+        experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
         #experimentSetCopy = Fit_Gauss(experimentSetCopy)
         #Compare_ExperimentSets(experimentSet, experimentSetCopy)
-
-
 
     def Setting_Parameters(self):
         par1 = float(input('Enter parameter 1: '))

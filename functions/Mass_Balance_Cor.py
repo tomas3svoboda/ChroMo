@@ -4,6 +4,7 @@ import scipy
 
 def Mass_Balance_Cor(experimentSetCor2, experimentSetGauss):
     experimentSetCor3 = Deep_Copy_ExperimentSet(experimentSetCor2)
+    experimentIndex = 0
     for exp2, expG, exp3 in zip(experimentSetCor2.experiments, experimentSetGauss.experiments, experimentSetCor3.experiments):
         initialFeedTime = exp2.experimentCondition.feedTime
         #print(initialFeedTime - (initialFeedTime/2), initialFeedTime + (initialFeedTime/2))
@@ -21,8 +22,13 @@ def Mass_Balance_Cor(experimentSetCor2, experimentSetGauss):
                 feedMassSum += comp_feed_mass
                 #print("outputMassSum = " + str(outputMassSum))
                 #print("feedMassSum = " + str(feedMassSum))
-            return abs(outputMassSum - feedMassSum)
+                result = abs(outputMassSum - feedMassSum)
+                print("experimentSet.experiments[" + str(experimentIndex) + "]")
+                print("Loss Function absolute value: " + str(result))
+                print("Loss Function relative value: " + str(result / feedMassSum))
+            return result
         newFeedTime = scipy.optimize.minimize_scalar(Loss_Func, bounds=(initialFeedTime - (initialFeedTime/2), initialFeedTime + (initialFeedTime/2)), method='bounded')
-        print(newFeedTime)
+        #print(newFeedTime)
         exp3.experimentCondition.feedTime = newFeedTime.x
+        experimentIndex += 1
     return experimentSetCor3
