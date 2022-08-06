@@ -9,3 +9,4 @@ class Metadata:
     def __init__(self):
         self.date = ""
         self.description = ""
+        self.path = ""

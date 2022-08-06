@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from os import walk
+from datetime import datetime
 from objects.ExperimentSet import ExperimentSet
 from objects.ExperimentComponent import ExperimentComponent
 from objects.Experiment import Experiment
@@ -52,8 +53,8 @@ class Operator:
         experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
-        experimentSetCopy = Fit_Gauss(experimentSetCopy)
-        Compare_ExperimentSets(experimentSet, experimentSetCopy)
+        #experimentSetCopy = Fit_Gauss(experimentSetCopy)
+        #Compare_ExperimentSets(experimentSet, experimentSetCopy)
 
     def Setting_Parameters(self):
         par1 = float(input('Enter parameter 1: '))
@@ -64,6 +65,8 @@ class Operator:
 
     def Load_Experiment_Set(self, path):
         experimentSet = ExperimentSet()
+        experimentSet.metadata.path = path
+        experimentSet.metadata.date = datetime.date.today().strftime("%m/%d/%Y")
         filenames = next(walk(path), (None, None, []))[2]
         for file in filenames:
             df = pd.read_excel(path + "\\" + file)
@@ -81,6 +84,7 @@ class Operator:
             experiment = Experiment()
             experiment.metadata.date = date
             experiment.metadata.description = description
+            experiment.metadata.path = path + "\\" + file
             experiment.experimentCondition.flowRate = float(flowRate)
             experiment.experimentCondition.feedVolume = float(feedVolume)
             experiment.experimentCondition.columnLength = float(columnLength)
@@ -106,12 +110,15 @@ class Operator:
                     componentDict[component.name] = list()
                     componentDict[component.name].append(component)
         clusters = ExperimentClusters()
+        clusters.metadata = experimentSet.metadata
         clusters.clusters = componentDict
-        clusters.metadata.description = "Clusters by component"
+        clusters.metadata.description += "\nClusters by component"
         return clusters
 
     def Cluster_By_Condition(self, experimentSet):
         clusterByCondition = ExperimentClusters()
+        clusterByCondition.metadata = experimentSet.metadata
+        clusterByCondition.metadata.description += "\nClusters by condition"
         for experiment in experimentSet.experiments:
             for component in experiment.experimentComponents:
                 foundFlag = False
@@ -126,6 +133,8 @@ class Operator:
 
     def Cluster_By_Condition2(self, experimentSet):
         clusterByCondition = ExperimentClusters()
+        clusterByCondition.metadata = experimentSet.metadata
+        clusterByCondition.metadata.description += "\nClusters by condition"
         tmpCompList = list()
         for experiment in experimentSet.experiments:
             tmpCompList = tmpCompList + experiment.experimentComponents

@@ -4,10 +4,14 @@ from objects.Experiment import Experiment
 
 def Deep_Copy_ExperimentSet(experimentSet):
     newExperimentSet = ExperimentSet()
+    newExperimentSet.metadata.path = experimentSet.metadata.path
+    newExperimentSet.metadata.date = experimentSet.metadata.date
+    newExperimentSet.metadata.description = experimentSet.metadata.description
     for experiment in experimentSet.experiments:
         newExperiment = Experiment()
         newExperiment.metadata.date = experiment.metadata.date
         newExperiment.metadata.description = experiment.metadata.description
+        newExperiment.metadata.path = experiment.metadata.path
         newExperiment.experimentCondition.flowRate = experiment.experimentCondition.flowRate
         newExperiment.experimentCondition.feedVolume = experiment.experimentCondition.feedVolume
         newExperiment.experimentCondition.columnLength = experiment.experimentCondition.columnLength
