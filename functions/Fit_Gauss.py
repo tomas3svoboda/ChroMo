@@ -26,14 +26,28 @@ def Fit_Gauss(experimentSetGauss):
         return y - GaussSum(x, p, n)
     for exp in experimentSetGauss.experiments:
         for comp in exp.experimentComponents:
-            print(comp.concentrationTime)
             data_set = comp.concentrationTime.to_numpy()
-            print(data_set)
             max_time = data_set[-1, 0]
             max_conc = max(data_set[:, 1])
             max_conc_index = data_set[:, 1].tolist().index(max_conc)
 
-            initials = [[max_conc, data_set[max_conc_index, 0], 1.0, 0.0]]
+            if max_conc < max_time / 5:
+                mutiplier = 10
+                data_set[:, 1] = 10 * data_set[:, 1]
+                max_conc = 10 * max_conc
+            elif max_conc < max_time / 50:
+                mutiplier = 100
+                data_set[:, 1] = 100 * data_set[:, 1]
+                max_conc = 100 * max_conc
+            elif max_conc < max_time / 500:
+                mutiplier = 1000
+                data_set[:, 1] = 100 * data_set[:, 1]
+                max_conc = 100 * max_conc
+            else:
+                mutiplier = 1
+
+            init = data_set[max_conc_index, 0] + ((data_set[max_conc_index, 0]-data_set[max_conc_index-1, 0])/3)
+            initials = [[max_conc, init, 0.4, 0.0]]
             n_value = len(initials)
 
             # executes least-squares regression analysis to optimize initial parameters
@@ -46,7 +60,7 @@ def Fit_Gauss(experimentSetGauss):
             for i in range(n_value):
                 areas[i] = quad(gaussian, data_set[0, 0], data_set[-1, 0], args=(const[4*i], const[4*i+1], const[4*i+2], const[4*i+3]))[0]
             time = np.linspace(0, max_time, 200)
-            result = pd.DataFrame({'time': time, comp.name: GaussSum(time, const, n_value)})
+            result = pd.DataFrame({'time': time, comp.name: ((GaussSum(time, const, n_value))/mutiplier)})
             comp.concentrationTime = result
             print(result)
 

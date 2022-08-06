@@ -52,8 +52,8 @@ class Operator:
         experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
-        #experimentSetCopy = Fit_Gauss(experimentSetCopy)
-        #Compare_ExperimentSets(experimentSet, experimentSetCopy)
+        experimentSetCopy = Fit_Gauss(experimentSetCopy)
+        Compare_ExperimentSets(experimentSet, experimentSetCopy)
 
     def Setting_Parameters(self):
         par1 = float(input('Enter parameter 1: '))
