@@ -16,12 +16,8 @@ def Mass_Balance_Cor(experimentSetCor2, experimentSetGauss):
                 #comp_feed
                 comp_output_mass = np.trapz(x=dfG.iloc[:, 0].to_numpy(), y=dfG.iloc[:, 1].to_numpy())/expG.experimentCondition.flowRate/3600
                 comp_feed_mass = feedTime * comp2.feedConcentration * exp2.experimentCondition.flowRate
-                #print("np.trapz() / flowRate / 3600 = " + str(np.trapz(x=dfG.iloc[:, 0].to_numpy(), y=dfG.iloc[:, 1].to_numpy())) + " / " + str(exp2.experimentCondition.flowRate) + " = " + str(comp_output_mass))
-                #print("feedTime * feedConc * flowRate = " + str(feedTime) + " * " + str(comp2.feedConcentration) + " * " + str(exp2.experimentCondition.flowRate) + " = " + str(comp_feed_mass))
                 outputMassSum += comp_output_mass
                 feedMassSum += comp_feed_mass
-                #print("outputMassSum = " + str(outputMassSum))
-                #print("feedMassSum = " + str(feedMassSum))
                 result = abs(outputMassSum - feedMassSum)
                 exp3.feedMassSum = feedMassSum
             return result
