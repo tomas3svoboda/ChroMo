@@ -15,6 +15,7 @@ from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 from functions.Compare_ExperimentSets import Compare_ExperimentSets
 from functions.Mass_Balance_Cor import Mass_Balance_Cor
 from functions.Select_Iso_Exp import Select_Iso_Exp
+from functions.Lin_Solver import Lin_Solver
 """
 Main class orchestrating program functions and user interface
 """
@@ -44,13 +45,14 @@ class Operator:
 
     #Start for testing purposes
     def Start_For_Testing(self):
-        path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
+        Lin_Solver()
+        #path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
         #path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
-        experimentSet = self.Load_Experiment_Set(path)
-        experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
-        experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
-        expIso = Select_Iso_Exp(experimentSetCopy, experimentClusterComp)
-        experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
+        #experimentSet = self.Load_Experiment_Set(path)
+        #experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
+        #experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
+        #expIso = Select_Iso_Exp(experimentSetCopy, experimentClusterComp)
+        #experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
         #experimentSetCopy = Fit_Gauss(experimentSetCopy)
