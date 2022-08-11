@@ -14,7 +14,14 @@ import matplotlib.pyplot as plt
 # Total porosity of the sorbent packing [-]
 # Henry's constant of the linear isotherm [-]
 # Axial dispersion coefficient [mm^2/s]
-def Lin_Solver(flowRate = 150, length = 235, diameter = 16, feedVol = 3, feedConc = 150e-3, porosity = 0.4, henryConst = 0.9, disperCoef = 2):
+def Lin_Solver(flowRate = 150,
+               length=235,
+               diameter=16,
+               feedVol=3,
+               feedConc=150e-3,
+               porosity=0.4,
+               henryConst=0.9,
+               disperCoef=2):
 
     def diagonal_form(a, lower=1, upper=1):
         # Transforms banded matrix into diagonal ordered form
@@ -38,7 +45,7 @@ def Lin_Solver(flowRate = 150, length = 235, diameter = 16, feedVol = 3, feedCon
     # Calculation of the feed time [s]
     feedTime = (feedVol / flowRate) * 3600
     # Calculation of the flow speed [mm/s]
-    flowSpeed = (flowRate * 1000 / 3600) / (math.pi * ((diameter / 2) ** 2) * porosity)
+    flowSpeed = (flowRate * 1000 / 3600) / (math.pi * ((diameter / 4) ** 2) * porosity)
 
     # Defining constants
     a = disperCoef/((((1-porosity)*henryConst)/porosity)-1)  # *** !!! PODLE DOKUMENTU
@@ -53,7 +60,7 @@ def Lin_Solver(flowRate = 150, length = 235, diameter = 16, feedVol = 3, feedCon
     dt = time / Nt  # Calculating time step [mm]
 
     feedSteps = feedTime // dt  # Whole number of feed iterations
-    feedTimeAprox = feedTime % dt  # aproximation of division
+    feedTimeAprox = feedTime % dt  # approximation of division
 
     # Rounding iteration step based on defined feed parameters
     if feedTimeAprox >= 0.5:
@@ -71,21 +78,23 @@ def Lin_Solver(flowRate = 150, length = 235, diameter = 16, feedVol = 3, feedCon
     C_0 = np.zeros(len(x))  # Implementing initial conditions
     c[0, :] = C_0
 
-    # Crank-Nicolson matrixes preparation
+    # Crank-Nicolson matrices preparation
     # A.c(t+1) = B.c(t)x, where c(t+1) and c(t) are vectors of c(x) values
-    # Preparation of boudaries in matrix A
+    # Preparation of boundaries in matrix A
     A = np.zeros((Nx, Nx))  # A matrix data structure
     A[0, 0] = flowSpeed + 1/(2*dx)  # Left boundary
     A[0, 1] = -1/(2*dx)  # Left boundary
     A[Nx - 1, Nx - 2] = -1/(2*dx)  # Right boundary
     A[Nx - 1, Nx - 1] = 1/(2*dx)  # Right Boundary
-    # Preparation of boudaries in matrix B
+
+    # Preparation of boundaries in matrix B
     B = np.zeros((Nx, Nx))  # B matrix data structure
     B[0, 0] = -1/(2*dx)  # Left boundary
     B[0, 1] = 1/(2*dx)  # Left boundary
     B[Nx - 1, Nx - 2] = 1/(2*dx)  # Right boundary
     B[Nx - 1, Nx - 1] = -1/(2*dx)  # Right Boundary
-    # Filling up Matrixes A and B
+
+    # Filling up Matrices A and B
     for i in range(1, Nx - 1):
         A[i, i - 1] = -((dt*a)/(2*(dx**2)))-((dt*b)/(4*dx))
         A[i, i] = 1 + ((dt*a)/(dx**2))
@@ -96,38 +105,35 @@ def Lin_Solver(flowRate = 150, length = 235, diameter = 16, feedVol = 3, feedCon
     A_diag = diagonal_form(A)
 
     Aabs = np.abs(A)
-    Babs = np.abs(B)
     for i in range(0, Nx):
         if Aabs[i, i] <= np.sum(Aabs[i, :]) - Aabs[i, i]:
-            print('Matrix A is not strictly diagonaly dominant in row ' +
-                  str(i) + '. witerative method may not coverge.\n')
+            print('Matrix A is not strictly diagonally dominant in row ' +
+                  str(i) + 'therefore, iterative method may not coverge.\n')
             break
         elif i == Nx - 1:
             print('Matrix A is strictly diagonally dominant,' +
-                  'therefore iterative method will converge!\n')
+                  'therefore, iterative method will converge!\n')
 
     # Implementing discretization
     for i in range(1, Nt):  # Advance in time
         b = B.dot(c[i - 1, :])
         b[0] = feed[i] # From left boundaryU
         c[i, :] = linalg.solve_banded((1, 1), A_diag, b)
-        # c[i,:] = linalg.solve(A, b) # Solve linear system of algbraic eqations
+        # c[i,:] = linalg.solve(A, b) # Solve linear system of algebraic equations
         if i == 1:
             print('Solution algorithm has been started:')
         if i % (Nt // 20) == 0:
             print(str(i) + ' steps has been finished ... ' +
                   str(Nt - i) + ' steps remain.')
-    feedMass = feedVol * feedConc  # Calculating teoretical mass fed into system
+    feedMass = feedVol * feedConc  # Calculating theoretical mass fed into system
     massCumulOut = 0  # Mass cumulation over time in outlet from the column
-    massCumulIn = 0  # Mass cumulation over time in inlet to the column
 
     for i in range(0, Nt):  # Calculation of mass cumulation over time
         actConcOut = c[i, -1]
         massCumulOut += (dt * flowRate * actConcOut / 3600)
 
-    # Calculation of differece between mass in feed and in the outlet
+    # Calculation of difference between mass in feed and in the outlet
     massDifferenceOut = feedMass - massCumulOut
-    massDifferenceIn = feedMass - massCumulIn
     # Display mass balance check
     print('\nFeed Mass:   ' + str(round(feedMass, 2)) + ' mg')
     print('Outlet Mass:   ' + str(round(massCumulOut, 2)) + ' mg')
