@@ -46,9 +46,9 @@ class Operator:
 
     #Start for testing purposes
     def Start_For_Testing(self):
-        Nonlin_Solver()
+        Lin_Solver()
         #path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
-        #path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
+        path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
         #experimentSet = self.Load_Experiment_Set(path)
         #experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
         #experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)

@@ -14,14 +14,14 @@ import matplotlib.pyplot as plt
 # Total porosity of the sorbent packing [-]
 # Henry's constant of the linear isotherm [-]
 # Axial dispersion coefficient [mm^2/s]
-def Lin_Solver(flowRate = 150,
+def Lin_Solver(flowRate = 50,
                length=235,
                diameter=16,
-               feedVol=3,
+               feedVol=15,
                feedConc=150e-3,
                porosity=0.4,
-               henryConst=0.9,
-               disperCoef=2):
+               henryConst=1.9,
+               disperCoef=6):
 
     def diagonal_form(a, lower=1, upper=1):
         # Transforms banded matrix into diagonal ordered form
@@ -45,14 +45,14 @@ def Lin_Solver(flowRate = 150,
     # Calculation of the feed time [s]
     feedTime = (feedVol / flowRate) * 3600
     # Calculation of the flow speed [mm/s]
-    flowSpeed = (flowRate * 1000 / 3600) / (math.pi * ((diameter / 4) ** 2) * porosity)
+    flowSpeed = ((flowRate / 3600) * math.pi * (diameter**2) * porosity)/4
 
     # Defining constants
-    a = disperCoef/((((1-porosity)*henryConst)/porosity)-1)  # *** !!! PODLE DOKUMENTU
-    b = flowSpeed/((((1-porosity)*henryConst)/porosity)-1)  # *** !!! PODLE DOKUMENTU
+    a = disperCoef/((((1-porosity)*henryConst)/porosity)+1)  # *** !!! PODLE DOKUMENTU
+    b = flowSpeed/((((1-porosity)*henryConst)/porosity)+1)  # *** !!! PODLE DOKUMENTU
 
     time = 3000  # Finite time of the experiment [s]
-    Nx = 3000  # Number of spatial differences
+    Nx = 500  # Number of spatial differences
     Nt = 3000  # Number of time differences
     x = np.linspace(0, length, Nx)  # Preparation of space vector
     dx = length / Nx  # Calculating space step [mm]
@@ -117,7 +117,7 @@ def Lin_Solver(flowRate = 150,
     # Implementing discretization
     for i in range(1, Nt):  # Advance in time
         b = B.dot(c[i - 1, :])
-        b[0] = feed[i] # From left boundary (start at 1 ???)
+        b[0] = b[0] + flowSpeed * feed[i]  # From left boundary (start at 1 ???)
         c[i, :] = linalg.solve_banded((1, 1), A_diag, b)
         # c[i,:] = linalg.solve(A, b) # Solve linear system of algebraic equations
         if i == 1:
