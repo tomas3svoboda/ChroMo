@@ -16,6 +16,7 @@ from functions.Compare_ExperimentSets import Compare_ExperimentSets
 from functions.Mass_Balance_Cor import Mass_Balance_Cor
 from functions.Select_Iso_Exp import Select_Iso_Exp
 from functions.Lin_Solver import Lin_Solver
+from functions.Nonlin_Solver import Nonlin_Solver
 """
 Main class orchestrating program functions and user interface
 """
@@ -45,7 +46,7 @@ class Operator:
 
     #Start for testing purposes
     def Start_For_Testing(self):
-        Lin_Solver()
+        Nonlin_Solver()
         #path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
         #path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
         #experimentSet = self.Load_Experiment_Set(path)

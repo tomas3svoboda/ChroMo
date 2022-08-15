@@ -1,8 +1,10 @@
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 # Numerical solver of the EDM with Langmuir Isotherm - nonlinear parabolic PDE
 
-def Nonlin_Solver(flowRate = 800, length = 235, diameter = 16, feedVol = 5, feedConc = 2, porosity = 0.5, henryConst = 2.5, disperCoef = 0.95):
+def Nonlin_Solver(flowRate = 800, length = 235, diameter = 16, feedVol = 5, feedConc = 2, porosity = 0.5,
+                  langmuirConst = 2.5, disperCoef = 0.95, saturationConst = 1, Nx = 180, Nt = 1000):
     def Danckwert_lb_c2ap(c_i1, c_i0, dx, dt, C1, C2, cIn):
         # First derivative defined as Um/Dax*(c[t,0]-cIn)
         # Second derivative used aproxmation of fictitious point c[t,0-1] = c[t,0+1]
@@ -46,15 +48,12 @@ def Nonlin_Solver(flowRate = 800, length = 235, diameter = 16, feedVol = 5, feed
     # Calculation of the flow speed [mm/s]
     flowSpeed = (flowRate * 1000 / 3600) / (math.pi * ((diameter / 2) ** 2) * porosity)
 
-    C1 = (1 / disperCoef) + ((1 + porosity) * henryConst / (porosity * disperCoef))
-    C2 = flowSpeed / disperCoef
-
+    a = disperCoef/((((1 - porosity)*saturationConst*langmuirConst)/(((langmuirConst*feedConc-1)**2)*porosity))+1)
+    b = flowSpeed/((((1 - porosity)*saturationConst*langmuirConst)/(((langmuirConst*feedConc-1)**2)*porosity))+1)
     # Defining finite time of the experiment [s]
     time = 500
     # Defining number of spatial differences
-    Nx = 180
     # Defining number of time differences
-    Nt = 1000
     # Preparation of space vector
     x = np.linspace(0, length, Nx)
     # Calculating space step [mm]
@@ -63,10 +62,11 @@ def Nonlin_Solver(flowRate = 800, length = 235, diameter = 16, feedVol = 5, feed
     # Preparation of time vector
     t = np.linspace(0, time, Nt)
     # Calculating space step [mm]
-    dt = time / Nx
+    dt = time / Nt
 
     # Preparation of solution matrix
     c = np.zeros((len(t), len(x)))
+    print(c.shape)
 
     # Implementing initial conditions
     C_0 = np.zeros(len(x))
@@ -82,22 +82,51 @@ def Nonlin_Solver(flowRate = 800, length = 235, diameter = 16, feedVol = 5, feed
     if feedTimeAprox >= 0.5:
         feedSteps += 1
 
+    feed = np.linspace(0, time, Nt)
+    for i in range(0, Nt):
+        if i <= feedSteps:
+            feed[i] = feedConc
+        else:
+            feed[i] = 0
+
     # Implementing discretization
-    for i in range(0, Nt - 1):  # Advance in time
+    for j in range(1, Nt-1):  # Advance in time
         # ----------------------------------------------------------------------
         # Feed pulse implementation
-        # !!! PŘEPSAT NA VECTOR
-        if i <= feedSteps:
-            cIn = feedConc
-        else:
-            cIn = 0
-        # Calculating left boudary [x=0] in time ti
-        c[i + 1, 0] = Danckwert_lb_c2ap(c[i, 1], c[i, 0], dx, dt, C1, C2, cIn)
-        # ----------------------------------------------------------------------
-        for n in range(1, Nx - 1):  # Calculating values of space differences in time ti
-            # Calculating value for space xn in time ti
-            c[i + 1, n] = c1c2x_fwrdt(c[i, n], c[i, n + 1], c[i, n - 1], dx, dt, C1, C2)
-        # ----------------------------------------------------------------------
-        # Calculating right boundary [x=L] in time ti
-        c[i + 1, Nx - 2] = Danckwert_rb_c2ap(c[i, Nx - 2], c[i, Nx - 1], dx, dt, C1)
+        cIn = feed[j]
+        for i in range(1, Nx-2):
+            divident1 = dt*disperCoef*(c[j-1, i+1] - 2*c[j-1, i] + c[j-1, i-1])
+            divisor1 = (((1 - porosity)*saturationConst*langmuirConst)/(((langmuirConst*c[j-1, i] - 1)**2)*porosity) + 1)*(dx**2)
+            divident2 = dt*flowSpeed*(c[j-1, i+1] - c[j-1, i-1])
+            divisor2 = (((1 - porosity)*saturationConst*langmuirConst)/(((langmuirConst*c[j-1, i] - 1)**2)*porosity) + 1)*(dx*2)
+            c[j, i] = (divident1/divisor1) - (divident2/divisor2)
+        c[j, 0] = (c[j, 1] + dx*flowSpeed*cIn)/(1 + dx*flowSpeed)
+        c[j, Nx-1] = c[j, Nx-2]
+    feedMass = feedVol * feedConc  # Calculating teoretical mass fed into system
+    massCumulOut = 0  # Mass cumulation over time in outlet from the column
+    massCumulIn = 0  # Mass cumulation over time in inlet to the column
+
+    for i in range(0, Nt):  # Calculation of mass cumulation over time
+        actConcOut = c[i, -1]
+        massCumulOut += (dt * flowRate * actConcOut / 3600)
+
+    # Calculation of differece between mass in feed and in the outlet
+    massDifferenceOut = feedMass - massCumulOut
+    massDifferenceIn = feedMass - massCumulIn
+    # Display mass balance check
+    print('\nFeed Mass:   ' + str(round(feedMass, 2)) + ' mg')
+    print('Outlet Mass:   ' + str(round(massCumulOut, 2)) + ' mg')
+    print('Difference:   ' + str(round(-(massDifferenceOut), 2)) + ' mg   '
+          + str(round((massDifferenceOut * 100 / feedMass), 2)) + ' %\n')
+    fig1 = plt.figure(1)
+    ax1 = fig1.add_subplot(projection='3d')
+    X, Y = np.meshgrid(x, t)
+    Z = c
+    ax1.plot_surface(X, Y, Z)
+    ax1.set_xlabel('Lenght [mm]')
+    ax1.set_ylabel('Time [s]')
+    ax1.set_zlabel('Concentration [mg/mL]')
+    plt.savefig('3D_surface_plot_' + str(Nt) + 'x' + str(Nx) + '_' + str(int(round(Nt / Nx, 0))) \
+                + '.png')
+    plt.show()
     return c

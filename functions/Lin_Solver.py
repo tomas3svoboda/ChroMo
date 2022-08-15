@@ -109,7 +109,7 @@ def Lin_Solver(flowRate = 150, length = 235, diameter = 16, feedVol = 3, feedCon
     # Implementing discretization
     for i in range(1, Nt):  # Advance in time
         b = B.dot(c[i - 1, :])
-        b[0] = feed[i] # From left boundaryU
+        b[0] = feed[i] # From left boundary (start at 1 ???)
         c[i, :] = linalg.solve_banded((1, 1), A_diag, b)
         # c[i,:] = linalg.solve(A, b) # Solve linear system of algbraic eqations
         if i == 1:
