@@ -24,6 +24,7 @@ def Compare_ExperimentSets(experimentSet1, experimentSet2):
                         newDF = pd.concat([comp1.concentrationTime, comp2.concentrationTime], axis=1)
                         pd.set_option('display.max_rows', None)
                         print(newDF)
+                        newDF.to_excel('C:/Users/z004d8nt/PycharmProjects/ChoMo/docu/table'+str(indexExp)+str(indexComp)+'.xlsx')
                         comp1.concentrationTime.plot.line(x=0)
                         comp2.concentrationTime.plot.line(x=0)
                         plt.show()

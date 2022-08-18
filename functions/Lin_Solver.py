@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 def Lin_Solver(flowRate = 50,
                length=235,
                diameter=16,
-               feedVol=3,
+               feedVol=15,
                feedConc=150e-3,
                porosity=0.4,
                henryConst=1.9,
