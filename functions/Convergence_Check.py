@@ -12,6 +12,7 @@ def Covergence_Check(threshold = 0.01, flowRate = 800, length = 235, diameter = 
                           saturationConst, 180, Nt)
         mn = (flowSpeed*math.pi*(diameter**2)*porosity)/4 * np.trapz(c[:, Nt])
         return abs(mfeed-mn)
+    #use minimize_scalar
     convergenceCheck = 999999
     convergenceCount = 0
     k = 1000

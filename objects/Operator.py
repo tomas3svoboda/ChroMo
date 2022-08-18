@@ -8,6 +8,7 @@ from objects.ExperimentComponent import ExperimentComponent
 from objects.Experiment import Experiment
 from objects.ExperimentClusters import ExperimentClusters
 import datetime
+import time
 from functions.Fit_Gauss import Fit_Gauss
 from functions.Ret_Time_Cor import Ret_Time_Cor
 from functions.Remote_DP_Elim import Remote_DP_Elim
@@ -17,6 +18,27 @@ from functions.Mass_Balance_Cor import Mass_Balance_Cor
 from functions.Select_Iso_Exp import Select_Iso_Exp
 from functions.Lin_Solver import Lin_Solver
 from functions.Nonlin_Solver import Nonlin_Solver
+from functions.Single_Loss_Function import Single_Loss_Function
+from functions.Bilevel_Optim import Bilevel_Optim
+from functions.Lev2_Optim import Lev2_Optim
+
+"""
+Time measuring decorator
+"""
+def timeit(method):
+    def timed(*args, **kwargs):
+        ts = time.time()
+        result = method(*args, **kwargs)
+        te = time.time()
+        if 'log_time' in kwargs:
+            name = kwargs.get('log_name', method.__name__.upper())
+            kwargs['log_time'][name] = int((te - ts) * 1000)
+        else:
+            print('%r  %2.22f ms' % (method.__name__, (te - ts) * 1000))
+        return result
+    return timed
+
+
 """
 Main class orchestrating program functions and user interface
 """
@@ -45,13 +67,26 @@ class Operator:
         # TODO Continue
 
     #Start for testing purposes
+
+    @timeit
     def Start_For_Testing(self):
-        Nonlin_Solver()
-        #path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
+        #Nonlin_Solver()
+        path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
         #path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
-        #experimentSet = self.Load_Experiment_Set(path)
-        #experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
-        #experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
+        experimentSet = self.Load_Experiment_Set(path)
+        #Single_Loss_Function(experimentSet.experiments[0])
+        experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
+        experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
+        comp = experimentSetCopy.experiments[0].experimentComponents[0]
+        cond = experimentSetCopy.experiments[0].experimentCondition
+        #print(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration)
+        #res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, 0.4, 14, 8, debugPrint=True, debugGraph=True)
+        #t = np.linspace(0, 10800, 5000)
+        #plt.plot(t, res[:, -1])
+        #plt.show()
+        result = Bilevel_Optim(experimentSetCopy, experimentClusterComp)
+        #result = Lev2_Optim([150, 235, 16, 3, 150e-3], experimentClusterComp.clusters['Sac'])
+        #print(result)
         #expIso = Select_Iso_Exp(experimentSetCopy, experimentClusterComp)
         #experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
@@ -95,6 +130,7 @@ class Operator:
             for index in range(columnNames[1:].size):
                 experimentComponent = ExperimentComponent()
                 experimentComponent.concentrationTime = df.iloc[:, [0, 1 + index]].astype(float)
+                experimentComponent.concentrationTime['Time'] = experimentComponent.concentrationTime['Time'].apply(lambda x: x*60)
                 experimentComponent.concentrationTime.reset_index(inplace=True, drop=True)
                 experimentComponent.name = columnNames[1+index]
                 experimentComponent.feedConcentration = float(feedConcentrations[index])

@@ -1,6 +1,12 @@
 import numpy as np
+import pandas as pd
 import math
+from scipy.interpolate import CubicSpline
 import matplotlib.pyplot as plt
+from objects.ExperimentSet import ExperimentSet
+from objects.Experiment import Experiment
+from objects.ExperimentComponent import ExperimentComponent
+from functions.Fit_Gauss import Fit_Gauss
 # Numerical solver of the EDM with Langmuir Isotherm - nonlinear parabolic PDE
 
 def Nonlin_Solver(flowRate = 800, length = 235, diameter = 16, feedVol = 5, feedConc = 2, porosity = 0.5,
@@ -48,8 +54,6 @@ def Nonlin_Solver(flowRate = 800, length = 235, diameter = 16, feedVol = 5, feed
     # Calculation of the flow speed [mm/s]
     flowSpeed = (flowRate * 1000 / 3600) / (math.pi * ((diameter / 2) ** 2) * porosity)
 
-    a = disperCoef/((((1 - porosity)*saturationConst*langmuirConst)/(((langmuirConst*feedConc-1)**2)*porosity))+1)
-    b = flowSpeed/((((1 - porosity)*saturationConst*langmuirConst)/(((langmuirConst*feedConc-1)**2)*porosity))+1)
     # Defining finite time of the experiment [s]
     time = 500
     # Defining number of spatial differences
@@ -66,11 +70,10 @@ def Nonlin_Solver(flowRate = 800, length = 235, diameter = 16, feedVol = 5, feed
 
     # Preparation of solution matrix
     c = np.zeros((len(t), len(x)))
-    print(c.shape)
 
     # Implementing initial conditions
     C_0 = np.zeros(len(x))
-    C_0[0] = feedConc
+    C_0[0] = (c[0, 1] + dx*flowSpeed*feedConc)/(1 + dx*flowSpeed)
 
     # c[0,0] = feedConc # For the left boudary
     c[0, :] = C_0  # First row (time = 0) are all elements C_0
@@ -89,6 +92,46 @@ def Nonlin_Solver(flowRate = 800, length = 235, diameter = 16, feedVol = 5, feed
         else:
             feed[i] = 0
 
+    # using Fit_Gauss to smooth out input feed
+    """
+    tmpFeedTime = np.linspace(0, time, Nt)
+    d = {'time': tmpFeedTime, 'conc': feed}
+    tmpDF = pd.DataFrame(data=d)
+    tmpExperimentSet = ExperimentSet()
+    tmpExperiment = Experiment()
+    tmpComponent = ExperimentComponent()
+    tmpComponent.concentrationTime = tmpDF
+    tmpComponent.name = 'conc'
+    tmpExperiment.experimentComponents.append(tmpComponent)
+    tmpExperimentSet.experiments.append(tmpExperiment)
+    print(tmpExperimentSet.experiments[0].experimentComponents[0].concentrationTime)
+    tmpGauss = Fit_Gauss(tmpExperimentSet)
+    feed = tmpGauss.experiments[0].experimentComponents[0].concentrationTime.iloc[:, 1].to_numpy()
+    """
+    # using scipy.interpolate.CubicSpline to smooth out input feed
+    bp = 0
+    tmpTimeStep = time/(Nt//20)
+    tmpFeed = np.linspace(0, time, Nt//20)
+    for i in range(0, Nt//20):
+        if i*tmpTimeStep < feedTime:
+            tmpFeed[i] = feedConc
+        else:
+            tmpFeed[i] = 0
+            if bp == 0:
+                bp = i
+
+    tmpFeedTime = np.linspace(0, time, Nt//20)
+    #rmList = [range(bp-20, bp+19)]
+    #tmpFeed = np.delete(tmpFeed, rmList)
+    #tmpFeedTime = np.delete(tmpFeedTime, rmList)
+    cs = CubicSpline(x=tmpFeedTime, y=tmpFeed, bc_type='natural')
+    plt.plot(tmpFeedTime, tmpFeed)
+    plt.show()
+    feed = cs(np.linspace(0, time, Nt))
+    plt.plot(np.linspace(0, time, Nt), feed)
+    plt.show()
+
+
     # Implementing discretization
     for j in range(1, Nt-1):  # Advance in time
         # ----------------------------------------------------------------------
@@ -96,10 +139,10 @@ def Nonlin_Solver(flowRate = 800, length = 235, diameter = 16, feedVol = 5, feed
         cIn = feed[j]
         for i in range(1, Nx-2):
             divident1 = dt*disperCoef*(c[j-1, i+1] - 2*c[j-1, i] + c[j-1, i-1])
-            divisor1 = (((1 - porosity)*saturationConst*langmuirConst)/(((langmuirConst*c[j-1, i] - 1)**2)*porosity) + 1)*(dx**2)
+            divisor1 = (((1 - porosity)*saturationConst*langmuirConst)/(((-langmuirConst*c[j-1, i] + 1)**2)*porosity) + 1)*(dx**2)
             divident2 = dt*flowSpeed*(c[j-1, i+1] - c[j-1, i-1])
-            divisor2 = (((1 - porosity)*saturationConst*langmuirConst)/(((langmuirConst*c[j-1, i] - 1)**2)*porosity) + 1)*(dx*2)
-            c[j, i] = (divident1/divisor1) - (divident2/divisor2)
+            divisor2 = (((1 - porosity)*saturationConst*langmuirConst)/(((-langmuirConst*c[j-1, i] + 1)**2)*porosity) + 1)*(dx*2)
+            c[j, i] = (divident1/divisor1) - (divident2/divisor2) + c[j-1, i]
         c[j, 0] = (c[j, 1] + dx*flowSpeed*cIn)/(1 + dx*flowSpeed)
         c[j, Nx-1] = c[j, Nx-2]
     feedMass = feedVol * feedConc  # Calculating teoretical mass fed into system

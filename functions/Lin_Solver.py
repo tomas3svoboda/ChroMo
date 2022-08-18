@@ -14,14 +14,16 @@ import matplotlib.pyplot as plt
 # Total porosity of the sorbent packing [-]
 # Henry's constant of the linear isotherm [-]
 # Axial dispersion coefficient [mm^2/s]
-def Lin_Solver(flowRate = 150,
+def Lin_Solver(flowRate = 50,
                length=235,
                diameter=16,
                feedVol=3,
                feedConc=150e-3,
                porosity=0.4,
-               henryConst=0.9,
-               disperCoef=2):
+               henryConst=1.9,
+               disperCoef=12,
+               debugPrint=False,
+               debugGraph=False):
 
     def diagonal_form(a, lower=1, upper=1):
         # Transforms banded matrix into diagonal ordered form
@@ -45,15 +47,15 @@ def Lin_Solver(flowRate = 150,
     # Calculation of the feed time [s]
     feedTime = (feedVol / flowRate) * 3600
     # Calculation of the flow speed [mm/s]
-    flowSpeed = (flowRate * 1000 / 3600) / (math.pi * ((diameter / 4) ** 2) * porosity)
+    flowSpeed = ((flowRate / 3600) * math.pi * (diameter**2) * porosity)/4
 
     # Defining constants
-    a = disperCoef/((((1-porosity)*henryConst)/porosity)-1)  # *** !!! PODLE DOKUMENTU
-    b = flowSpeed/((((1-porosity)*henryConst)/porosity)-1)  # *** !!! PODLE DOKUMENTU
+    a = disperCoef/((((1-porosity)*henryConst)/porosity)+1)  # *** !!! PODLE DOKUMENTU
+    b = flowSpeed/((((1-porosity)*henryConst)/porosity)+1)  # *** !!! PODLE DOKUMENTU
 
-    time = 3000  # Finite time of the experiment [s]
-    Nx = 3000  # Number of spatial differences
-    Nt = 3000  # Number of time differences
+    time = 10800  # Finite time of the experiment [s]
+    Nx = 2000  # Number of spatial differences
+    Nt = 4000  # Number of time differences
     x = np.linspace(0, length, Nx)  # Preparation of space vector
     dx = length / Nx  # Calculating space step [mm]
     t = np.linspace(0, time, Nt)  # Preparation of time vector
@@ -117,7 +119,7 @@ def Lin_Solver(flowRate = 150,
     # Implementing discretization
     for i in range(1, Nt):  # Advance in time
         b = B.dot(c[i - 1, :])
-        b[0] = feed[i] # From left boundary (start at 1 ???)
+        b[0] = b[0] + flowSpeed * feed[i]  # From left boundary (start at 1 ???)
         c[i, :] = linalg.solve_banded((1, 1), A_diag, b)
         # c[i,:] = linalg.solve(A, b) # Solve linear system of algebraic equations
         if i == 1:
@@ -139,15 +141,16 @@ def Lin_Solver(flowRate = 150,
     print('Outlet Mass:   ' + str(round(massCumulOut, 2)) + ' mg')
     print('Difference:   ' + str(round(-(massDifferenceOut), 2)) + ' mg   '
           + str(round((massDifferenceOut * 100 / feedMass), 2)) + ' %\n')
-    fig1 = plt.figure(1)
-    ax1 = fig1.add_subplot(projection='3d')
-    X, Y = np.meshgrid(x, t)
-    Z = c
-    ax1.plot_surface(X, Y, Z)
-    ax1.set_xlabel('Lenght [mm]')
-    ax1.set_ylabel('Time [s]')
-    ax1.set_zlabel('Concentration [mg/mL]')
-    plt.savefig('3D_surface_plot_' + str(Nt) + 'x' + str(Nx) + '_' + str(int(round(Nt / Nx, 0))) \
-                + '.png')
-    plt.show()
+    if debugGraph:
+        fig1 = plt.figure(1)
+        ax1 = fig1.add_subplot(projection='3d')
+        X, Y = np.meshgrid(x, t)
+        Z = c
+        ax1.plot_surface(X, Y, Z)
+        ax1.set_xlabel('Lenght [mm]')
+        ax1.set_ylabel('Time [s]')
+        ax1.set_zlabel('Concentration [mg/mL]')
+        plt.savefig('3D_surface_plot_' + str(Nt) + 'x' + str(Nx) + '_' + str(int(round(Nt / Nx, 0))) \
+                    + '.png')
+        plt.show()
     return c
