@@ -7,6 +7,6 @@ import functions.global_ as gl
 
 def Lev1_Optim(experimentClustersComp):
     print("Calling Lev1_Optim with porosity " + str(gl.porosity) + "!")
-    res = minimize(Lev1_Loss_Function, gl.porosity, args=(experimentClustersComp), bounds=Bounds(lb=0, ub=1), method='Nelder-Mead')
+    res = minimize(Lev1_Loss_Function, gl.porosity, args=(experimentClustersComp), bounds=Bounds(lb=0, ub=1), method='Nelder-Mead',tol=0.1)
     gl.porosity = res.x[0]
     return res.fun

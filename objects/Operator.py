@@ -71,8 +71,8 @@ class Operator:
     @timeit
     def Start_For_Testing(self):
         #Nonlin_Solver()
-        path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
-        #path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
+        #path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
+        path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
         experimentSet = self.Load_Experiment_Set(path)
         #Single_Loss_Function(experimentSet.experiments[0])
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)

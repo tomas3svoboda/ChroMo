@@ -7,7 +7,7 @@ import functions.global_ as gl
 
 def Lev2_Optim(porosity, experimentCluster, key):
     print("Calling Lev2_Optim with params " + str(gl.compParamDict[key]) + "!")
-    res = minimize(Lev2_Loss_Function, gl.compParamDict[key], args=(experimentCluster, porosity), bounds=((0, None), (0, None)), method='Nelder-Mead', options={'maxfev': 3})
+    res = minimize(Lev2_Loss_Function, gl.compParamDict[key], args=(experimentCluster, porosity), bounds=((0, None), (0, None)), method='Nelder-Mead')
     gl.compParamDict[key] = res.x
     print(gl.compParamDict)
     return res.fun
