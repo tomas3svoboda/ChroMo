@@ -107,14 +107,15 @@ def Lin_Solver(flowRate = 50,
     A_diag = diagonal_form(A)
 
     Aabs = np.abs(A)
-    for i in range(0, Nx):
-        if Aabs[i, i] <= np.sum(Aabs[i, :]) - Aabs[i, i]:
-            print('Matrix A is not strictly diagonally dominant in row ' +
-                  str(i) + 'therefore, iterative method may not coverge.\n')
-            break
-        elif i == Nx - 1:
-            print('Matrix A is strictly diagonally dominant,' +
-                  'therefore, iterative method will converge!\n')
+    if debugPrint:
+        for i in range(0, Nx):
+            if Aabs[i, i] <= np.sum(Aabs[i, :]) - Aabs[i, i]:
+                print('Matrix A is not strictly diagonally dominant in row ' +
+                      str(i) + 'therefore, iterative method may not coverge.\n')
+                break
+            elif i == Nx - 1:
+                print('Matrix A is strictly diagonally dominant,' +
+                      'therefore, iterative method will converge!\n')
 
     # Implementing discretization
     for i in range(1, Nt):  # Advance in time
@@ -122,25 +123,27 @@ def Lin_Solver(flowRate = 50,
         b[0] = b[0] + flowSpeed * feed[i]  # From left boundary (start at 1 ???)
         c[i, :] = linalg.solve_banded((1, 1), A_diag, b)
         # c[i,:] = linalg.solve(A, b) # Solve linear system of algebraic equations
-        if i == 1:
-            print('Solution algorithm has been started:')
-        if i % (Nt // 20) == 0:
-            print(str(i) + ' steps has been finished ... ' +
-                  str(Nt - i) + ' steps remain.')
-    feedMass = feedVol * feedConc  # Calculating theoretical mass fed into system
-    massCumulOut = 0  # Mass cumulation over time in outlet from the column
+        if debugPrint:
+            if i == 1:
+                print('Solution algorithm has been started:')
+            if i % (Nt // 20) == 0:
+                print(str(i) + ' steps has been finished ... ' +
+                      str(Nt - i) + ' steps remain.')
+    if debugPrint:
+        feedMass = feedVol * feedConc  # Calculating theoretical mass fed into system
+        massCumulOut = 0  # Mass cumulation over time in outlet from the column
 
-    for i in range(0, Nt):  # Calculation of mass cumulation over time
-        actConcOut = c[i, -1]
-        massCumulOut += (dt * flowRate * actConcOut / 3600)
+        for i in range(0, Nt):  # Calculation of mass cumulation over time
+            actConcOut = c[i, -1]
+            massCumulOut += (dt * flowRate * actConcOut / 3600)
 
-    # Calculation of difference between mass in feed and in the outlet
-    massDifferenceOut = feedMass - massCumulOut
-    # Display mass balance check
-    print('\nFeed Mass:   ' + str(round(feedMass, 2)) + ' mg')
-    print('Outlet Mass:   ' + str(round(massCumulOut, 2)) + ' mg')
-    print('Difference:   ' + str(round(-(massDifferenceOut), 2)) + ' mg   '
-          + str(round((massDifferenceOut * 100 / feedMass), 2)) + ' %\n')
+        # Calculation of difference between mass in feed and in the outlet
+        massDifferenceOut = feedMass - massCumulOut
+        # Display mass balance check
+        print('\nFeed Mass:   ' + str(round(feedMass, 2)) + ' mg')
+        print('Outlet Mass:   ' + str(round(massCumulOut, 2)) + ' mg')
+        print('Difference:   ' + str(round(-(massDifferenceOut), 2)) + ' mg   '
+              + str(round((massDifferenceOut * 100 / feedMass), 2)) + ' %\n')
     if debugGraph:
         fig1 = plt.figure(1)
         ax1 = fig1.add_subplot(projection='3d')

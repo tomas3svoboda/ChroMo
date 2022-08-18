@@ -9,4 +9,5 @@ def Lev2_Loss_Function(params, experimentCluster, porosity):
     for comp in experimentCluster:
         res = Single_Loss_Function(params2, comp)
         sum += res
+    print("Loss function value: " + str(sum))
     return sum

@@ -8,4 +8,5 @@ def Lev1_Loss_Function(porosity, experimentClustersComp):
     for key in experimentClustersComp.clusters:
         res = Lev2_Optim(porosity[0], experimentClustersComp.clusters[key], key)
         sum += res
+    print("Loss function value: " + str(sum))
     return sum

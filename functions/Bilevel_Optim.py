@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 def Bilevel_Optim(experimentSetCor3, experimentClustersComp):
     print("Calling Bilevel_Optim!")
     for key in experimentClustersComp.clusters:
-        gl.compParamDict[key] = [14, 8]
+        gl.compParamDict[key] = [20, 18]
     gl.porosity = 0.4
     result = Lev1_Optim(experimentClustersComp)
     cond = experimentSetCor3.experiments[0].experimentCondition
