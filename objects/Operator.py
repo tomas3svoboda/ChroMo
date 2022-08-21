@@ -76,11 +76,25 @@ class Operator:
         experimentSet = self.Load_Experiment_Set(path)
         #Single_Loss_Function(experimentSet.experiments[0])
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
-        experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
+        experimentSetCopy = Fit_Gauss(experimentSetCopy)
+        #Compare_ExperimentSets(experimentSet, experimentSetCopy)
+
         comp = experimentSetCopy.experiments[0].experimentComponents[0]
         cond = experimentSetCopy.experiments[0].experimentCondition
         #print(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration)
-        #res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, 0.4, 14, 8, debugPrint=True, debugGraph=True)
+        res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, 0.52 ,12000,  8000, debugPrint=True, debugGraph=True)
+
+        experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
+        experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
+        experimentSetCopy = Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
+        experimentSetCopy = Mass_Balance_Cor(experimentSetCopy, experimentSetCopy)
+
+        #comp = experimentSetCopy.experiments[0].experimentComponents[2].concentrationTime
+        #cond = experimentSetCopy.experiments[0].experimentCondition
+        #plt.scatter(comp['time'],comp['Fru'])
+        #plt.show()
+        #comp.plot(x ='Time', y='Sac')
+        #plt.show()
         #t = np.linspace(0, 10800, 5000)
         #plt.plot(t, res[:, -1])
         #plt.show()
@@ -89,10 +103,7 @@ class Operator:
         #print(result)
         #expIso = Select_Iso_Exp(experimentSetCopy, experimentClusterComp)
         #experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
-        #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
-        #Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
-        #experimentSetCopy = Fit_Gauss(experimentSetCopy)
-        #Compare_ExperimentSets(experimentSet, experimentSetCopy)
+
 
     def Setting_Parameters(self):
         par1 = float(input('Enter parameter 1: '))

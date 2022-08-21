@@ -11,14 +11,14 @@ import matplotlib.pyplot as plt
 def Bilevel_Optim(experimentSetCor3, experimentClustersComp):
     print("Calling Bilevel_Optim!")
     for key in experimentClustersComp.clusters:
-        gl.compParamDict[key] = [20, 18]
+        gl.compParamDict[key] = [40, 30]
     gl.porosity = 0.4
     result = Lev1_Optim(experimentClustersComp)
     cond = experimentSetCor3.experiments[0].experimentCondition
     comp = experimentSetCor3.experiments[0].experimentComponents[0]
-    res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, gl.porosity, gl.compParamDict['Sac'][0], gl.compParamDict['Sac'][1], debugPrint=True, debugGraph=True)
-    t = np.linspace(0, 10800, 200)
+    res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, gl.porosity, gl.compParamDict['Sac'][0], gl.compParamDict['Sac'][1], debugPrint=True)
+    '''t = np.linspace(0, 10800, 200)
     plt.plot(t, res[:, -1])
     comp.concentrationTime.plot.line(x=0)
-    plt.show()
+    plt.show()'''
     return result #???

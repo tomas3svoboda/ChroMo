@@ -16,7 +16,7 @@ def Single_Loss_Function(params, experimentComp):
                             params[2],
                             debugPrint=False)[:, -1]
     # !remove hard wired time values
-    time = np.linspace(0, 10800, 4000)
+    time = np.linspace(0, 10800, 3000)
     f = interp1d(time, modelCurve)
     modelCurveInterpolated = f(df.iloc[:, 0].to_numpy())
     tmpErrSum = 0

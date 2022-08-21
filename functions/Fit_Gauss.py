@@ -24,11 +24,15 @@ def Fit_Gauss(experimentSetGauss):
     # between the data and the function
     def residuals(p, y, x, n):
         return y - GaussSum(x, p, n)
+
     for exp in experimentSetGauss.experiments:
         for comp in exp.experimentComponents:
             data_set = comp.concentrationTime.to_numpy()
+            data_set[:, 0] = data_set[:, 0]/60
             max_time = data_set[-1, 0]
+            print(max_time)
             max_conc = max(data_set[:, 1])
+            print(max_conc)
             max_conc_index = data_set[:, 1].tolist().index(max_conc)
 
             if max_conc < max_time / 5:
@@ -41,8 +45,16 @@ def Fit_Gauss(experimentSetGauss):
                 max_conc = 100 * max_conc
             elif max_conc < max_time / 500:
                 mutiplier = 1000
-                data_set[:, 1] = 100 * data_set[:, 1]
-                max_conc = 100 * max_conc
+                data_set[:, 1] = 1000 * data_set[:, 1]
+                max_conc = 1000 * max_conc
+            elif max_conc < max_time / 5000:
+                mutiplier = 10000
+                data_set[:, 1] = 10000 * data_set[:, 1]
+                max_conc = 10000 * max_conc
+            elif max_conc < max_time / 50000:
+                mutiplier = 100000
+                data_set[:, 1] = 100000 * data_set[:, 1]
+                max_conc = 100000 * max_conc
             else:
                 mutiplier = 1
 
@@ -59,10 +71,27 @@ def Fit_Gauss(experimentSetGauss):
             areas = dict()
             for i in range(n_value):
                 areas[i] = quad(gaussian, data_set[0, 0], data_set[-1, 0], args=(const[4*i], const[4*i+1], const[4*i+2], const[4*i+3]))[0]
-            time = np.linspace(0, max_time, 200)
-            result = pd.DataFrame({'time': time, comp.name: ((GaussSum(time, const, n_value))/mutiplier)})
+
+            time = (np.linspace(0, max_time, 40))
+            gauss_data = GaussSum(time, const, n_value)/mutiplier
+            time_red = (np.linspace(0, max_time, 6))
+            n = 0
+            for i in gauss_data:
+                if i > (max_conc/30):
+                    time_red = np.append(time_red, (time[n]))
+                n += 1
+            time = np.sort(time)
+
+            comp_name = comp.name
+            result = pd.DataFrame({'time': time_red, comp_name: ((GaussSum(time_red, const, n_value))/mutiplier)})
+            result['time'] *= 60
+            #result = result.drop((result[result[comp_name] < (max_conc/30)].index))
+            #result = result.drop((result[(result[comp_name]<(max_conc/30)) and (not ((result['time'] % 100) == 0))].index))
+            #result.loc[0] = [0,0]
+            #result.loc[len(result.index)] = [max_time,data_set[-1, 1]]
+            #result = result.dropna()
+
             comp.concentrationTime = result
-            print(result)
 
     return experimentSetGauss
 

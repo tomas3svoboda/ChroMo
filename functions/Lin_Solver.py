@@ -54,8 +54,8 @@ def Lin_Solver(flowRate = 50,
     b = flowSpeed/((((1-porosity)*henryConst)/porosity)+1)  # *** !!! PODLE DOKUMENTU
 
     time = 10800  # Finite time of the experiment [s]
-    Nx = 2000  # Number of spatial differences
-    Nt = 4000  # Number of time differences
+    Nx = 20  # Number of spatial differences
+    Nt = 3000  # Number of time differences
     x = np.linspace(0, length, Nx)  # Preparation of space vector
     dx = length / Nx  # Calculating space step [mm]
     t = np.linspace(0, time, Nt)  # Preparation of time vector
@@ -145,7 +145,7 @@ def Lin_Solver(flowRate = 50,
         print('Difference:   ' + str(round(-(massDifferenceOut), 2)) + ' mg   '
               + str(round((massDifferenceOut * 100 / feedMass), 2)) + ' %\n')
     if debugGraph:
-        fig1 = plt.figure(1)
+        '''fig1 = plt.figure(1)
         ax1 = fig1.add_subplot(projection='3d')
         X, Y = np.meshgrid(x, t)
         Z = c
@@ -155,5 +155,7 @@ def Lin_Solver(flowRate = 50,
         ax1.set_zlabel('Concentration [mg/mL]')
         plt.savefig('3D_surface_plot_' + str(Nt) + 'x' + str(Nx) + '_' + str(int(round(Nt / Nx, 0))) \
                     + '.png')
+        '''
+        plt.plot(t,c[:,-1])
         plt.show()
     return c
