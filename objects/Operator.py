@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from os import walk
 from datetime import datetime
@@ -21,6 +22,7 @@ from functions.Nonlin_Solver import Nonlin_Solver
 from functions.Single_Loss_Function import Single_Loss_Function
 from functions.Bilevel_Optim import Bilevel_Optim
 from functions.Lev2_Optim import Lev2_Optim
+from functions.Lev2_Loss_Function import Lev2_Loss_Function
 
 """
 Time measuring decorator
@@ -71,23 +73,23 @@ class Operator:
     @timeit
     def Start_For_Testing(self):
         #Nonlin_Solver()
-        #path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
-        path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
+        path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
+        #path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
         experimentSet = self.Load_Experiment_Set(path)
         #Single_Loss_Function(experimentSet.experiments[0])
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
-        experimentSetCopy = Fit_Gauss(experimentSetCopy)
+        #experimentSetCopy = Fit_Gauss(experimentSetCopy)
         #Compare_ExperimentSets(experimentSet, experimentSetCopy)
 
-        comp = experimentSetCopy.experiments[0].experimentComponents[0]
-        cond = experimentSetCopy.experiments[0].experimentCondition
+        #comp = experimentSetCopy.experiments[0].experimentComponents[0]
+        #cond = experimentSetCopy.experiments[0].experimentCondition
         #print(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration)
-        res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, 0.52 ,12000,  8000, debugPrint=True, debugGraph=True)
+        #res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, 0.52 ,12000,  8000, debugPrint=True, debugGraph=True)
 
         experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
-        experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
-        experimentSetCopy = Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
-        experimentSetCopy = Mass_Balance_Cor(experimentSetCopy, experimentSetCopy)
+        #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
+        #experimentSetCopy = Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
+        #experimentSetCopy = Mass_Balance_Cor(experimentSetCopy, experimentSetCopy)
 
         #comp = experimentSetCopy.experiments[0].experimentComponents[2].concentrationTime
         #cond = experimentSetCopy.experiments[0].experimentCondition
@@ -98,12 +100,43 @@ class Operator:
         #t = np.linspace(0, 10800, 5000)
         #plt.plot(t, res[:, -1])
         #plt.show()
-        result = Bilevel_Optim(experimentSetCopy, experimentClusterComp)
+        #result = Bilevel_Optim(experimentSetCopy, experimentClusterComp)
         #result = Lev2_Optim([150, 235, 16, 3, 150e-3], experimentClusterComp.clusters['Sac'])
         #print(result)
         #expIso = Select_Iso_Exp(experimentSetCopy, experimentClusterComp)
         #experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
-
+        experimentCluster = experimentClusterComp.clusters['Sac']
+        xstart = 1
+        ystart = 1
+        zstart = 0.2
+        xend = 5000
+        yend = 5000
+        zend = 1
+        xstep = 10
+        ystep = 10
+        zstep = 0.1
+        for porosity in np.arange(zstart, zend, zstep):
+            x = 0
+            resultArr = np.zeros((len(np.arange(xstart, xend, xstep)), len(np.arange(ystart, yend, ystep))))
+            for henryConst in np.arange(xstart, xend, xstep):
+                print(henryConst)
+                y = 0
+                for disperCoef in np.arange(ystart, yend, ystep):
+                    print(disperCoef)
+                    res = Lev2_Loss_Function([henryConst, disperCoef], experimentCluster, porosity)
+                    resultArr[x, y] = res
+                    y += 1
+                x += 1
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            X, Y = np.meshgrid(np.arange(ystart, yend, ystep), np.arange(xstart, xend, xstep))
+            Z = resultArr
+            ax.plot_surface(X, Y, Z)
+            ax.set_xlabel('Henry Constant')
+            ax.set_ylabel('Dispersion Coeficient')
+            ax.set_zlabel('Loss Function Value')
+            ax.set_title('porosity = ' + str(porosity))
+            plt.show()
 
     def Setting_Parameters(self):
         par1 = float(input('Enter parameter 1: '))
