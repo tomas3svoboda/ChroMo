@@ -108,14 +108,14 @@ class Operator:
         experimentCluster = experimentClusterComp.clusters['Sac']
         xstart = 1
         ystart = 1
-        zstart = 0.2
         xend = 5000
         yend = 5000
-        zend = 1
-        xstep = 10
-        ystep = 10
-        zstep = 0.1
-        for porosity in np.arange(zstart, zend, zstep):
+        xstep = 1
+        ystep = 1
+        porosityStart = 0.2
+        porosotyEnd = 1
+        porosityStep = 0.1
+        for porosity in np.arange(porosityStart, porosotyEnd, porosityStep):
             x = 0
             resultArr = np.zeros((len(np.arange(xstart, xend, xstep)), len(np.arange(ystart, yend, ystep))))
             for henryConst in np.arange(xstart, xend, xstep):
