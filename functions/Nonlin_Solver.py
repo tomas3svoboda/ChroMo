@@ -9,7 +9,7 @@ from objects.ExperimentComponent import ExperimentComponent
 from functions.Fit_Gauss import Fit_Gauss
 # Numerical solver of the EDM with Langmuir Isotherm - nonlinear parabolic PDE
 
-def Nonlin_Solver(flowRate = 800, length = 235, diameter = 16, feedVol = 5, feedConc = 2, porosity = 0.5,
+def Nonlin_Solver(flowRate = 200, length = 235, diameter = 16, feedVol = 5, feedConc = 2, porosity = 0.5,
                   langmuirConst = 2.5, disperCoef = 0.95, saturationConst = 1, Nx = 180, Nt = 1000):
     def Danckwert_lb_c2ap(c_i1, c_i0, dx, dt, C1, C2, cIn):
         # First derivative defined as Um/Dax*(c[t,0]-cIn)
@@ -110,9 +110,9 @@ def Nonlin_Solver(flowRate = 800, length = 235, diameter = 16, feedVol = 5, feed
     """
     # using scipy.interpolate.CubicSpline to smooth out input feed
     bp = 0
-    tmpTimeStep = time/(Nt//20)
-    tmpFeed = np.linspace(0, time, Nt//20)
-    for i in range(0, Nt//20):
+    tmpTimeStep = time/(Nt//1)
+    tmpFeed = np.linspace(0, time, Nt//1)
+    for i in range(0, Nt//1):
         if i*tmpTimeStep < feedTime:
             tmpFeed[i] = feedConc
         else:
@@ -120,10 +120,10 @@ def Nonlin_Solver(flowRate = 800, length = 235, diameter = 16, feedVol = 5, feed
             if bp == 0:
                 bp = i
 
-    tmpFeedTime = np.linspace(0, time, Nt//20)
-    #rmList = [range(bp-20, bp+19)]
-    #tmpFeed = np.delete(tmpFeed, rmList)
-    #tmpFeedTime = np.delete(tmpFeedTime, rmList)
+    tmpFeedTime = np.linspace(0, time, Nt//1)
+    rmList = [range(bp-150, bp+149)]
+    tmpFeed = np.delete(tmpFeed, rmList)
+    tmpFeedTime = np.delete(tmpFeedTime, rmList)
     cs = CubicSpline(x=tmpFeedTime, y=tmpFeed, bc_type='natural')
     plt.plot(tmpFeedTime, tmpFeed)
     plt.show()

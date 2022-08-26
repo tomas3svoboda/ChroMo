@@ -1,6 +1,5 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from os import walk
 from datetime import datetime
@@ -23,6 +22,7 @@ from functions.Single_Loss_Function import Single_Loss_Function
 from functions.Bilevel_Optim import Bilevel_Optim
 from functions.Lev2_Optim import Lev2_Optim
 from functions.Lev2_Loss_Function import Lev2_Loss_Function
+from functions.Loss_Function_Analysis import Loss_Function_Analysis
 
 """
 Time measuring decorator
@@ -105,38 +105,7 @@ class Operator:
         #print(result)
         #expIso = Select_Iso_Exp(experimentSetCopy, experimentClusterComp)
         #experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
-        experimentCluster = experimentClusterComp.clusters['Sac']
-        xstart = 1
-        ystart = 1
-        xend = 5000
-        yend = 5000
-        xstep = 1
-        ystep = 1
-        porosityStart = 0.2
-        porosotyEnd = 1
-        porosityStep = 0.1
-        for porosity in np.arange(porosityStart, porosotyEnd, porosityStep):
-            x = 0
-            resultArr = np.zeros((len(np.arange(xstart, xend, xstep)), len(np.arange(ystart, yend, ystep))))
-            for henryConst in np.arange(xstart, xend, xstep):
-                print(henryConst)
-                y = 0
-                for disperCoef in np.arange(ystart, yend, ystep):
-                    print(disperCoef)
-                    res = Lev2_Loss_Function([henryConst, disperCoef], experimentCluster, porosity)
-                    resultArr[x, y] = res
-                    y += 1
-                x += 1
-            fig = plt.figure()
-            ax = fig.add_subplot(111, projection='3d')
-            X, Y = np.meshgrid(np.arange(ystart, yend, ystep), np.arange(xstart, xend, xstep))
-            Z = resultArr
-            ax.plot_surface(X, Y, Z)
-            ax.set_xlabel('Henry Constant')
-            ax.set_ylabel('Dispersion Coeficient')
-            ax.set_zlabel('Loss Function Value')
-            ax.set_title('porosity = ' + str(porosity))
-            plt.show()
+        Loss_Function_Analysis(experimentClusterComp, component='Glc')
 
     def Setting_Parameters(self):
         par1 = float(input('Enter parameter 1: '))
