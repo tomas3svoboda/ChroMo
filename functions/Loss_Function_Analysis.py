@@ -32,8 +32,36 @@ def Loss_Function_Analysis(experimentClusterComp,
         X, Y = np.meshgrid(np.arange(ystart, yend, ystep), np.arange(xstart, xend, xstep))
         Z = resultArr
         ax.plot_surface(X, Y, Z)
-        ax.set_xlabel('Henry Constant')
-        ax.set_ylabel('Dispersion Coeficient')
+        ax.set_xlabel('Dispersion Coeficient')
+        ax.set_ylabel('Henry Constant')
         ax.set_zlabel('Loss Function Value')
         ax.set_title('porosity = ' + str(porosity))
+        xindex = np.argwhere(resultArr == np.min(resultArr))[0][0]
+        yindex = np.argwhere(resultArr == np.min(resultArr))[0][1]
+        print("Minimum:")
+        print("Hentry Constant = " + str(xstart + (xindex*xstep)) + "(index=" + str(xindex) + ")")
+        print("Dispersion Coeficient = " + str(ystart + (yindex*ystep)) + "(index=" + str(yindex) + ")")
         plt.show()
+        while True:
+            i = input("Print closeup?[Y - yes, N - no, E - exit]")
+            if i == "Y":
+                xstart2 = int(input("Henry Constant start index?"))
+                xend2 = int(input("Henry Constant end index?"))
+                ystart2 = int(input("Dispersion Coeficient start index?"))
+                yend2 = int(input("Dispersion Coeficient end index?"))
+                newResultArr = resultArr[xstart2:xend2+1, ystart2:yend2+1]
+                fig = plt.figure()
+                ax = fig.add_subplot(111, projection='3d')
+                X, Y = np.meshgrid(np.arange(ystart + (ystart2*ystep), ystart + (yend2*ystep) + 1, ystep), np.arange(xstart + (xstart2*xstep), xstart + (xend2*xstep) + 1, xstep))
+                Z = newResultArr
+                ax.plot_surface(X, Y, Z)
+                ax.set_xlabel('Dispersion Coeficient')
+                ax.set_ylabel('Henry Constant')
+                ax.set_zlabel('Loss Function Value')
+                ax.set_title('porosity = ' + str(porosity))
+                plt.show()
+                break
+            if i == "N":
+                break
+            if i == "E":
+                return

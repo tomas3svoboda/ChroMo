@@ -18,7 +18,7 @@ from functions.Mass_Balance_Cor import Mass_Balance_Cor
 from functions.Select_Iso_Exp import Select_Iso_Exp
 from functions.Lin_Solver import Lin_Solver
 from functions.Nonlin_Solver import Nonlin_Solver
-from functions.Single_Loss_Function import Single_Loss_Function
+from functions.Single_Loss_Function_1 import Single_Loss_Function_1
 from functions.Bilevel_Optim import Bilevel_Optim
 from functions.Lev2_Optim import Lev2_Optim
 from functions.Lev2_Loss_Function import Lev2_Loss_Function
@@ -73,11 +73,8 @@ class Operator:
     @timeit
     def Start_For_Testing(self):
         #Nonlin_Solver()
-        path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
         #path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
-        experimentSet = self.Load_Experiment_Set(path)
         #Single_Loss_Function(experimentSet.experiments[0])
-        experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
         #experimentSetCopy = Fit_Gauss(experimentSetCopy)
         #Compare_ExperimentSets(experimentSet, experimentSetCopy)
 
@@ -85,8 +82,11 @@ class Operator:
         #cond = experimentSetCopy.experiments[0].experimentCondition
         #print(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration)
         #res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, 0.52 ,12000,  8000, debugPrint=True, debugGraph=True)
-
+        path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
+        experimentSet = self.Load_Experiment_Set(path)
+        experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
         experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
+        Loss_Function_Analysis(experimentClusterComp, component='Glc', xstep=600, ystep=500)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #experimentSetCopy = Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
         #experimentSetCopy = Mass_Balance_Cor(experimentSetCopy, experimentSetCopy)
@@ -105,7 +105,6 @@ class Operator:
         #print(result)
         #expIso = Select_Iso_Exp(experimentSetCopy, experimentClusterComp)
         #experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
-        Loss_Function_Analysis(experimentClusterComp, component='Glc')
 
     def Setting_Parameters(self):
         par1 = float(input('Enter parameter 1: '))
