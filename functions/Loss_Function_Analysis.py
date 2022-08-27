@@ -49,6 +49,14 @@ def Loss_Function_Analysis(experimentClusterComp,
                 xend2 = int(input("Henry Constant end index?"))
                 ystart2 = int(input("Dispersion Coeficient start index?"))
                 yend2 = int(input("Dispersion Coeficient end index?"))
+                if xstart2 < 0:
+                    xstart2 = 0
+                if xend2 >= resultArr.shape[0]:
+                    xend2 = resultArr.shape[0]-1
+                if ystart2 < 0:
+                    ystart2 = 0
+                if yend2 >= resultArr.shape[1]:
+                    yend2 = resultArr.shape[1]-1
                 newResultArr = resultArr[xstart2:xend2+1, ystart2:yend2+1]
                 fig = plt.figure()
                 ax = fig.add_subplot(111, projection='3d')
