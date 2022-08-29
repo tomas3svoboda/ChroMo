@@ -39,35 +39,19 @@ def Loss_Function_Analysis(experimentClusterComp,
         xindex = np.argwhere(resultArr == np.min(resultArr))[0][0]
         yindex = np.argwhere(resultArr == np.min(resultArr))[0][1]
         print("Minimum:")
-        print("Hentry Constant = " + str(xstart + (xindex*xstep)) + "(index=" + str(xindex) + ")")
-        print("Dispersion Coeficient = " + str(ystart + (yindex*ystep)) + "(index=" + str(yindex) + ")")
+        print("Hentry Constant = " + str(xstart + (xindex*xstep)))
+        print("Dispersion Coeficient = " + str(ystart + (yindex*ystep)))
         plt.show()
         while True:
             i = input("Print closeup?[Y - yes, N - no, E - exit]")
             if i == "Y":
-                xstart2 = int(input("Henry Constant start index?"))
-                xend2 = int(input("Henry Constant end index?"))
-                ystart2 = int(input("Dispersion Coeficient start index?"))
-                yend2 = int(input("Dispersion Coeficient end index?"))
-                if xstart2 < 0:
-                    xstart2 = 0
-                if xend2 >= resultArr.shape[0]:
-                    xend2 = resultArr.shape[0]-1
-                if ystart2 < 0:
-                    ystart2 = 0
-                if yend2 >= resultArr.shape[1]:
-                    yend2 = resultArr.shape[1]-1
-                newResultArr = resultArr[xstart2:xend2+1, ystart2:yend2+1]
-                fig = plt.figure()
-                ax = fig.add_subplot(111, projection='3d')
-                X, Y = np.meshgrid(np.arange(ystart + (ystart2*ystep), ystart + (yend2*ystep) + 1, ystep), np.arange(xstart + (xstart2*xstep), xstart + (xend2*xstep) + 1, xstep))
-                Z = newResultArr
-                ax.plot_surface(X, Y, Z)
-                ax.set_xlabel('Dispersion Coeficient')
-                ax.set_ylabel('Henry Constant')
-                ax.set_zlabel('Loss Function Value')
-                ax.set_title('porosity = ' + str(porosity))
-                plt.show()
+                xstart2 = int(input("Henry Constant start?"))
+                xend2 = int(input("Henry Constant end?"))
+                xstep2 = int(input("Henry Constant step?"))
+                ystart2 = int(input("Dispersion Coeficient start?"))
+                yend2 = int(input("Dispersion Coeficient end?"))
+                ystep2 = int(input("Dispersion Coeficient step?"))
+                Loss_Function_Analysis(experimentClusterComp, component, xstart2, ystart2, xend2, yend2, xstep2, ystep2, porosity, porosity+(porosityStep/2), porosityStep)
                 break
             if i == "N":
                 break

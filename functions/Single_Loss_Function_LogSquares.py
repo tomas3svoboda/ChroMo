@@ -4,7 +4,7 @@ import math
 import numpy as np
 # Calculates loss value of sigle particular solution and according time series. Serves for isotherm decision.
 
-def Single_Loss_Function_3(params, experimentComp):
+def Single_Loss_Function_LogSquares(params, experimentComp):
     errSum = 0
     df = experimentComp.concentrationTime
     modelCurve = Lin_Solver(experimentComp.experiment.experimentCondition.flowRate,
@@ -23,10 +23,10 @@ def Single_Loss_Function_3(params, experimentComp):
     tmpErrSum = 0
     max = 0
     for a, b in zip(df.iloc[:, 1].to_numpy(), modelCurveInterpolated):
-        err = abs(a-b)
+        err = ((a-b)**2)
         tmpErrSum += err
         if a > max:
             max = a
     errSum += tmpErrSum
-    errSum = math.log(errSum/max)
+    errSum = math.log(errSum/(max**2))
     return errSum

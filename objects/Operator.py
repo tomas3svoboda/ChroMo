@@ -18,7 +18,7 @@ from functions.Mass_Balance_Cor import Mass_Balance_Cor
 from functions.Select_Iso_Exp import Select_Iso_Exp
 from functions.Lin_Solver import Lin_Solver
 from functions.Nonlin_Solver import Nonlin_Solver
-from functions.Single_Loss_Function_1 import Single_Loss_Function_1
+from functions.Single_Loss_Function_Simple import Single_Loss_Function_Simple
 from functions.Bilevel_Optim import Bilevel_Optim
 from functions.Lev2_Optim import Lev2_Optim
 from functions.Lev2_Loss_Function import Lev2_Loss_Function

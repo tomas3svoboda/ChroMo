@@ -3,7 +3,7 @@ from scipy.interpolate import interp1d
 import numpy as np
 # Calculates loss value of sigle particular solution and according time series. Serves for isotherm decision.
 
-def Single_Loss_Function_2(params, experimentComp):
+def Single_Loss_Function_Simple(params, experimentComp):
     errSum = 0
     df = experimentComp.concentrationTime
     modelCurve = Lin_Solver(experimentComp.experiment.experimentCondition.flowRate,
@@ -20,12 +20,12 @@ def Single_Loss_Function_2(params, experimentComp):
     f = interp1d(time, modelCurve)
     modelCurveInterpolated = f(df.iloc[:, 0].to_numpy())
     tmpErrSum = 0
-    max = 0
+    cmax = 0
     for a, b in zip(df.iloc[:, 1].to_numpy(), modelCurveInterpolated):
-        err = ((a-b)**2)
+        err = abs(a-b)
         tmpErrSum += err
-        if a > max:
-            max = a
+        if a > cmax:
+            cmax = a
     errSum += tmpErrSum
-    errSum = errSum/(max**2)
+    errSum = errSum/cmax
     return errSum
