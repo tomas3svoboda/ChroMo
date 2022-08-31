@@ -23,7 +23,7 @@ from functions.Bilevel_Optim import Bilevel_Optim
 from functions.Lev2_Optim import Lev2_Optim
 from functions.Lev2_Loss_Function import Lev2_Loss_Function
 from functions.Loss_Function_Analysis import Loss_Function_Analysis
-from functions.Loss_Function_Analysis_Log import Loss_Function_Analysis_Log
+from functions.Loss_Function_Analysis import Loss_Function_Analysis_Log
 
 """
 Time measuring decorator
@@ -87,7 +87,7 @@ class Operator:
         experimentSet = self.Load_Experiment_Set(path)
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
         experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
-        Loss_Function_Analysis_Log(experimentClusterComp, component='Glc', xsteps=10, ysteps=10)
+        Loss_Function_Analysis_Log(experimentClusterComp, component='Glc', xsteps=15, ysteps=15)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #experimentSetCopy = Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
         #experimentSetCopy = Mass_Balance_Cor(experimentSetCopy, experimentSetCopy)
