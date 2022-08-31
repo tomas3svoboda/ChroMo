@@ -19,10 +19,8 @@ def Loss_Function_Analysis(experimentClusterComp,
         x = 0
         resultArr = np.zeros((len(np.arange(xstart, xend, xstep)), len(np.arange(ystart, yend, ystep))))
         for henryConst in np.arange(xstart, xend, xstep):
-            print(henryConst)
             y = 0
             for disperCoef in np.arange(ystart, yend, ystep):
-                print(disperCoef)
                 res = Lev2_Loss_Function([henryConst, disperCoef], experimentCluster, porosity)
                 resultArr[x, y] = res
                 y += 1
