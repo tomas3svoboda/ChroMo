@@ -87,7 +87,7 @@ class Operator:
         experimentSet = self.Load_Experiment_Set(path)
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
         experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
-        Loss_Function_Analysis_Log(experimentClusterComp, component='Glc', xsteps=15, ysteps=15)
+        Loss_Function_Analysis(experimentClusterComp, component='Glc', xstep=200, ystep=200)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #experimentSetCopy = Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
         #experimentSetCopy = Mass_Balance_Cor(experimentSetCopy, experimentSetCopy)
