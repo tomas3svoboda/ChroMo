@@ -2,13 +2,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from os import walk
-from datetime import datetime
+import datetime
+import time
+import random #just for testing, delete on release
 from objects.ExperimentSet import ExperimentSet
 from objects.ExperimentComponent import ExperimentComponent
 from objects.Experiment import Experiment
 from objects.ExperimentClusters import ExperimentClusters
-import datetime
-import time
+from objects.Solution import Solution
 from functions.Fit_Gauss import Fit_Gauss
 from functions.Ret_Time_Cor import Ret_Time_Cor
 from functions.Remote_DP_Elim import Remote_DP_Elim
@@ -23,7 +24,6 @@ from functions.Bilevel_Optim import Bilevel_Optim
 from functions.Lev2_Optim import Lev2_Optim
 from functions.Lev2_Loss_Function import Lev2_Loss_Function
 from functions.Loss_Function_Analysis import Loss_Function_Analysis
-from functions.Loss_Function_Analysis import Loss_Function_Analysis_Log
 
 """
 Time measuring decorator
@@ -84,10 +84,15 @@ class Operator:
         #print(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration)
         #res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, 0.52 ,12000,  8000, debugPrint=True, debugGraph=True)
         path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
+        solution = Solution()
         experimentSet = self.Load_Experiment_Set(path)
-        experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
-        experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
-        Loss_Function_Analysis(experimentClusterComp, component='Glc', xstep=200, ystep=200)
+        for exp in experimentSet.experiments:
+            for comp in exp.experimentComponents:
+                solution.Add_Result(comp.name, comp.experiment.metadata.path, random.random(), random.random(), random.random())
+        solution.Export_To_CSV("C:\\Users\\Adam\\ChroMo\\testSolution.csv")
+        #experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
+        #experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
+        #Loss_Function_Analysis(experimentClusterComp, component='Glc', xstep=200, ystep=200)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #experimentSetCopy = Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
         #experimentSetCopy = Mass_Balance_Cor(experimentSetCopy, experimentSetCopy)
