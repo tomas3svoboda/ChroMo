@@ -5,7 +5,7 @@ class Solution:
     def __init__(self):
         self.experimentSet = ExperimentSet()
         self.modelExperimentSet = ExperimentSet()
-        self.results = pd.DataFrame([], columns=['Component', 'Path_to_experiment', 'Henry Constant', 'Dispersion Coeficient', 'Porosity'])
+        self.results = pd.DataFrame([], columns=['Component', 'Path_to_experiment', 'Henry Constant', 'Dispersion Coeficient', 'Porosity', 'Langmuir Constant', 'Freundlich Constant'])
 
     def Add_Result(self, comp, pathToExp, henryConst, disperCoef, porosity):
         newRow = pd.DataFrame([[comp, pathToExp, henryConst, disperCoef, porosity]], columns=['Component', 'Path_to_experiment', 'Henry Constant', 'Dispersion Coeficient', 'Porosity'])
