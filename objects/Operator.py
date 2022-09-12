@@ -84,15 +84,15 @@ class Operator:
         #print(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration)
         #res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, 0.52 ,12000,  8000, debugPrint=True, debugGraph=True)
         path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
-        solution = Solution()
         experimentSet = self.Load_Experiment_Set(path)
+        '''solution = Solution()
         for exp in experimentSet.experiments:
             for comp in exp.experimentComponents:
                 solution.Add_Result(comp.name, comp.experiment.metadata.path, random.random(), random.random(), random.random())
-        solution.Export_To_CSV("C:\\Users\\Adam\\ChroMo\\testSolution.csv")
-        #experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
-        #experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
-        #Loss_Function_Analysis(experimentClusterComp, component='Glc', xstep=200, ystep=200)
+        solution.Export_To_CSV("C:\\Users\\Adam\\ChroMo\\testSolution.csv")'''
+        experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
+        experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
+        Loss_Function_Analysis(experimentClusterComp, component='Glc', xstep=200, ystep=200)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #experimentSetCopy = Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
         #experimentSetCopy = Mass_Balance_Cor(experimentSetCopy, experimentSetCopy)
