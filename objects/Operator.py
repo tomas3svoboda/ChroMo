@@ -1,29 +1,20 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
 from os import walk
 import datetime
 import time
-import random #just for testing, delete on release
 from objects.ExperimentSet import ExperimentSet
 from objects.ExperimentComponent import ExperimentComponent
 from objects.Experiment import Experiment
 from objects.ExperimentClusters import ExperimentClusters
-from objects.Solution import Solution
 from functions.Fit_Gauss import Fit_Gauss
 from functions.Ret_Time_Cor import Ret_Time_Cor
 from functions.Remote_DP_Elim import Remote_DP_Elim
 from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
-from functions.Compare_ExperimentSets import Compare_ExperimentSets
 from functions.Mass_Balance_Cor import Mass_Balance_Cor
 from functions.Select_Iso_Exp import Select_Iso_Exp
-from functions.Lin_Solver import Lin_Solver
-from functions.Nonlin_Solver import Nonlin_Solver
-from functions.Single_Loss_Function_Simple import Single_Loss_Function_Simple
-from functions.Bilevel_Optim import Bilevel_Optim
-from functions.Lev2_Optim import Lev2_Optim
-from functions.Lev2_Loss_Function import Lev2_Loss_Function
 from functions.Loss_Function_Analysis import Loss_Function_Analysis
+from functions.Iso_Decision import Iso_Decision
 
 """
 Time measuring decorator
@@ -92,7 +83,10 @@ class Operator:
         solution.Export_To_CSV("C:\\Users\\Adam\\ChroMo\\testSolution.csv")'''
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
         experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
-        Loss_Function_Analysis(experimentClusterComp, component='Glc', xstep=200, ystep=200)
+        expIso = Select_Iso_Exp(experimentSetCopy, experimentClusterComp)
+        testRes = Iso_Decision(expIso, [0.3, 15, 15])
+        print(testRes)
+        #Loss_Function_Analysis(experimentClusterComp, component='Glc', xstep=200, ystep=200)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #experimentSetCopy = Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
         #experimentSetCopy = Mass_Balance_Cor(experimentSetCopy, experimentSetCopy)

@@ -1,4 +1,4 @@
-from functions.Nonlin_Solver import Nonlin_Solver
+from functions.solvers.Nonlin_Solver import Nonlin_Solver
 import numpy as np
 import math
 

@@ -3,10 +3,8 @@
 # Generates FinalResults data object.
 from functions.Lev1_Optim import Lev1_Optim
 import functions.global_ as gl
-from functions.Lin_Solver import Lin_Solver
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+from functions.solvers.Lin_Solver import Lin_Solver
+
 
 def Bilevel_Optim(experimentSetCor3, experimentClustersComp):
     print("Calling Bilevel_Optim!")
