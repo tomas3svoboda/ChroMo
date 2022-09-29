@@ -17,7 +17,8 @@ def Loss_Function_Analysis(experimentClusterComp,
                             ystep = 50,
                             porosityStart = 0.2,
                             porosotyEnd = 1,
-                            porosityStep = 0.1):
+                            porosityStep = 0.1,
+                            lossFunctionChoice = "Simple"):
     experimentCluster = experimentClusterComp.clusters[component]
     for porosity in np.arange(porosityStart, porosotyEnd, porosityStep):
         x = 0
@@ -25,7 +26,7 @@ def Loss_Function_Analysis(experimentClusterComp,
         for henryConst in np.arange(xstart, xend, xstep):
             y = 0
             for disperCoef in np.arange(ystart, yend, ystep):
-                res = Lev2_Loss_Function([henryConst, disperCoef], experimentCluster, porosity)
+                res = Lev2_Loss_Function([henryConst, disperCoef], experimentCluster, porosity, lossFunctionChoice)
                 resultArr[x, y] = res
                 y += 1
             x += 1
@@ -55,7 +56,7 @@ def Loss_Function_Analysis(experimentClusterComp,
                 ystart2 = float(input("Dispersion Coeficient start?"))
                 yend2 = float(input("Dispersion Coeficient end?"))
                 ystep2 = float(input("Dispersion Coeficient step?"))
-                Loss_Function_Analysis(experimentClusterComp, component, xstart2, ystart2, xend2, yend2, xstep2, ystep2, porosity, porosity+(porosityStep/2), porosityStep)
+                Loss_Function_Analysis(experimentClusterComp, component, xstart2, ystart2, xend2, yend2, xstep2, ystep2, porosity, porosity+(porosityStep/2), porosityStep, lossFunctionChoice)
                 break
             if i == "N":
                 break
