@@ -1,10 +1,12 @@
 from objects.ExperimentSet import ExperimentSet
+from objects.Metadata import Metadata
 import pandas as pd
 
 class Solution:
     def __init__(self):
         self.experimentSet = ExperimentSet()
         self.modelExperimentSet = ExperimentSet()
+        self.metadata = Metadata()
         self.results = pd.DataFrame([], columns=['Component', 'Path_to_experiment', 'Henry Constant', 'Dispersion Coeficient', 'Porosity', 'Langmuir Constant', 'Freundlich Constant'])
 
     def Add_Result(self, comp, pathToExp, henryConst, disperCoef, porosity):

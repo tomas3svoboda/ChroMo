@@ -49,12 +49,12 @@ def Loss_Function_Analysis(experimentClusterComp,
         while True:
             i = input("Print closeup?[Y - yes, N - no, E - exit]")
             if i == "Y":
-                xstart2 = int(input("Henry Constant start?"))
-                xend2 = int(input("Henry Constant end?"))
-                xstep2 = int(input("Henry Constant step?"))
-                ystart2 = int(input("Dispersion Coeficient start?"))
-                yend2 = int(input("Dispersion Coeficient end?"))
-                ystep2 = int(input("Dispersion Coeficient step?"))
+                xstart2 = float(input("Henry Constant start?"))
+                xend2 = float(input("Henry Constant end?"))
+                xstep2 = float(input("Henry Constant step?"))
+                ystart2 = float(input("Dispersion Coeficient start?"))
+                yend2 = float(input("Dispersion Coeficient end?"))
+                ystep2 = float(input("Dispersion Coeficient step?"))
                 Loss_Function_Analysis(experimentClusterComp, component, xstart2, ystart2, xend2, yend2, xstep2, ystep2, porosity, porosity+(porosityStep/2), porosityStep)
                 break
             if i == "N":

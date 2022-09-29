@@ -86,7 +86,7 @@ class Operator:
         #expIso = Select_Iso_Exp(experimentSetCopy, experimentClusterComp)
         #testRes = Iso_Decision(expIso, [0.3, 15, 15])
         #print(testRes)
-        Loss_Function_Analysis(experimentClusterComp, component='Glc', xstep=200, ystep=200)
+        Loss_Function_Analysis(experimentClusterComp, component='Glc', xstep=500, ystep=500)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #experimentSetCopy = Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
         #experimentSetCopy = Mass_Balance_Cor(experimentSetCopy, experimentSetCopy)
