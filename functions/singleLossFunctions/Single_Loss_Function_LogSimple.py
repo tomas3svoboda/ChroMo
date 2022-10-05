@@ -9,7 +9,9 @@ def Single_Loss_Function_LogSimple(params, experimentComp):
     df = experimentComp.concentrationTime
     modelCurve = Solver_Choice('Lin', params, experimentComp)[:, -1]
     # TODO remove hard wired time values
-    time = np.linspace(0, 10800, 3000)
+    minTime = df.iat[0, 0]
+    maxTime = df.iat[-1, 0]
+    time = np.linspace(minTime, maxTime, 3000)
     f = interp1d(time, modelCurve)
     modelCurveInterpolated = f(df.iloc[:, 0].to_numpy())
     tmpErrSum = 0
