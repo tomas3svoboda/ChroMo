@@ -7,6 +7,7 @@ from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 
 def Fit_Gauss(experimentSetGauss):
     print('Fitting Gauss started!')
+    # ---------------------Start of external code-------------------------------
     # defines a typical gaussian function, of independent variable x,
     # amplitude a, position b, width parameter c, and erf parameter d.
     def gaussian(x, a, b, c, d):
@@ -24,7 +25,7 @@ def Fit_Gauss(experimentSetGauss):
     # between the data and the function
     def residuals(p, y, x, n):
         return y - GaussSum(x, p, n)
-
+    # ---------------------External code---------------------------------------
     for exp in experimentSetGauss.experiments:
         for comp in exp.experimentComponents:
             data_set = comp.concentrationTime.to_numpy()
@@ -68,9 +69,11 @@ def Fit_Gauss(experimentSetGauss):
             # integrates the gaussian functions through gauss quadrature and saves the
             # results to a dictionary.
 
+            #---------------------------- Start of External code--------------------------
             areas = dict()
             for i in range(n_value):
                 areas[i] = quad(gaussian, data_set[0, 0], data_set[-1, 0], args=(const[4*i], const[4*i+1], const[4*i+2], const[4*i+3]))[0]
+            #---------------------------- End of External code--------------------------
 
             time = (np.linspace(0, max_time, 40))
             gauss_data = GaussSum(time, const, n_value)/mutiplier
@@ -84,6 +87,7 @@ def Fit_Gauss(experimentSetGauss):
 
             comp_name = comp.name
             result = pd.DataFrame({'time': time_red, comp_name: ((GaussSum(time_red, const, n_value))/mutiplier)})
+            result = result.sort_values(by = ['time'])
             result['time'] *= 60
             #result = result.drop((result[result[comp_name] < (max_conc/30)].index))
             #result = result.drop((result[(result[comp_name]<(max_conc/30)) and (not ((result['time'] % 100) == 0))].index))
