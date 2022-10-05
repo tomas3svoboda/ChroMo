@@ -75,7 +75,7 @@ def Fit_Gauss(experimentSetGauss):
                 areas[i] = quad(gaussian, data_set[0, 0], data_set[-1, 0], args=(const[4*i], const[4*i+1], const[4*i+2], const[4*i+3]))[0]
             #---------------------------- End of External code--------------------------
 
-            time = (np.linspace(0, max_time, 40))
+            time = (np.linspace(0, max_time, 80))
             gauss_data = GaussSum(time, const, n_value)/mutiplier
             time_red = (np.linspace(0, max_time, 6))
             n = 0
@@ -89,6 +89,14 @@ def Fit_Gauss(experimentSetGauss):
             result = pd.DataFrame({'time': time_red, comp_name: ((GaussSum(time_red, const, n_value))/mutiplier)})
             result = result.sort_values(by = ['time'])
             result['time'] *= 60
+
+            #-----------------temporary solution---------------------
+            if comp.name == "ManOH":
+                result.drop(result[result['time'] < 0].index, inplace=True)
+
+
+
+            # -----------------temporary solution---------------------
             #result = result.drop((result[result[comp_name] < (max_conc/30)].index))
             #result = result.drop((result[(result[comp_name]<(max_conc/30)) and (not ((result['time'] % 100) == 0))].index))
             #result.loc[0] = [0,0]

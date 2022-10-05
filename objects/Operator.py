@@ -14,7 +14,9 @@ from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 from functions.Mass_Balance_Cor import Mass_Balance_Cor
 from functions.Select_Iso_Exp import Select_Iso_Exp
 from functions.Loss_Function_Analysis import Loss_Function_Analysis
+from functions.Loss_Function_Porosity_Analysis import Loss_Function_Porosity_Analysis
 from functions.Iso_Decision import Iso_Decision
+from functions.Compare_ExperimentSets import Compare_ExperimentSets
 
 """
 Time measuring decorator
@@ -74,7 +76,7 @@ class Operator:
         #cond = experimentSetCopy.experiments[0].experimentCondition
         #print(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration)
         #res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, 0.52 ,12000,  8000, debugPrint=True, debugGraph=True)
-        path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
+        path = "C:\\Users\\Adam\\ChroMo\\docu\\LossFunctionExperimentSet"
         experimentSet = self.Load_Experiment_Set(path)
         '''solution = Solution()
         for exp in experimentSet.experiments:
@@ -82,11 +84,17 @@ class Operator:
                 solution.Add_Result(comp.name, comp.experiment.metadata.path, random.random(), random.random(), random.random())
         solution.Export_To_CSV("C:\\Users\\Adam\\ChroMo\\testSolution.csv")'''
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
-        experimentClusterComp = self.Cluster_By_Component(experimentSetCopy)
+        experimentSetGauss = Fit_Gauss(experimentSetCopy)
+
+        experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetGauss)
+        experimentSetCor2 = Ret_Time_Cor(experimentSetGauss, experimentClusterCompCond)
+        experimentSetCor3 = Mass_Balance_Cor(experimentSetCor2)
+        #Compare_ExperimentSets(experimentSet, experimentSetCor3)
         #expIso = Select_Iso_Exp(experimentSetCopy, experimentClusterComp)
         #testRes = Iso_Decision(expIso, [0.3, 15, 15])
         #print(testRes)
-        Loss_Function_Analysis(experimentClusterComp, component='Glc', xstep=500, ystep=500)
+        experimentClusterComp = self.Cluster_By_Component(experimentSetCor3)
+        Loss_Function_Analysis(experimentClusterComp, component='Glc', xstep=100, ystep=100, porosityStep=0.2, lossFunctionChoice="Squares")
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #experimentSetCopy = Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
         #experimentSetCopy = Mass_Balance_Cor(experimentSetCopy, experimentSetCopy)
@@ -216,9 +224,9 @@ class Operator:
                 abs(comp1.feedConcentration - comp2.feedConcentration) < tolerance * comp1.feedConcentration and
                 abs(cond1.flowRate - cond2.flowRate) < tolerance * cond1.flowRate and
                 abs(cond1.columnDiameter - cond2.columnDiameter) < tolerance * cond1.columnDiameter and
-                abs(cond1.columnLength - cond2.columnLength) < tolerance * cond1.columnLength and
-                abs(cond1.feedVolume - cond2.feedVolume) < tolerance * cond1.feedVolume):
+                abs(cond1.columnLength - cond2.columnLength) < tolerance * cond1.columnLength):
             return True
+                #abs(cond1.feedVolume - cond2.feedVolume) < tolerance * cond1.feedVolume):
         return False
 
     """
