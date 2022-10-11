@@ -14,6 +14,7 @@ from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 from functions.Mass_Balance_Cor import Mass_Balance_Cor
 from functions.Select_Iso_Exp import Select_Iso_Exp
 from functions.Loss_Function_Analysis import Loss_Function_Analysis
+from functions.Solver_Analysis import Solver_Analysis
 from functions.Loss_Function_Porosity_Analysis import Loss_Function_Porosity_Analysis
 from functions.Iso_Decision import Iso_Decision
 from functions.Compare_ExperimentSets import Compare_ExperimentSets
@@ -76,13 +77,15 @@ class Operator:
         #cond = experimentSetCopy.experiments[0].experimentCondition
         #print(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration)
         #res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, 0.52 ,12000,  8000, debugPrint=True, debugGraph=True)
-        path = "C:\\Users\\Adam\\ChroMo\\docu\\LossFunctionExperimentSet"
+        path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
         experimentSet = self.Load_Experiment_Set(path)
+        Solver_Analysis(experimentSet, ["Glc", "Sac", "ManOH"], [[0.2, 10, 10], [0.2, 10, 10], [0.2, 10, 10]], "Lin")
         '''solution = Solution()
         for exp in experimentSet.experiments:
             for comp in exp.experimentComponents:
                 solution.Add_Result(comp.name, comp.experiment.metadata.path, random.random(), random.random(), random.random())
         solution.Export_To_CSV("C:\\Users\\Adam\\ChroMo\\testSolution.csv")'''
+        '''
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
         experimentSetGauss = Fit_Gauss(experimentSetCopy)
 
@@ -94,7 +97,8 @@ class Operator:
         #testRes = Iso_Decision(expIso, [0.3, 15, 15])
         #print(testRes)
         experimentClusterComp = self.Cluster_By_Component(experimentSetCor3)
-        Loss_Function_Analysis(experimentClusterComp, component='Glc', xstep=10, ystep=1, porosityStep=0.2, lossFunctionChoice="Simple")
+        Loss_Function_Analysis(experimentClusterComp, component='Glc', ystart=0, yend=26, ystep=0.5, xstart=0, xend=501, xstep=1, porosityStart=0.8, porosityStep=0.2, lossFunctionChoice="Simple")
+        '''
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #experimentSetCopy = Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
         #experimentSetCopy = Mass_Balance_Cor(experimentSetCopy, experimentSetCopy)

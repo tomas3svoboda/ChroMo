@@ -3,10 +3,10 @@ from scipy.interpolate import interp1d
 import numpy as np
 # Calculates loss value of sigle particular solution and according time series. Serves for isotherm decision.
 
-def Single_Loss_Function_Squares(params, experimentComp):
+def Single_Loss_Function_Squares(params, experimentComp, solver):
     errSum = 0
     df = experimentComp.concentrationTime
-    modelCurve = Solver_Choice('Lin', params, experimentComp)[:, -1]
+    modelCurve = Solver_Choice(solver, params, experimentComp)[:, -1]
     # TODO remove hard wired time values (need to fix in solvers?)
     minTime = df.iat[0, 0]
     maxTime = df.iat[-1, 0]
