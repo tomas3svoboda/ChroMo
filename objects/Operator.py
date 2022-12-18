@@ -1,6 +1,8 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from os import walk
+import os
 import datetime
 import time
 from objects.ExperimentSet import ExperimentSet
@@ -14,10 +16,13 @@ from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 from functions.Mass_Balance_Cor import Mass_Balance_Cor
 from functions.Select_Iso_Exp import Select_Iso_Exp
 from functions.Loss_Function_Analysis import Loss_Function_Analysis
+from functions.Loss_Function_Analysis_Simple import Loss_Function_Analysis_Simple
 from functions.Solver_Analysis import Solver_Analysis
 from functions.Loss_Function_Porosity_Analysis import Loss_Function_Porosity_Analysis
 from functions.Iso_Decision import Iso_Decision
 from functions.Compare_ExperimentSets import Compare_ExperimentSets
+from functions.Bilevel_Optim import Bilevel_Optim
+from functions.solvers.Solver_Choice import Solver_Choice
 
 """
 Time measuring decorator
@@ -41,27 +46,84 @@ Main class orchestrating program functions and user interface
 """
 class Operator:
     def Start(self):
-        par1, par2, par3, par4 = self.Setting_parameters()
         path = input('Enter path to Experiment set: ')
         experimentSet = self.Load_Experiment_Set(path)
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
-        experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
-        experimentSetCor1 = Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
-        experimentSetGauss = Fit_Gauss(experimentSetCor1)
-        while True:
-            dpElimInput = input("Use fitted Gauss curve directly as a corrected datapoints?[Y, N]")
-            if dpElimInput == "Y":
-                experimentSetCor2 = Remote_DP_Elim(experimentSetCor1, experimentSetGauss)
-                break
-            if dpElimInput == "N":
-                experimentSetCor2 = experimentSetGauss
-                break
-            else:
-                print("Wrong input.")
-        experimentSetCor3 = Mass_Balance_Cor(experimentSetCor2, experimentSetGauss)
-        experimentClusterComp = self.Cluster_By_Component(experimentSetCor3)
-        expIso = Select_Iso_Exp(experimentSetCor3, experimentClusterComp)
-        # TODO Continue
+        experimentSetGauss = Fit_Gauss(experimentSetCopy)
+        self.Save_Graphs_To_Directory(experimentSet, experimentSetGauss, path)
+        print("Graphs of Gauss Curves Created.")
+        experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetGauss)
+        experimentSetCor1 = Ret_Time_Cor(experimentSetGauss, experimentClusterCompCond, True)
+        print("File with Time Corrections Created.")
+        experimentSetCor2 = Mass_Balance_Cor(experimentSetCor1, True)
+        print("File with Mass Corrections Created.")
+        experimentClusterComp = self.Cluster_By_Component(experimentSetCor2)
+        compSelectString = ", ".join(experimentClusterComp.clusters.keys())
+        intervalSelection = input("Print graphs to help select intervals?[Y - yes, N - no]")
+        while intervalSelection == "Y":
+            porosity = float(input("Select Porosity: "))
+            Kstart = float(input("Select Start for K interval: "))
+            Kend = float(input("Select End for K interval: "))
+            Kstep = float(input("Select Step for K interval: "))
+            Dstart = float(input("Select Start for D interval: "))
+            Dend = float(input("Select End for D interval: "))
+            Dstep = float(input("Select Step for D interval: "))
+            comp = input("Select Component [" + compSelectString + "]: ")
+            Loss_Function_Analysis_Simple(experimentClusterComp, comp, Kstart, Dstart, Kend, Dend, Kstep, Dstep, porosity)
+            intervalSelection = input("Continue with graphs?[Y - yes, N - no]")
+        porosityDict = dict()
+        KDDict = dict()
+        porosityStart = float(input("Select Start for Porosity interval: "))
+        porosityEnd = float(input("Select End for Porosity interval: "))
+        porosityDict["init"] = float(input("Select an Initial guess for Porosity interval: "))
+        porosityDict["range"] = [porosityStart, porosityEnd]
+        for key in experimentClusterComp.clusters:
+            tmpDict = dict()
+            KStart = float(input("Select Start for K interval for component " + key + ": "))
+            KEnd = float(input("Select End for K interval for component " + key + ": "))
+            tmpDict["kinit"] = float(input("Select Initial guess for K interval for component " + key + ": "))
+            tmpDict["krange"] = [KStart, KEnd]
+            DStart = float(input("Select Start for D interval for component " + key + ": "))
+            DEnd = float(input("Select End for D interval for component " + key + ": "))
+            tmpDict["dinit"] = float(input("Select Initial guess for D interval for component " + key + ": "))
+            tmpDict["drange"] = [DStart, DEnd]
+            KDDict[key] = tmpDict
+        result = Bilevel_Optim(experimentSetCor2, experimentClusterComp, porosityDict, KDDict)
+        self.Save_Result(result, path)
+        chromatogramSelection = input("Print graphs to help select intervals?[Y - yes, N - no]")
+        while chromatogramSelection == "Y":
+            comp = input("Select Component [" + compSelectString + "]: ")
+            conditionSelectionString = "Select one of the following conditions:\n"
+            for index, compObj in enumerate(experimentClusterComp.clusters[comp]):
+                conditionSelectionString += str(index + 1) + \
+                                            " - Column diameter: " + \
+                                            str(compObj.experiment.experimentCondition.columnDiameter) + \
+                                            ", Column length: " + \
+                                            str(compObj.experiment.experimentCondition.columnLength) + \
+                                            ", Feed time: " + \
+                                            str(compObj.experiment.experimentCondition.feedTime) + \
+                                            ", Feed Volume: " + \
+                                            str(compObj.experiment.experimentCondition.feedVolume) + \
+                                            ", Flow rate: " + \
+                                            str(compObj.experiment.experimentCondition.flowRate) + \
+                                            "\n"
+            conditionSelection = int(input(conditionSelectionString)) - 1
+            solverOutput = Solver_Choice("Lin",
+                                         [result["porosity"], result["compparams"][comp][0], result["compparams"][comp][1]],
+                                         experimentClusterComp.clusters[comp][conditionSelection])[:, -1]
+            df = experimentClusterComp.clusters[comp][conditionSelection].concentrationTime
+            minTime = df.iat[0, 0]
+            maxTime = df.iat[-1, 0]
+            time = np.linspace(minTime, maxTime, 3000)
+            resultDF = pd.DataFrame({'time': time, 'concentration': solverOutput})
+            directory = "Chromatograms"
+            dirPath = os.path.join(path, directory)
+            fileName = "chromatogram_" + comp + "_" + str(conditionSelection)
+            filePath = dirPath + "\\" + fileName + ".csv"
+            resultDF.to_csv(filePath, index=False, compression=None)
+            chromatogramSelection = input("More Chromatograms?[Y - yes, N - no]")
+
+
 
     #Start for testing purposes
 
@@ -77,28 +139,26 @@ class Operator:
         #cond = experimentSetCopy.experiments[0].experimentCondition
         #print(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration)
         #res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, 0.52 ,12000,  8000, debugPrint=True, debugGraph=True)
-        path = "C:\\Users\\Adam\\ChroMo\\docu\\TestExperimentSet1"
+        path = "C:\\Users\\Adam\\ChroMo\\docu\\LossFunctionExperimentSet"
         experimentSet = self.Load_Experiment_Set(path)
-        Solver_Analysis(experimentSet, ["Glc", "Sac", "ManOH"], [[0.2, 10, 10], [0.2, 10, 10], [0.2, 10, 10]], "Lin")
+        #Solver_Analysis(experimentSet, ["Glc", "Sac", "ManOH"], [[0.2, 10, 10], [0.2, 10, 10], [0.2, 10, 10]], "Lin")
         '''solution = Solution()
         for exp in experimentSet.experiments:
             for comp in exp.experimentComponents:
                 solution.Add_Result(comp.name, comp.experiment.metadata.path, random.random(), random.random(), random.random())
         solution.Export_To_CSV("C:\\Users\\Adam\\ChroMo\\testSolution.csv")'''
-        '''
         experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
         experimentSetGauss = Fit_Gauss(experimentSetCopy)
-
-        experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetGauss)
-        experimentSetCor2 = Ret_Time_Cor(experimentSetGauss, experimentClusterCompCond)
+        experimentSetCompCond = self.Cluster_By_Condition2(experimentSetGauss)
+        experimentSetCor2 = Ret_Time_Cor(experimentSetGauss, experimentSetCompCond)
         experimentSetCor3 = Mass_Balance_Cor(experimentSetCor2)
         #Compare_ExperimentSets(experimentSet, experimentSetCor3)
         #expIso = Select_Iso_Exp(experimentSetCopy, experimentClusterComp)
         #testRes = Iso_Decision(expIso, [0.3, 15, 15])
         #print(testRes)
-        experimentClusterComp = self.Cluster_By_Component(experimentSetCor3)
-        Loss_Function_Analysis(experimentClusterComp, component='Glc', ystart=0, yend=26, ystep=0.5, xstart=0, xend=501, xstep=1, porosityStart=0.8, porosityStep=0.2, lossFunctionChoice="Simple")
-        '''
+        experimentClusterComp = self.Cluster_By_Component(experimentSetCor2)
+        Loss_Function_Analysis(experimentClusterComp, component='Glc', ystart=0, yend=76, ystep=1.5, xstart=0, xend=201, xstep=4, porosityStart=0.4, porosityStep=0.2, lossFunctionChoice="Squares", logScale=True)
+        Loss_Function_Analysis(experimentClusterComp, component='Glc', ystart=0, yend=76, ystep=1.5, xstart=0, xend=401, xstep=8, porosityStart=0.6, porosityStep=0.2, lossFunctionChoice="Squares", logScale=True)
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #experimentSetCopy = Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
         #experimentSetCopy = Mass_Balance_Cor(experimentSetCopy, experimentSetCopy)
@@ -118,12 +178,42 @@ class Operator:
         #expIso = Select_Iso_Exp(experimentSetCopy, experimentClusterComp)
         #experimentSetCor1 = Mass_Balance_Cor(experimentSet, experimentSet)
 
-    def Setting_Parameters(self):
-        par1 = float(input('Enter parameter 1: '))
-        par2 = float(input('Enter parameter 2: '))
-        par3 = float(input('Enter parameter 3: '))
-        par4 = float(input('Enter parameter 4: '))
-        return par1, par2, par3, par4
+    def Save_Result(self, result, parentDir):
+        directory = "Result"
+        dirPath = os.path.join(parentDir, directory)
+        os.mkdir(dirPath)
+        fileName = "Result.txt"
+        filePath = os.path.join(dirPath, fileName)
+        file = open(filePath, "a")
+        file.write("Final Porosity: " + str(result["porosity"]) + "\nFinal Lv2 Loss Function Value: " + str(result["lv1lossfunctionval"]) + "\n\n")
+        for comp in result["compparams"]:
+            file.write("For component " + comp + ":\n")
+            file.write("    Final K value: " + str(result["compparams"][comp][0]) + "\n")
+            file.write("    Final D value: " + str(result["compparams"][comp][1]) + "\n")
+            file.write("    Final Lv2 Loss Function Value: " + str(result["lv2lossfunctionvals"][comp]) + "\n\n")
+        file.close()
+
+    def Save_Graphs_To_Directory(self, experimentSet, experimentSetGauss, parentDir):
+        directory = "Gauss_graphs"
+        path = os.path.join(parentDir, directory)
+        os.mkdir(path)
+        figNum = 1;
+        for exp1, expG in zip(experimentSet.experiments, experimentSetGauss.experiments):
+            head, tail = os.path.split(exp1.metadata.path)
+            filename, extesion = os.path.splitext(tail)
+            for comp1, compG in zip(exp1.experimentComponents, expG.experimentComponents):
+                plt.figure(figNum)
+                figNum += 1;
+                time1 = comp1.concentrationTime.iloc[:, 0].to_numpy()
+                conc1 = comp1.concentrationTime.iloc[:, 1].to_numpy()
+                timeG = compG.concentrationTime.iloc[:, 0].to_numpy()
+                concG = compG.concentrationTime.iloc[:, 1].to_numpy()
+                plt.plot(time1, conc1, label = "original data")
+                plt.plot(timeG, concG, label = "Gauss curve")
+                graphName = path + "//Gauss_" + filename + "_" + comp1.name + ".png"
+                plt.legend()
+                plt.savefig(graphName)
+
 
     def Load_Experiment_Set(self, path):
         experimentSet = ExperimentSet()

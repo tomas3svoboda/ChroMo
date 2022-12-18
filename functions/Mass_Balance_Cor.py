@@ -1,8 +1,9 @@
 from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 import numpy as np
 import scipy
+import os
 
-def Mass_Balance_Cor(experimentSetCor2):
+def Mass_Balance_Cor(experimentSetCor2, writeToFile = False):
     experimentSetCor3 = Deep_Copy_ExperimentSet(experimentSetCor2)
     for exp2, exp3 in zip(experimentSetCor2.experiments, experimentSetCor3.experiments):
         initialFeedTime = exp2.experimentCondition.feedTime
@@ -22,11 +23,18 @@ def Mass_Balance_Cor(experimentSetCor2):
                 exp3.feedMassSum = feedMassSum
             return result
         newFeedTime = scipy.optimize.minimize_scalar(Loss_Func, bounds=(initialFeedTime - (initialFeedTime/2), initialFeedTime + (initialFeedTime/2)), method='bounded')
-        #print(newFeedTime)
+        if (writeToFile):
+            head, tail = os.path.split(exp3.metadata.path)
+            experimentName, extesion = os.path.splitext(tail)
+            filePath = head + "\\Mass_Correction.txt"
+            file = open(filePath, "a")
+            file.write("Experiment: " + experimentName + ", Original Feed Time: " + str(exp3.experimentCondition.feedTime*3600) + "s, New Feed Time: " + str(newFeedTime.x*3600) + "s\n")
         exp3.experimentCondition.feedTime = newFeedTime.x
+    """
     for exp in experimentSetCor3.experiments:
         print("Experiment: " + exp.metadata.path)
         print("Loss Function absolute value: " + str(exp.experimentCondition.feedTime))
         print("Loss Function relative value: " + str(exp.experimentCondition.feedTime / exp.feedMassSum))
         exp.feedMassSum = None
+    """
     return experimentSetCor3

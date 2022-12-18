@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def Solver_Analysis(experimentSet, componentList, paramList, solver="Lin"):
+def Solver_Analysis(experimentSet, componentList, paramList, solver):
     time = np.linspace(0, 10800, 3000)
     resultsDict = dict()
     cntr = 0

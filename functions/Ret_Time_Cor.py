@@ -1,6 +1,11 @@
 import pandas as pd
+import os
 
-def Ret_Time_Cor(experimentSet, experimentClustersCompCond):
+def Ret_Time_Cor(experimentSet, experimentClustersCompCond, writeToFile = False):
+    if(writeToFile):
+        head, tail = os.path.split(list(experimentClustersCompCond.clusters.values())[0][0].experiment.metadata.path)
+        filePath = head + "\\Time_Shifts.txt"
+        file = open(filePath, "a")
     for key, value in experimentClustersCompCond.clusters.items():
         peakTimeAvg = 0
         for comp in value:
@@ -17,4 +22,10 @@ def Ret_Time_Cor(experimentSet, experimentClustersCompCond):
             df = comp.concentrationTime
             df.iloc[:, 0] += timeDifference
             df.drop(df[df['time'] < 0].index, inplace=True)
+            if(writeToFile):
+                head2, tail2 = os.path.split(comp.experiment.metadata.path)
+                experimentName, extesion = os.path.splitext(tail2)
+                file.write("Experiment: " + experimentName + ", Component: " + comp.name + ", Shift: " + str(timeDifference) + "\n")
+    if(writeToFile):
+        file.close()
     return experimentSet
