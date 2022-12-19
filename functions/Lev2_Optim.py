@@ -8,7 +8,25 @@ import functions.global_ as gl
 def Lev2_Optim(porosity, experimentCluster, key):
     #print("Calling Lev2_Optim with params " + str(gl.compParamDict[key]) + "!")
     #res = minimize(Lev2_Loss_Function, gl.compParamDict[key], args=(experimentCluster, porosity), bounds=((0, None), (0, None)), method='Nelder-Mead', options={'fatol': 0.5,'maxfev': 25})
-    res = minimize(Lev2_Loss_Function, gl.compParamDict[key], args=(experimentCluster, porosity), bounds=((0, None), (0, None)), method='Nelder-Mead', options={'fatol': 0.1})
+    print("Calling Lev2_Optim with:\nK " +
+          str(gl.compParamDict[key][0]) +
+          " and range [" +
+          str(gl.compRangeDict[key][0][0]) +
+          ", " +
+          str(gl.compRangeDict[key][0][1]) +
+          "]!\nD " +
+          str(gl.compParamDict[key][1]) +
+          " and range [" +
+          str(gl.compRangeDict[key][1][0]) +
+          ", " +
+          str(gl.compRangeDict[key][1][1]) +
+          "]!")
+    res = minimize(Lev2_Loss_Function,
+                   gl.compParamDict[key],
+                   args=(experimentCluster, porosity),
+                   bounds=((gl.compRangeDict[key][0][0], gl.compRangeDict[key][0][1]), (gl.compRangeDict[key][1][0], gl.compRangeDict[key][1][1])),
+                   method='Nelder-Mead',
+                   options={'fatol': 0.1})
     print('__________________________________________')
     for i in [0,1]:
         #if res.x[i] == 0 or res.x[i] == 1000:
@@ -19,6 +37,7 @@ def Lev2_Optim(porosity, experimentCluster, key):
             print('Bound hit! ' + str(res.x))
             res.x[i] = 50
     gl.compParamDict[key] = res.x
+    gl.lv2LossFunctionVals[key] = res.fun
     print(str(key) + ' has params: ')
     print('henry, dispers: '+ str(res.x))
     print("lEVEL 2 Loss function value: " + str(res.fun))

@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import matplotlib.pyplot as plt
 from functions.Lev2_Loss_Function import Lev2_Loss_Function
@@ -18,7 +20,8 @@ def Loss_Function_Analysis(experimentClusterComp,
                             porosityStart = 0.2,
                             porosotyEnd = 1,
                             porosityStep = 0.1,
-                            lossFunctionChoice = "Simple"):
+                            lossFunctionChoice = "Simple",
+                            logScale = False):
     experimentCluster = experimentClusterComp.clusters[component]
     for porosity in np.arange(porosityStart, porosotyEnd, porosityStep):
         x = 0
@@ -27,6 +30,8 @@ def Loss_Function_Analysis(experimentClusterComp,
             y = 0
             for disperCoef in np.arange(ystart, yend, ystep):
                 res = Lev2_Loss_Function([henryConst, disperCoef], experimentCluster, porosity, lossFunctionChoice)
+                if logScale:
+                    res = math.log10(res)
                 resultArr[x, y] = res
                 y += 1
             x += 1
@@ -56,7 +61,7 @@ def Loss_Function_Analysis(experimentClusterComp,
                 ystart2 = float(input("Dispersion Coeficient start?"))
                 yend2 = float(input("Dispersion Coeficient end?"))
                 ystep2 = float(input("Dispersion Coeficient step?"))
-                Loss_Function_Analysis(experimentClusterComp, component, xstart2, ystart2, xend2, yend2, xstep2, ystep2, porosity, porosity+(porosityStep/2), porosityStep, lossFunctionChoice)
+                Loss_Function_Analysis(experimentClusterComp, component, xstart2, ystart2, xend2, yend2, xstep2, ystep2, porosity, porosity+(porosityStep/2), porosityStep, lossFunctionChoice, logScale)
                 break
             if i == "N":
                 break
