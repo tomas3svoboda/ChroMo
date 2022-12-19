@@ -6,22 +6,15 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
 # Numerical solver of the EDM with Linear Isotherm - linear parabolic PDE
-# Volume flowrate in [mL/h]
-# Lenght of the packed section in the column [mm]
-# Column diameter [mm]
-# Feed injection volume [mL]
-# Concentration of the balanced component in the feed [g/mL] or [mg/mm^3]
-# Total porosity of the sorbent packing [-]
-# Henry's constant of the linear isotherm [-]
-# Axial dispersion coefficient [mm^2/s]
-def Lin_Solver(flowRate = 50,
-               length=235,
-               diameter=16,
-               feedVol=15,
-               feedConc=150e-3,
-               porosity=0.4,
-               henryConst=1.9,
-               disperCoef=12,
+
+def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
+               length=235,          # Lenght of the packed section in the column [mm]
+               diameter=16,         # Column diameter [mm]
+               feedVol=15,          # Feed injection volume [mL]
+               feedConc=150e-3,     # Concentration of the balanced component in the feed [g/mL] or [mg/mm^3]
+               porosity=0.4,        # Total porosity of the sorbent packing [-]
+               henryConst=1.9,      # Henry's constant of the linear isotherm [-]
+               disperCoef=12,       # Axial dispersion coefficient [mm^2/s]
                debugPrint=False,
                debugGraph=False):
 
@@ -47,7 +40,9 @@ def Lin_Solver(flowRate = 50,
     # Calculation of the feed time [s]
     feedTime = (feedVol / flowRate) * 3600
     # Calculation of the flow speed [mm/s]
-    flowSpeed = ((flowRate / 3600) * math.pi * (diameter**2) * porosity)/4
+    flowSpeed = (flowRate * 1000/3600) / ((math.pi * (diameter**2) / 4) * porosity)
+    # 1 h = 3600 s
+    # 1 mL = 1000 mm^3
 
     # Defining constants
     a = disperCoef/((((1-porosity)*henryConst)/porosity)+1)  # *** !!! PODLE DOKUMENTU
@@ -55,7 +50,7 @@ def Lin_Solver(flowRate = 50,
 
     time = 10800  # Finite time of the experiment [s]
     Nx = 20  # Number of spatial differences
-    Nt = 3000  # Number of time differences
+    Nt = 2000  # Number of time differences
     x = np.linspace(0, length, Nx)  # Preparation of space vector
     dx = length / Nx  # Calculating space step [mm]
     t = np.linspace(0, time, Nt)  # Preparation of time vector
