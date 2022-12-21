@@ -21,6 +21,7 @@ def Loss_Function_Analysis(experimentClusterComp,
                             porosotyEnd = 1,
                             porosityStep = 0.1,
                             lossFunctionChoice = "Simple",
+                            factor = 1,
                             logScale = False):
     experimentCluster = experimentClusterComp.clusters[component]
     for porosity in np.arange(porosityStart, porosotyEnd, porosityStep):
@@ -29,7 +30,7 @@ def Loss_Function_Analysis(experimentClusterComp,
         for henryConst in np.arange(xstart, xend, xstep):
             y = 0
             for disperCoef in np.arange(ystart, yend, ystep):
-                res = Lev2_Loss_Function([henryConst, disperCoef], experimentCluster, porosity, lossFunctionChoice)
+                res = Lev2_Loss_Function([henryConst, disperCoef], experimentCluster, porosity, lossFunctionChoice, factor)
                 if logScale:
                     res = math.log10(res)
                 resultArr[x, y] = res

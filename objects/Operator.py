@@ -48,16 +48,39 @@ class Operator:
     def Start(self):
         path = input('Enter path to Experiment set: ')
         experimentSet = self.Load_Experiment_Set(path)
-        experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
-        experimentSetGauss = Fit_Gauss(experimentSetCopy)
-        self.Save_Graphs_To_Directory(experimentSet, experimentSetGauss, path)
-        print("Graphs of Gauss Curves Created.")
-        experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetGauss)
-        experimentSetCor1 = Ret_Time_Cor(experimentSetGauss, experimentClusterCompCond, True)
-        print("File with Time Corrections Created.")
-        experimentSetCor2 = Mass_Balance_Cor(experimentSetCor1, True)
-        print("File with Mass Corrections Created.")
-        experimentClusterComp = self.Cluster_By_Component(experimentSetCor2)
+        gaussSelection = input("Replace experiment data with gauss curve?[Y - yes, N - no]")
+        currentExperimentSet = Deep_Copy_ExperimentSet(experimentSet)
+        if gaussSelection == "Y":
+            currentExperimentSet = Fit_Gauss(currentExperimentSet)
+            self.Save_Graphs_To_Directory(experimentSet, currentExperimentSet, path)
+            print("Graphs of Gauss Curves Created.")
+        else:
+            print("Fitting Gauss Curve skipped.")
+        retTimeSelection = input("Correct for retention time?[Y - yes, N - no]")
+        if retTimeSelection == "Y":
+            experimentClusterCompCond = self.Cluster_By_Condition2(currentExperimentSet)
+            currentExperimentSet = Ret_Time_Cor(currentExperimentSet, experimentClusterCompCond, True)
+            print("File with Time Corrections Created.")
+        else:
+            print("Retention Time Correction skipped.")
+        massBalanceSelection = input("Correct for mass balance?[Y - yes, N - no]")
+        if massBalanceSelection == "Y":
+            currentExperimentSet = Mass_Balance_Cor(currentExperimentSet, True)
+            print("File with Mass Corrections Created.")
+        else:
+            print("Mass Balance Correction skipped.")
+        experimentClusterComp = self.Cluster_By_Component(currentExperimentSet)
+        lossFunctionChoices = ['Simple', 'Squares', 'LogSimple', 'LogSquares']
+        lossFunctionString = ", ".join(lossFunctionChoices)
+        lossFunctionSelection = input("Sellect loss function [" + lossFunctionString + "]")
+        factorSelectionString = "1 - Fc = 1\n" + \
+                                "2 - Fc = 1 / maximalOutputConc\n" + \
+                                "3 - Fc = 1 / maximalOutputConc^2\n" + \
+                                "4 - Fc = 1 / feedConc\n" + \
+                                "5 - Fc = 1 / feedConc^2\n" + \
+                                "6 - Fc = 1 / feedMass\n" + \
+                                "7 - Fc = 1 / feedMass^2\n"
+        factorSelection = input("Select factor:\n" + factorSelectionString)
         compSelectString = ", ".join(experimentClusterComp.clusters.keys())
         intervalSelection = input("Print graphs to help select intervals?[Y - yes, N - no]")
         while intervalSelection == "Y":
@@ -69,7 +92,7 @@ class Operator:
             Dend = float(input("Select End for D interval: "))
             Dstep = float(input("Select Step for D interval: "))
             comp = input("Select Component [" + compSelectString + "]: ")
-            Loss_Function_Analysis_Simple(experimentClusterComp, comp, Kstart, Dstart, Kend, Dend, Kstep, Dstep, porosity)
+            Loss_Function_Analysis_Simple(experimentClusterComp, comp, Kstart, Dstart, Kend, Dend, Kstep, Dstep, porosity, lossFunctionSelection, factorSelection)
             intervalSelection = input("Continue with graphs?[Y - yes, N - no]")
         porosityDict = dict()
         KDDict = dict()
@@ -88,9 +111,9 @@ class Operator:
             tmpDict["dinit"] = float(input("Select Initial guess for D interval for component " + key + ": "))
             tmpDict["drange"] = [DStart, DEnd]
             KDDict[key] = tmpDict
-        result = Bilevel_Optim(experimentSetCor2, experimentClusterComp, porosityDict, KDDict)
+        result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, porosityDict, KDDict, lossFunctionSelection, factorSelection)
         self.Save_Result(result, path)
-        chromatogramSelection = input("Print graphs to help select intervals?[Y - yes, N - no]")
+        chromatogramSelection = input("Create Chromatogram?[Y - yes, N - no]")
         while chromatogramSelection == "Y":
             comp = input("Select Component [" + compSelectString + "]: ")
             conditionSelectionString = "Select one of the following conditions:\n"
@@ -114,10 +137,11 @@ class Operator:
             df = experimentClusterComp.clusters[comp][conditionSelection].concentrationTime
             minTime = df.iat[0, 0]
             maxTime = df.iat[-1, 0]
-            time = np.linspace(minTime, maxTime, 3000)
+            time = np.linspace(minTime, maxTime, 2000)
             resultDF = pd.DataFrame({'time': time, 'concentration': solverOutput})
             directory = "Chromatograms"
             dirPath = os.path.join(path, directory)
+            os.mkdir(dirPath)
             fileName = "chromatogram_" + comp + "_" + str(conditionSelection)
             filePath = dirPath + "\\" + fileName + ".csv"
             resultDF.to_csv(filePath, index=False, compression=None)

@@ -9,11 +9,11 @@ Loss Function options:
     'LogSimple' - Single_Loss_Function_LogSimple
     'LogSquares' - Single_Loss_Function_LogSquares
 """
-def Lev2_Loss_Function(params, experimentCluster, porosity, lossFunction = 'Simple'):
+def Lev2_Loss_Function(params, experimentCluster, porosity, lossFunction = 'Simple', factor = 1, solver = "Lin"):
     params2 = [porosity, params[0], params[1]]
     sum = 0
     for comp in experimentCluster:
-        res = Single_Loss_Function_Choice(lossFunction, params2, comp)
+        res = Single_Loss_Function_Choice(lossFunction, params2, comp, solver, factor)
         sum += res
     #print("lEVEL 2 Loss function value: " + str(sum))
     return sum

@@ -18,14 +18,15 @@ def Loss_Function_Analysis_Simple(experimentClusterComp,
                             xstep,
                             ystep,
                             porosity,
-                            lossFunctionChoice = "Squares"):
+                            lossFunctionChoice = "Squares",
+                            factor = 1):
     experimentCluster = experimentClusterComp.clusters[component]
     x = 0
     resultArr = np.zeros((len(np.arange(xstart, xend, xstep)), len(np.arange(ystart, yend, ystep))))
     for henryConst in np.arange(xstart, xend, xstep):
         y = 0
         for disperCoef in np.arange(ystart, yend, ystep):
-            res = Lev2_Loss_Function([henryConst, disperCoef], experimentCluster, porosity, lossFunctionChoice)
+            res = Lev2_Loss_Function([henryConst, disperCoef], experimentCluster, porosity, lossFunctionChoice, factor)
             resultArr[x, y] = res
             y += 1
         x += 1

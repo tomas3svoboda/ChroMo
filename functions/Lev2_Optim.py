@@ -5,7 +5,7 @@ from scipy.optimize import minimize
 from functions.Lev2_Loss_Function import Lev2_Loss_Function
 import functions.global_ as gl
 
-def Lev2_Optim(porosity, experimentCluster, key):
+def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor):
     #print("Calling Lev2_Optim with params " + str(gl.compParamDict[key]) + "!")
     #res = minimize(Lev2_Loss_Function, gl.compParamDict[key], args=(experimentCluster, porosity), bounds=((0, None), (0, None)), method='Nelder-Mead', options={'fatol': 0.5,'maxfev': 25})
     print("Calling Lev2_Optim with:\nK " +
@@ -23,7 +23,7 @@ def Lev2_Optim(porosity, experimentCluster, key):
           "]!")
     res = minimize(Lev2_Loss_Function,
                    gl.compParamDict[key],
-                   args=(experimentCluster, porosity),
+                   args=(experimentCluster, porosity, lossFunction, factor),
                    bounds=((gl.compRangeDict[key][0][0], gl.compRangeDict[key][0][1]), (gl.compRangeDict[key][1][0], gl.compRangeDict[key][1][1])),
                    method='Nelder-Mead',
                    options={'fatol': 0.1})

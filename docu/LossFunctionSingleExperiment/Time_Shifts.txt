@@ -1,0 +1,4 @@
+Experiment: TestExperiment3, Component: Sac, Shift: 0.0
+Experiment: TestExperiment3, Component: Glc, Shift: 0.0
+Experiment: TestExperiment3, Component: Fru, Shift: 0.0
+Experiment: TestExperiment3, Component: ManOH, Shift: 0.0
