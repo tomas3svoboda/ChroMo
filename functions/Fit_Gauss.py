@@ -7,7 +7,9 @@ from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 
 def Fit_Gauss(experimentSetGauss):
     print('Fitting Gauss started!')
+
     # ---------------------Start of external code-------------------------------
+
     # defines a typical gaussian function, of independent variable x,
     # amplitude a, position b, width parameter c, and erf parameter d.
     def gaussian(x, a, b, c, d):
@@ -25,7 +27,9 @@ def Fit_Gauss(experimentSetGauss):
     # between the data and the function
     def residuals(p, y, x, n):
         return y - GaussSum(x, p, n)
-    # ---------------------External code---------------------------------------
+
+    # ---------------------End of external code---------------------------------------
+
     for exp in experimentSetGauss.experiments:
         for comp in exp.experimentComponents:
             data_set = comp.concentrationTime.to_numpy()
@@ -35,6 +39,8 @@ def Fit_Gauss(experimentSetGauss):
             max_conc = max(data_set[:, 1])
             print(max_conc)
             max_conc_index = data_set[:, 1].tolist().index(max_conc)
+
+    # Multiplier based on absolute values of concentrations ensures proper function of external code below
 
             if max_conc < max_time / 5:
                 mutiplier = 10
@@ -63,38 +69,44 @@ def Fit_Gauss(experimentSetGauss):
             initials = [[max_conc, init, 0.4, 0.0]]
             n_value = len(initials)
 
+            #---------------------------- Start of External code--------------------------
+
             # executes least-squares regression analysis to optimize initial parameters
             const = leastsq(residuals, initials, args=(data_set[:, 1], data_set[:, 0], n_value))[0]
 
             # integrates the gaussian functions through gauss quadrature and saves the
             # results to a dictionary.
 
-            #---------------------------- Start of External code--------------------------
             areas = dict()
             for i in range(n_value):
                 areas[i] = quad(gaussian, data_set[0, 0], data_set[-1, 0], args=(const[4*i], const[4*i+1], const[4*i+2], const[4*i+3]))[0]
+
             #---------------------------- End of External code--------------------------
 
             time = (np.linspace(0, max_time, 80))
+
+            # This chunk of code assures more dense concentration/time data during the peak is being eluted and
+            # less dense during concentration around 0 coming out of column
+
             gauss_data = GaussSum(time, const, n_value)/mutiplier
-            time_red = (np.linspace(0, max_time, 6))
+            time_red = (np.linspace(0, max_time, 30))
             n = 0
             for i in gauss_data:
-                if i > (max_conc/30):
+                if i > (max_conc/60):
                     time_red = np.append(time_red, (time[n]))
                 n += 1
-            time = np.sort(time)
+
+            np.sort(time)
 
             comp_name = comp.name
             result = pd.DataFrame({'time': time_red, comp_name: ((GaussSum(time_red, const, n_value))/mutiplier)})
-            result = result.sort_values(by = ['time'])
+            result = result.sort_values(by=['time'])
             result['time'] *= 60
 
             #-----------------temporary solution---------------------
+
             if comp.name == "ManOH":
                 result.drop(result[result['time'] < 0].index, inplace=True)
-
-
 
             # -----------------temporary solution---------------------
             #result = result.drop((result[result[comp_name] < (max_conc/30)].index))
