@@ -237,6 +237,7 @@ class Operator:
                 graphName = path + "//Gauss_" + filename + "_" + comp1.name + ".png"
                 plt.legend()
                 plt.savefig(graphName)
+        plt.close("all")
 
 
     def Load_Experiment_Set(self, path):
