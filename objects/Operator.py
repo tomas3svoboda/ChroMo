@@ -23,6 +23,7 @@ from functions.Iso_Decision import Iso_Decision
 from functions.Compare_ExperimentSets import Compare_ExperimentSets
 from functions.Bilevel_Optim import Bilevel_Optim
 from functions.solvers.Solver_Choice import Solver_Choice
+from functions.Handle_File_Creation import Handle_File_Creation
 
 """
 Time measuring decorator
@@ -48,6 +49,9 @@ class Operator:
     def Start(self):
         path = input('Enter path to Experiment set: ')
         experimentSet = self.Load_Experiment_Set(path)
+        if experimentSet.experiments == []:
+            print("No experiments found, Shutting down.")
+            return
         gaussSelection = input("Replace experiment data with gauss curve?[Y - yes, N - no]")
         currentExperimentSet = Deep_Copy_ExperimentSet(experimentSet)
         if gaussSelection == "Y":
@@ -92,7 +96,7 @@ class Operator:
             Dend = float(input("Select End for D interval: "))
             Dstep = float(input("Select Step for D interval: "))
             comp = input("Select Component [" + compSelectString + "]: ")
-            Loss_Function_Analysis_Simple(experimentClusterComp, comp, Kstart, Dstart, Kend, Dend, Kstep, Dstep, porosity, lossFunctionSelection, factorSelection)
+            Loss_Function_Analysis_Simple(experimentClusterComp, comp, path, Kstart, Dstart, Kend, Dend, Kstep, Dstep, porosity, lossFunctionSelection, factorSelection)
             intervalSelection = input("Continue with graphs?[Y - yes, N - no]")
         porosityDict = dict()
         KDDict = dict()
@@ -114,38 +118,39 @@ class Operator:
         result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, porosityDict, KDDict, lossFunctionSelection, factorSelection)
         self.Save_Result(result, path)
         chromatogramSelection = input("Create Chromatogram?[Y - yes, N - no]")
-        while chromatogramSelection == "Y":
-            comp = input("Select Component [" + compSelectString + "]: ")
-            conditionSelectionString = "Select one of the following conditions:\n"
-            for index, compObj in enumerate(experimentClusterComp.clusters[comp]):
-                conditionSelectionString += str(index + 1) + \
-                                            " - Column diameter: " + \
-                                            str(compObj.experiment.experimentCondition.columnDiameter) + \
-                                            ", Column length: " + \
-                                            str(compObj.experiment.experimentCondition.columnLength) + \
-                                            ", Feed time: " + \
-                                            str(compObj.experiment.experimentCondition.feedTime) + \
-                                            ", Feed Volume: " + \
-                                            str(compObj.experiment.experimentCondition.feedVolume) + \
-                                            ", Flow rate: " + \
-                                            str(compObj.experiment.experimentCondition.flowRate) + \
-                                            "\n"
-            conditionSelection = int(input(conditionSelectionString)) - 1
-            solverOutput = Solver_Choice("Lin",
-                                         [result["porosity"], result["compparams"][comp][0], result["compparams"][comp][1]],
-                                         experimentClusterComp.clusters[comp][conditionSelection])[:, -1]
-            df = experimentClusterComp.clusters[comp][conditionSelection].concentrationTime
-            minTime = df.iat[0, 0]
-            maxTime = df.iat[-1, 0]
-            time = np.linspace(minTime, maxTime, 2000)
-            resultDF = pd.DataFrame({'time': time, 'concentration': solverOutput})
+        if chromatogramSelection == "Y":
             directory = "Chromatograms"
             dirPath = os.path.join(path, directory)
-            os.mkdir(dirPath)
-            fileName = "chromatogram_" + comp + "_" + str(conditionSelection)
-            filePath = dirPath + "\\" + fileName + ".csv"
-            resultDF.to_csv(filePath, index=False, compression=None)
-            chromatogramSelection = input("More Chromatograms?[Y - yes, N - no]")
+            Handle_File_Creation(dirPath, True)
+            while chromatogramSelection == "Y":
+                comp = input("Select Component [" + compSelectString + "]: ")
+                conditionSelectionString = "Select one of the following conditions:\n"
+                for index, compObj in enumerate(experimentClusterComp.clusters[comp]):
+                    conditionSelectionString += str(index + 1) + \
+                                                " - Column diameter: " + \
+                                                str(compObj.experiment.experimentCondition.columnDiameter) + \
+                                                ", Column length: " + \
+                                                str(compObj.experiment.experimentCondition.columnLength) + \
+                                                ", Feed time: " + \
+                                                str(compObj.experiment.experimentCondition.feedTime) + \
+                                                ", Feed Volume: " + \
+                                                str(compObj.experiment.experimentCondition.feedVolume) + \
+                                                ", Flow rate: " + \
+                                                str(compObj.experiment.experimentCondition.flowRate) + \
+                                                "\n"
+                conditionSelection = int(input(conditionSelectionString)) - 1
+                solverOutput = Solver_Choice("Lin",
+                                             [result["porosity"], result["compparams"][comp][0], result["compparams"][comp][1]],
+                                             experimentClusterComp.clusters[comp][conditionSelection])[:, -1]
+                df = experimentClusterComp.clusters[comp][conditionSelection].concentrationTime
+                minTime = df.iat[0, 0]
+                maxTime = df.iat[-1, 0]
+                time = np.linspace(minTime, maxTime, 2000)
+                resultDF = pd.DataFrame({'time': time, 'concentration': solverOutput})
+                fileName = "chromatogram_" + comp + "_" + str(conditionSelection)
+                filePath = dirPath + "\\" + fileName + ".csv"
+                resultDF.to_csv(filePath, index=False, compression=None)
+                chromatogramSelection = input("More Chromatograms?[Y - yes, N - no]")
 
 
 
@@ -163,6 +168,7 @@ class Operator:
         #cond = experimentSetCopy.experiments[0].experimentCondition
         #print(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration)
         #res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, 0.52 ,12000,  8000, debugPrint=True, debugGraph=True)
+        # C:\Users\Adam\ChroMo\docu\LossFunctionSingleExperiment
         path = "C:\\Users\\Adam\\ChroMo\\docu\\LossFunctionExperimentSet"
         experimentSet = self.Load_Experiment_Set(path)
         #Solver_Analysis(experimentSet, ["Glc", "Sac", "ManOH"], [[0.2, 10, 10], [0.2, 10, 10], [0.2, 10, 10]], "Lin")
@@ -205,10 +211,10 @@ class Operator:
     def Save_Result(self, result, parentDir):
         directory = "Result"
         dirPath = os.path.join(parentDir, directory)
-        os.mkdir(dirPath)
+        Handle_File_Creation(dirPath, True)
         fileName = "Result.txt"
         filePath = os.path.join(dirPath, fileName)
-        file = open(filePath, "a")
+        file = Handle_File_Creation(filePath)
         file.write("Final Porosity: " + str(result["porosity"]) + "\nFinal Lv2 Loss Function Value: " + str(result["lv1lossfunctionval"]) + "\n\n")
         for comp in result["compparams"]:
             file.write("For component " + comp + ":\n")
@@ -220,7 +226,7 @@ class Operator:
     def Save_Graphs_To_Directory(self, experimentSet, experimentSetGauss, parentDir):
         directory = "Gauss_graphs"
         path = os.path.join(parentDir, directory)
-        os.mkdir(path)
+        Handle_File_Creation(path, True)
         figNum = 1;
         for exp1, expG in zip(experimentSet.experiments, experimentSetGauss.experiments):
             head, tail = os.path.split(exp1.metadata.path)
@@ -237,6 +243,7 @@ class Operator:
                 graphName = path + "//Gauss_" + filename + "_" + comp1.name + ".png"
                 plt.legend()
                 plt.savefig(graphName)
+        plt.close("all")
 
 
     def Load_Experiment_Set(self, path):
@@ -245,6 +252,8 @@ class Operator:
         experimentSet.metadata.date = datetime.date.today().strftime("%m/%d/%Y")
         filenames = next(walk(path), (None, None, []))[2]
         for file in filenames:
+            if not (file.endswith(".xlsx") or file.endswith(".xls") or file.endswith(".csv")):
+                continue
             df = pd.read_excel(path + "\\" + file)
             description = df.iat[0, 3]
             date = df.iat[2, 3]

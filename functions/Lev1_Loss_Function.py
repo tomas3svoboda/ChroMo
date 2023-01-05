@@ -9,7 +9,7 @@ def Lev1_Loss_Function(porosity, experimentClustersComp, lossFunction, factor):
         res = Lev2_Optim(porosity[0], experimentClustersComp.clusters[key], key, lossFunction, factor)
         sum += res
     print('_________________________________________________________________________________________________')
-    print('porosity: ' + str(porosity))
-    print("LEVEL 1 Loss function value: " + str(sum))
+    print('porosity: ' + str(porosity.round(2)))
+    print("LEVEL 1 Loss function value: " + str(round(sum, 2)))
     print('__________________________________________')
     return sum

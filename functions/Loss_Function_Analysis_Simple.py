@@ -11,6 +11,7 @@ y axis - Dispersion coeficient
 """
 def Loss_Function_Analysis_Simple(experimentClusterComp,
                             component,
+                            path,
                             xstart,
                             ystart,
                             xend,
@@ -47,3 +48,14 @@ def Loss_Function_Analysis_Simple(experimentClusterComp,
     print("Hentry Constant = " + str(xstart + (xindex*xstep)))
     print("Dispersion Coeficient = " + str(ystart + (yindex*ystep)))
     plt.show()
+    save = input("Save the plot?[Y - yes]:")
+    if save == "Y":
+        fileName = input("Enter filename:")
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.plot_surface(X, Y, Z)
+        ax.set_xlabel('Dispersion Coeficient')
+        ax.set_ylabel('Henry Constant')
+        ax.set_zlabel('Loss Function Value')
+        ax.set_title('porosity = ' + str(porosity))
+        plt.savefig(path + "\\" + fileName)

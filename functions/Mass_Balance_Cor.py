@@ -1,4 +1,5 @@
 from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
+from functions.Handle_File_Creation import Handle_File_Creation
 import numpy as np
 import scipy
 import os
@@ -7,7 +8,7 @@ def Mass_Balance_Cor(experimentSetCor2, writeToFile = False):
     experimentSetCor3 = Deep_Copy_ExperimentSet(experimentSetCor2)
     if writeToFile:
         filePath = experimentSetCor2.metadata.path + "\\Mass_Correction.txt"
-        file = open(filePath, "a")
+        file = Handle_File_Creation(filePath)
     for exp2, exp3 in zip(experimentSetCor2.experiments, experimentSetCor3.experiments):
         initialFeedTime = exp2.experimentCondition.feedTime
         #print(initialFeedTime - (initialFeedTime/2), initialFeedTime + (initialFeedTime/2))

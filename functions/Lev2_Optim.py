@@ -11,17 +11,17 @@ def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor):
     #print("Calling Lev2_Optim with params " + str(gl.compParamDict[key]) + "!")
     #res = minimize(Lev2_Loss_Function, gl.compParamDict[key], args=(experimentCluster, porosity), bounds=((0, None), (0, None)), method='Nelder-Mead', options={'fatol': 0.5,'maxfev': 25})
     print("Calling Lev2_Optim with:\nK " +
-          str(gl.compParamDict[key][0]) +
+          str(round(gl.compParamDict[key][0], 2)) +
           " and range [" +
-          str(gl.compRangeDict[key][0][0]) +
+          str(round(gl.compRangeDict[key][0][0], 2)) +
           ", " +
-          str(gl.compRangeDict[key][0][1]) +
+          str(round(gl.compRangeDict[key][0][1], 2)) +
           "]!\nD " +
-          str(gl.compParamDict[key][1]) +
+          str(round(gl.compParamDict[key][1], 2)) +
           " and range [" +
-          str(gl.compRangeDict[key][1][0]) +
+          str(round(gl.compRangeDict[key][1][0], 2)) +
           ", " +
-          str(gl.compRangeDict[key][1][1]) +
+          str(round(gl.compRangeDict[key][1][1], 2)) +
           "]!")
 
     res = shgo(func = lambda x : Lev2_Loss_Function(gl.compParamDict[key], experimentCluster, porosity, lossFunction, factor),
@@ -32,14 +32,14 @@ def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor):
     for i in [0,1]:
         #if res.x[i] == 0 or res.x[i] == 1000:
         if res.x[i] >= 15000:
-            print('Bound hit! ' + str(res.x))
+            print('Bound hit! ' + str(res.x.round(2)))
             res.x[i] = 1000
         elif res.x[i] == 0:
-            print('Bound hit! ' + str(res.x))
+            print('Bound hit! ' + str(res.x.round(2)))
             res.x[i] = 50
     gl.compParamDict[key] = res.x
     gl.lv2LossFunctionVals[key] = res.fun
     print(str(key) + ' has params: ')
-    print('henry, dispers: '+ str(res.x))
-    print("lEVEL 2 Loss function value: " + str(res.fun))
+    print('henry, dispers: '+ str(res.x.round(2)))
+    print("lEVEL 2 Loss function value: " + str(round(res.fun, 2)))
     return res.fun
