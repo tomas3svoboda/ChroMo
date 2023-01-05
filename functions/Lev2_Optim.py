@@ -29,14 +29,15 @@ def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor):
                    args=(),
                    options={'f_tol': 0.1})
     print('__________________________________________')
-    for i in [0,1]:
+
+    '''for i in [0,1]:
         #if res.x[i] == 0 or res.x[i] == 1000:
         if res.x[i] >= 15000:
             print('Bound hit! ' + str(res.x.round(2)))
             res.x[i] = 1000
         elif res.x[i] == 0:
             print('Bound hit! ' + str(res.x.round(2)))
-            res.x[i] = 50
+            res.x[i] = 50'''
     gl.compParamDict[key] = res.x
     gl.lv2LossFunctionVals[key] = res.fun
     print(str(key) + ' has params: ')
