@@ -26,7 +26,7 @@ def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor):
 
     res = shgo(func = lambda x : Lev2_Loss_Function(gl.compParamDict[key], experimentCluster, porosity, lossFunction, factor),
                    bounds=((gl.compRangeDict[key][0][0], gl.compRangeDict[key][0][1]), (gl.compRangeDict[key][1][0], gl.compRangeDict[key][1][1])),
-                   args=(experimentCluster, porosity, lossFunction, factor),
+                   args=(),
                    options={'f_tol': 0.1})
     print('__________________________________________')
     for i in [0,1]:

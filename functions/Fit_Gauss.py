@@ -35,14 +35,18 @@ def Fit_Gauss(experimentSetGauss):
             data_set = comp.concentrationTime.to_numpy()
             data_set[:, 0] = data_set[:, 0]/60
             max_time = data_set[-1, 0]
-            print(max_time)
+            # print(max_time)
             max_conc = max(data_set[:, 1])
-            print(max_conc)
+            # print(max_conc)
             max_conc_index = data_set[:, 1].tolist().index(max_conc)
 
     # Multiplier based on absolute values of concentrations ensures proper function of external code below
 
-            if max_conc < max_time / 5:
+            if max_conc < max_time / 2:
+                mutiplier = 5
+                data_set[:, 1] = 5 * data_set[:, 1]
+                max_conc = 5 * max_conc
+            elif max_conc < max_time / 5:
                 mutiplier = 10
                 data_set[:, 1] = 10 * data_set[:, 1]
                 max_conc = 10 * max_conc
@@ -89,7 +93,7 @@ def Fit_Gauss(experimentSetGauss):
             # less dense during concentration around 0 coming out of column
 
             gauss_data = GaussSum(time, const, n_value)/mutiplier
-            time_red = (np.linspace(0, max_time, 30))
+            time_red = (np.linspace(0, max_time, 60))
             n = 0
             for i in gauss_data:
                 if i > (max_conc/60):
