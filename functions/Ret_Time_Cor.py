@@ -1,3 +1,4 @@
+from functions.Handle_File_Creation import Handle_File_Creation
 import pandas as pd
 import os
 
@@ -5,7 +6,7 @@ def Ret_Time_Cor(experimentSet, experimentClustersCompCond, writeToFile = False)
     if writeToFile:
         head, tail = os.path.split(list(experimentClustersCompCond.clusters.values())[0][0].experiment.metadata.path)
         filePath = head + "\\Time_Shifts.txt"
-        file = open(filePath, "a")
+        file = Handle_File_Creation(filePath)
     for key, value in experimentClustersCompCond.clusters.items():
         peakTimeAvg = 0
         for comp in value:
