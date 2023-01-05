@@ -4,6 +4,8 @@
 from scipy.optimize import minimize
 from functions.Lev2_Loss_Function import Lev2_Loss_Function
 import functions.global_ as gl
+from scipy.optimize import shgo
+
 
 def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor):
     #print("Calling Lev2_Optim with params " + str(gl.compParamDict[key]) + "!")
@@ -21,12 +23,11 @@ def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor):
           ", " +
           str(gl.compRangeDict[key][1][1]) +
           "]!")
-    res = minimize(Lev2_Loss_Function,
-                   gl.compParamDict[key],
-                   args=(experimentCluster, porosity, lossFunction, factor),
+
+    res = shgo(func = lambda x : Lev2_Loss_Function(gl.compParamDict[key], experimentCluster, porosity, lossFunction, factor),
                    bounds=((gl.compRangeDict[key][0][0], gl.compRangeDict[key][0][1]), (gl.compRangeDict[key][1][0], gl.compRangeDict[key][1][1])),
-                   method='Nelder-Mead',
-                   options={'fatol': 0.1})
+                   args=(experimentCluster, porosity, lossFunction, factor),
+                   options={'f_tol': 0.1})
     print('__________________________________________')
     for i in [0,1]:
         #if res.x[i] == 0 or res.x[i] == 1000:
