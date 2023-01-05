@@ -96,7 +96,7 @@ class Operator:
             Dend = float(input("Select End for D interval: "))
             Dstep = float(input("Select Step for D interval: "))
             comp = input("Select Component [" + compSelectString + "]: ")
-            Loss_Function_Analysis_Simple(experimentClusterComp, comp, Kstart, Dstart, Kend, Dend, Kstep, Dstep, porosity, lossFunctionSelection, factorSelection)
+            Loss_Function_Analysis_Simple(experimentClusterComp, comp, path, Kstart, Dstart, Kend, Dend, Kstep, Dstep, porosity, lossFunctionSelection, factorSelection)
             intervalSelection = input("Continue with graphs?[Y - yes, N - no]")
         porosityDict = dict()
         KDDict = dict()
