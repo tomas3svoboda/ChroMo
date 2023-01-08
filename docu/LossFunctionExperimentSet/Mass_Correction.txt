@@ -1,0 +1,3 @@
+Experiment: TestExperiment3, Original Feed Time: 20.4s, New Feed Time: 10.212199170659316s
+Experiment: TestExperiment4, Original Feed Time: 60.48s, New Feed Time: 30.255403272138754s
+Experiment: TestExperiment7, Original Feed Time: 28.8s, New Feed Time: 14.421114358152694s

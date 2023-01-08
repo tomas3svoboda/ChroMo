@@ -49,9 +49,6 @@ class Operator:
     def Start(self):
         path = input('Enter path to Experiment set: ')
         experimentSet = self.Load_Experiment_Set(path)
-        if experimentSet.experiments == []:
-            print("No experiments found, Shutting down.")
-            return
         gaussSelection = input("Replace experiment data with gauss curve?[Y - yes, N - no]")
         currentExperimentSet = Deep_Copy_ExperimentSet(experimentSet)
         if gaussSelection == "Y":
@@ -62,8 +59,9 @@ class Operator:
             print("Fitting Gauss Curve skipped.")
         retTimeSelection = input("Correct for retention time?[Y - yes, N - no]")
         if retTimeSelection == "Y":
-            experimentClusterCompCond = self.Cluster_By_Condition2(currentExperimentSet)
-            currentExperimentSet = Ret_Time_Cor(currentExperimentSet, experimentClusterCompCond, True)
+            #experimentClusterCompCond = self.Cluster_By_Condition2(currentExperimentSet)
+            experimentClusterExp = self.Cluster_By_Experiment(currentExperimentSet)
+            currentExperimentSet = Ret_Time_Cor(currentExperimentSet, experimentClusterExp, True)
             print("File with Time Corrections Created.")
         else:
             print("Retention Time Correction skipped.")
@@ -169,6 +167,7 @@ class Operator:
         #print(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration)
         #res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, 0.52 ,12000,  8000, debugPrint=True, debugGraph=True)
         # C:\Users\Adam\ChroMo\docu\LossFunctionSingleExperiment
+        # C:\Users\Adam\ChroMo\docu\LossFunctionExperimentSet
         path = "C:\\Users\\Adam\\ChroMo\\docu\\LossFunctionExperimentSet"
         experimentSet = self.Load_Experiment_Set(path)
         #Solver_Analysis(experimentSet, ["Glc", "Sac", "ManOH"], [[0.2, 10, 10], [0.2, 10, 10], [0.2, 10, 10]], "Lin")
@@ -340,6 +339,39 @@ class Operator:
             tmpCompList = [x for x in tmpCompList if x not in maxCluster]
         return clusterByCondition
 
+    def Cluster_By_Experiment(self, experimentSet):
+        clusterByExperiment = ExperimentClusters()
+        clusterByExperiment.metadata = experimentSet.metadata
+        clusterByExperiment.metadata.description += "\nClusters by experiments"
+        tmpCompList = experimentSet.experiments
+        dictKey = 0
+        while len(tmpCompList) > 0:
+            maxCount = 0
+            maxCluster = list()
+            for experiment in tmpCompList:
+                tmpCluster = list()
+                tmpCluster.append(experiment)
+                for experiment2 in tmpCompList:
+                    if experiment != experiment2 and self.Cluster_Match_Exp(experiment, experiment2):
+                        tmpCluster.append(experiment2)
+                if len(tmpCluster) > maxCount:
+                    maxCount = len(tmpCluster)
+                    maxCluster = tmpCluster
+            clusterByExperiment.clusters[dictKey] = [maxCluster]
+            tmpCompList = [x for x in tmpCompList if x not in maxCluster]
+            dictKey += 1
+        for key, value in clusterByExperiment.clusters.items():
+            componentDict = {}
+            for experiment in value[0]:
+                for component in experiment.experimentComponents:
+                    if component.name in componentDict:
+                        componentDict[component.name].append(component)
+                    else:
+                        componentDict[component.name] = list()
+                        componentDict[component.name].append(component)
+            clusterByExperiment.clusters[key].append(componentDict)
+        return clusterByExperiment
+
 
     """
     Calculates if comp2 is close to comp1 with tolerance(default 0.05)
@@ -354,6 +386,18 @@ class Operator:
                 abs(cond1.columnLength - cond2.columnLength) < tolerance * cond1.columnLength):
             return True
                 #abs(cond1.feedVolume - cond2.feedVolume) < tolerance * cond1.feedVolume):
+        return False
+
+    """
+    Calculates if exp2 is close to exp1 with tolerance(default 0.05)
+    """
+    def Cluster_Match_Exp(self, exp1, exp2, tolerance = 0.05):
+        cond1 = exp1.experimentCondition
+        cond2 = exp2.experimentCondition
+        if(abs(cond1.flowRate - cond2.flowRate) < tolerance * cond1.flowRate and
+           abs(cond1.columnDiameter - cond2.columnDiameter) < tolerance * cond1.columnDiameter and
+           abs(cond1.columnLength - cond2.columnLength) < tolerance * cond1.columnLength):
+            return True
         return False
 
     """

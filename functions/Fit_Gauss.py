@@ -35,9 +35,7 @@ def Fit_Gauss(experimentSetGauss):
             data_set = comp.concentrationTime.to_numpy()
             data_set[:, 0] = data_set[:, 0]/60
             max_time = data_set[-1, 0]
-            print(max_time)
             max_conc = max(data_set[:, 1])
-            print(max_conc)
             max_conc_index = data_set[:, 1].tolist().index(max_conc)
 
     # Multiplier based on absolute values of concentrations ensures proper function of external code below

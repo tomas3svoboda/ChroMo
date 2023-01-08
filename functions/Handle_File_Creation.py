@@ -12,10 +12,11 @@ def Handle_File_Creation(path, dir = False):
         if inp != "Y":
             print("Shutting down.")
             exit()
+        if dir:
+            shutil.rmtree(path)
     if not dir:
         file = open(path, "w")
         return file
     if dir:
-        shutil.rmtree(path)
         os.mkdir(path)
         return True
