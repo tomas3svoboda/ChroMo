@@ -4,6 +4,8 @@
 from scipy.optimize import minimize
 from functions.Lev2_Loss_Function import Lev2_Loss_Function
 import functions.global_ as gl
+from scipy.optimize import shgo
+
 
 def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor):
     #print("Calling Lev2_Optim with params " + str(gl.compParamDict[key]) + "!")
@@ -21,21 +23,21 @@ def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor):
           ", " +
           str(round(gl.compRangeDict[key][1][1], 2)) +
           "]!")
-    res = minimize(Lev2_Loss_Function,
-                   gl.compParamDict[key],
-                   args=(experimentCluster, porosity, lossFunction, factor),
+
+    res = shgo(func = lambda x : Lev2_Loss_Function(gl.compParamDict[key], experimentCluster, porosity, lossFunction, factor),
                    bounds=((gl.compRangeDict[key][0][0], gl.compRangeDict[key][0][1]), (gl.compRangeDict[key][1][0], gl.compRangeDict[key][1][1])),
-                   method='Nelder-Mead',
-                   options={'fatol': 0.1})
+                   args=(),
+                   options={'f_tol': 0.1})
     print('__________________________________________')
-    for i in [0,1]:
+
+    '''for i in [0,1]:
         #if res.x[i] == 0 or res.x[i] == 1000:
         if res.x[i] >= 15000:
             print('Bound hit! ' + str(res.x.round(2)))
             res.x[i] = 1000
         elif res.x[i] == 0:
             print('Bound hit! ' + str(res.x.round(2)))
-            res.x[i] = 50
+            res.x[i] = 50'''
     gl.compParamDict[key] = res.x
     gl.lv2LossFunctionVals[key] = res.fun
     print(str(key) + ' has params: ')
