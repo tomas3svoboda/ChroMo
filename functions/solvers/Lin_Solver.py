@@ -49,8 +49,8 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
     b = flowSpeed/((((1-porosity)*henryConst)/porosity)+1)  # *** !!! PODLE DOKUMENTU
 
     time = 10800  # Finite time of the experiment [s]
-    Nx = 20  # Number of spatial differences
-    Nt = 2000  # Number of time differences
+    Nx = 30  # Number of spatial differences
+    Nt = 500  # Number of time differences
     x = np.linspace(0, length, Nx)  # Preparation of space vector
     dx = length / Nx  # Calculating space step [mm]
     t = np.linspace(0, time, Nt)  # Preparation of time vector
