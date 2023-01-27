@@ -7,7 +7,7 @@ import functions.global_ as gl
 from scipy.optimize import shgo
 
 
-def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor):
+def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor, solver):
     #print("Calling Lev2_Optim with params " + str(gl.compParamDict[key]) + "!")
     #res = minimize(Lev2_Loss_Function, gl.compParamDict[key], args=(experimentCluster, porosity), bounds=((0, None), (0, None)), method='Nelder-Mead', options={'fatol': 0.5,'maxfev': 25})
     print("Calling Lev2_Optim with:\nK " +
@@ -23,11 +23,16 @@ def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor):
           ", " +
           str(round(gl.compRangeDict[key][1][1], 2)) +
           "]!")
-
-    res = shgo(func = lambda x : Lev2_Loss_Function(gl.compParamDict[key], experimentCluster, porosity, lossFunction, factor),
-                   bounds=((gl.compRangeDict[key][0][0], gl.compRangeDict[key][0][1]), (gl.compRangeDict[key][1][0], gl.compRangeDict[key][1][1])),
-                   args=(),
-                   options={'f_tol': 0.1})
+    if solver == "Lin":
+        res = shgo(func = lambda x : Lev2_Loss_Function(gl.compParamDict[key], experimentCluster, porosity, lossFunction, factor, solver),
+                       bounds=((gl.compRangeDict[key][0][0], gl.compRangeDict[key][0][1]), (gl.compRangeDict[key][1][0], gl.compRangeDict[key][1][1])),
+                       args=(),
+                       options={'f_tol': 0.1})
+    elif solver == "Nonlin":
+        res = shgo(func = lambda x : Lev2_Loss_Function(gl.compParamDict[key], experimentCluster, porosity, lossFunction, factor, solver),
+                       bounds=((gl.compRangeDict[key][0][0], gl.compRangeDict[key][0][1]), (gl.compRangeDict[key][1][0], gl.compRangeDict[key][1][1]), (gl.compRangeDict[key][2][0], gl.compRangeDict[key][2][1])),
+                       args=(),
+                       options={'f_tol': 0.1})
     print('__________________________________________')
 
     '''for i in [0,1]:

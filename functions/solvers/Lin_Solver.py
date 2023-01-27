@@ -15,6 +15,9 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
                porosity=0.4,        # Total porosity of the sorbent packing [-]
                henryConst=1.9,      # Henry's constant of the linear isotherm [-]
                disperCoef=12,       # Axial dispersion coefficient [mm^2/s]
+               Nx = 30,             # Number of spatial differences
+               Nt = 500,            # Number of time differences
+               time=10800,          # Finite time of the experiment [s]
                debugPrint=False,
                debugGraph=False):
 
@@ -48,9 +51,7 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
     a = disperCoef/((((1-porosity)*henryConst)/porosity)+1)  # *** !!! PODLE DOKUMENTU
     b = flowSpeed/((((1-porosity)*henryConst)/porosity)+1)  # *** !!! PODLE DOKUMENTU
 
-    time = 10800  # Finite time of the experiment [s]
-    Nx = 30  # Number of spatial differences
-    Nt = 500  # Number of time differences
+
     x = np.linspace(0, length, Nx)  # Preparation of space vector
     dx = length / Nx  # Calculating space step [mm]
     t = np.linspace(0, time, Nt)  # Preparation of time vector

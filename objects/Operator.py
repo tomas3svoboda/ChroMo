@@ -75,6 +75,9 @@ class Operator:
         lossFunctionChoices = ['Simple', 'Squares', 'LogSimple', 'LogSquares']
         lossFunctionString = ", ".join(lossFunctionChoices)
         lossFunctionSelection = input("Sellect loss function [" + lossFunctionString + "]")
+        solverChoices = ['Lin', 'Nonlin']
+        solverString = ", ".join(solverChoices)
+        solverSelection = input("Sellect solver [" + solverString + "]")
         factorSelectionString = "1 - Fc = 1\n" + \
                                 "2 - Fc = 1 / maximalOutputConc\n" + \
                                 "3 - Fc = 1 / maximalOutputConc^2\n" + \
@@ -87,6 +90,8 @@ class Operator:
         intervalSelection = input("Print graphs to help select intervals?[Y - yes, N - no]")
         while intervalSelection == "Y":
             porosity = float(input("Select Porosity: "))
+            if solverSelection == "Nonlin":
+                satur = float(input("Select Saturation Coefficient: "))
             Kstart = float(input("Select Start for K interval: "))
             Kend = float(input("Select End for K interval: "))
             Kstep = float(input("Select Step for K interval: "))
@@ -94,10 +99,10 @@ class Operator:
             Dend = float(input("Select End for D interval: "))
             Dstep = float(input("Select Step for D interval: "))
             comp = input("Select Component [" + compSelectString + "]: ")
-            Loss_Function_Analysis_Simple(experimentClusterComp, comp, path, Kstart, Dstart, Kend, Dend, Kstep, Dstep, porosity, lossFunctionSelection, factorSelection)
+            Loss_Function_Analysis_Simple(experimentClusterComp, comp, path, Kstart, Dstart, Kend, Dend, Kstep, Dstep, porosity, satur, lossFunctionSelection, factorSelection, solverSelection)
             intervalSelection = input("Continue with graphs?[Y - yes, N - no]")
         porosityDict = dict()
-        KDDict = dict()
+        KDQDict = dict()
         porosityStart = float(input("Select Start for Porosity interval: "))
         porosityEnd = float(input("Select End for Porosity interval: "))
         porosityDict["init"] = float(input("Select an Initial guess for Porosity interval: "))
@@ -112,8 +117,13 @@ class Operator:
             DEnd = float(input("Select End for D interval for component " + key + ": "))
             tmpDict["dinit"] = float(input("Select Initial guess for D interval for component " + key + ": "))
             tmpDict["drange"] = [DStart, DEnd]
-            KDDict[key] = tmpDict
-        result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, porosityDict, KDDict, lossFunctionSelection, factorSelection)
+            if solverSelection == "Nonlin":
+                QStart = float(input("Select Start for Q interval for component " + key + ": "))
+                QEnd = float(input("Select End for Q interval for component " + key + ": "))
+                tmpDict["qinit"] = float(input("Select Initial guess for Q interval for component " + key + ": "))
+                tmpDict["qrange"] = [QStart, QEnd]
+            KDQDict[key] = tmpDict
+        result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, porosityDict, KDQDict, lossFunctionSelection, factorSelection, solverSelection)
         self.Save_Result(result, path)
         chromatogramSelection = input("Create Chromatogram?[Y - yes, N - no]")
         if chromatogramSelection == "Y":
@@ -137,8 +147,8 @@ class Operator:
                                                 str(compObj.experiment.experimentCondition.flowRate) + \
                                                 "\n"
                 conditionSelection = int(input(conditionSelectionString)) - 1
-                solverOutput = Solver_Choice("Lin",
-                                             [result["porosity"], result["compparams"][comp][0], result["compparams"][comp][1]],
+                solverOutput = Solver_Choice(solverSelection,
+                                             [result["porosity"], result["compparams"][comp][0], result["compparams"][comp][1], result["compparams"][comp][2]],
                                              experimentClusterComp.clusters[comp][conditionSelection])[:, -1]
                 df = experimentClusterComp.clusters[comp][conditionSelection].concentrationTime
                 minTime = df.iat[0, 0]

@@ -10,7 +10,10 @@ Loss Function options:
     'LogSquares' - Single_Loss_Function_LogSquares
 """
 def Lev2_Loss_Function(params, experimentCluster, porosity, lossFunction = 'Simple', factor = 1, solver = "Lin"):
-    params2 = [porosity, params[0], params[1]]
+    if solver == "Lin":
+        params2 = [porosity, params[0], params[1]]
+    elif solver == "Nonlin":
+        params2 = [porosity, params[0], params[1], params[2]]
     sum = 0
     for comp in experimentCluster:
         res = Single_Loss_Function_Choice(lossFunction, params2, comp, solver, factor)

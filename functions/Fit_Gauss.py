@@ -101,20 +101,20 @@ def Fit_Gauss(experimentSetGauss):
             np.sort(time)
 
             comp_name = comp.name
-            result = pd.DataFrame({'time': time_red, comp_name: ((GaussSum(time_red, const, n_value))/mutiplier)})
-            result = result.sort_values(by=['time'])
-            result['time'] *= 60
+            result = pd.DataFrame({'Time': time_red, comp_name: ((GaussSum(time_red, const, n_value))/mutiplier)})
+            result = result.sort_values(by=['Time'])
+            result['Time'] *= 60
 
             #-----------------temporary solution---------------------
 
             if comp.name == "ManOH":
-                result.drop(result[result['time'] < 0].index, inplace=True)
+                result.drop(result[result['Time'] < 0].index, inplace=True)
 
             # -----------------temporary solution---------------------
             #result = result.drop((result[result[comp_name] < (max_conc/30)].index))
-            #result = result.drop((result[(result[comp_name]<(max_conc/30)) and (not ((result['time'] % 100) == 0))].index))
+            #result = result.drop((result[(result[comp_name]<(max_conc/30)) and (not ((result['Time'] % 100) == 0))].index))
             #result.loc[0] = [0,0]
-            #result.loc[len(result.index)] = [max_time,data_set[-1, 1]]
+            #result.loc[len(result.index)] = [max_Time,data_set[-1, 1]]
             #result = result.dropna()
 
             comp.concentrationTime = result

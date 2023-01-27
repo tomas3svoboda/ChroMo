@@ -1,90 +1,69 @@
 import numpy as np
 import pandas as pd
 import math
-from scipy.interpolate import CubicSpline
+from autograd import grad, jacobian
+from scipy import linalg
+from scipy import optimize
+from IPython.display import display
+from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-from objects.ExperimentSet import ExperimentSet
-from objects.Experiment import Experiment
-from objects.ExperimentComponent import ExperimentComponent
-from functions.Fit_Gauss import Fit_Gauss
-# Numerical solver of the EDM with Langmuir Isotherm - nonlinear parabolic PDE
 
-def Nonlin_Solver(flowRate = 200, length = 235, diameter = 16, feedVol = 5, feedConc = 2, porosity = 0.5,
-                  langmuirConst = 2.5, disperCoef = 0.95, saturationConst = 1, Nx = 180, Nt = 1000):
-    def Danckwert_lb_c2ap(c_i1, c_i0, dx, dt, C1, C2, cIn):
-        # First derivative defined as Um/Dax*(c[t,0]-cIn)
-        # Second derivative used aproxmation of fictitious point c[t,0-1] = c[t,0+1]
-        # Then second order centered difference for second derivative in x
-        # First-order Forward difference for first derivative in t
-        c_next = c_i0 + ((dt / C1) * (2 * c_i1 - 2 * c_i0) / (dx ** 2)) - ((dt * (C2 ** 2) * (c_i0 - cIn)) / C1)
-        return c_next
-
-    def Danckwert_rb_c2ap(c_iN1, c_iN, dx, dt, C1):
-        # Second derivative used aproxmation of fictitious point c[t,N+1] = c[t,N-1]
-        # Then second order centered difference for second derivative in x
-        # First-order Forward difference for first derivative in t
-        c_next = c_iN + ((dt * (2 * c_iN1 - 2 * c_iN)) / (C1 * (dx ** 2)))
-        return c_next
-
-    def Danckwert_lb_fwrd2(c_i1, c_i2, c_i0, dx, dt, C1, C2, cIn):
-        # First derivative defined as Um/Dax*(c[t,0]-cIn) for x = 0
-        # Second derivative uses second-order forward differential scheme with c[t,1] and c [t,2] in x
-        # First-order Forward difference for first derivative in t
-        c_next = c_i0 + ((dt / C1) * ((c_i2 - 2 * c_i1 + c_i0) / (dx ** 2))) - ((dt * (C2 ** 2) * (c_i0 - cIn)) / C1)
-        return c_next
-
-    # -------------------------------------------------------------------------------
-    # BODIES
-
-    def c1c2x_fwrdt(c_in, c_i1, c_in1, dx, dt, C1, C2):
-        # First order centered difference for first order derivative in x
-        # Second order centered difference for second derivative in x
-        # First-order Forward difference for first derivative in t
-        c_next = c_in + ((dt / C1) * ((c_i1 - 2 * c_in + c_in1) / (dx ** 2))) - (C2 * dt * (c_i1 - c_in1)) / (
-                    2 * C1 * dx)
-        return c_next
-
-    def fwrd1fwrd2x_fwrdt(c_in, c_i1, c_i2, dx, dt, C1, C2):
-        c_next = c_in + ((dt / C1) * ((c_i2 - 2 * c_i1 + c_in) / (dx ** 2))) - (
-                    (C2 * dt * (c_i1 - c_in)) / (2 * C1 * dx))
-        return c_next
+# ***Numerical solution of Equilibrium Dispersive Model of Chromatography***
+#                       ***Langmuir isotherm***
+#                 ***Cranck-Nicolson Implicid Method***
+# Developed by Ing. Tomas Svoboda
+# University of Chemistry and Technology in Prague, Czech Republic
+# Department of Carbohydrates and Cereals
+# tomas3.svoboda@vscht.cz
+'''
+This script implements Cranck-Nicolson implicit method for numerical solution of
+non-linear second order convection-diffusion PDE used to describe concentration 
+wave propagation trough the chromatographic column. Numerical scheme utilizes
+averaged centred difference scheme in spatial direction and forward difference
+scheme in time direction. Danckwert's boudaries are implemented with usage of
+fictious point for left boundary. The solution of non-lienar algebraic system for
+each time step is done by scipy.lialg.solve_banded which significatly boosts
+speed.
+'''
+def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
+                  length = 235,         # Lenght of the packed section in the column [mm]
+                  diameter = 16,        # Column diameter [mm]
+                  feedVol = 30,         # Feed injection volume [mL]
+                  feedConc = 150e-3,    # Concentration of the balanced component in the feed [g/mL] or [mg/mm^3]
+                  porosity = 0.4,       # Total porosity of the sorbent packing [-]
+                  langmuirConst = 1.5,  # Langmuir's constant of the linear isotherm [-]
+                  disperCoef = 5,       # Axial dispersion coefficient [mm^2/s]
+                  saturCoef = 15,       # Saturation Coefficient
+                  Nx = 30,              # Number of spatial differences - Nx
+                  Nt = 3000,            # Number of time differences - Nt
+                  time = 3000,          # Finite time of the experiment [s]
+                  debugPrint=False,
+                  debugGraph=False
+                  ):
 
     # Calculation of the feed time [s]
     feedTime = (feedVol / flowRate) * 3600
+
     # Calculation of the flow speed [mm/s]
     flowSpeed = (flowRate * 1000 / 3600) / (math.pi * ((diameter / 2) ** 2) * porosity)
+    if debugPrint:
+        print('Flow speed:   ' + str(round(flowSpeed, 2)) + ' [mm/s]')
 
-    # Defining finite time of the experiment [s]
-    time = 500
-    # Defining number of spatial differences
-    # Defining number of time differences
-    # Preparation of space vector
-    x = np.linspace(0, length, Nx)
-    # Calculating space step [mm]
-    dx = length / Nx
+    # ________________________________________________________________________
+    # DATA STRUCTURES PREPARATION
 
-    # Preparation of time vector
-    t = np.linspace(0, time, Nt)
-    # Calculating space step [mm]
-    dt = time / Nt
+    x = np.linspace(0, length, Nx)  # Preparation of space vector
+    dx = length / Nx  # Calculating space step [mm]
+    t = np.linspace(0, time, Nt)  # Preparation of time vector
+    dt = time / Nt  # Calculating time step [mm]
 
-    # Preparation of solution matrix
-    c = np.zeros((len(t), len(x)))
-
-    # Implementing initial conditions
-    C_0 = np.zeros(len(x))
-    C_0[0] = (c[0, 1] + dx*flowSpeed*feedConc)/(1 + dx*flowSpeed)
-
-    # c[0,0] = feedConc # For the left boudary
-    c[0, :] = C_0  # First row (time = 0) are all elements C_0
-
-    tStep = time / Nt  # time step [s]
-    feedSteps = feedTime // tStep  # whole number of feed iterations
-    feedTimeAprox = feedTime % tStep  # aproximation of division
-    # rounding iteration step based on defined feed parameters
+    # Feed preparation
+    feedSteps = int(feedTime // dt)  # Whole number of feed iterations
+    feedTimeAprox = feedTime % dt  # aproximation of division
+    # Rounding iteration step based on defined feed parameters
     if feedTimeAprox >= 0.5:
         feedSteps += 1
-
+    # Constructing pulse injection feed vector
     feed = np.linspace(0, time, Nt)
     for i in range(0, Nt):
         if i <= feedSteps:
@@ -92,59 +71,64 @@ def Nonlin_Solver(flowRate = 200, length = 235, diameter = 16, feedVol = 5, feed
         else:
             feed[i] = 0
 
-    # using Fit_Gauss to smooth out input feed
-    """
-    tmpFeedTime = np.linspace(0, time, Nt)
-    d = {'time': tmpFeedTime, 'conc': feed}
-    tmpDF = pd.DataFrame(data=d)
-    tmpExperimentSet = ExperimentSet()
-    tmpExperiment = Experiment()
-    tmpComponent = ExperimentComponent()
-    tmpComponent.concentrationTime = tmpDF
-    tmpComponent.name = 'conc'
-    tmpExperiment.experimentComponents.append(tmpComponent)
-    tmpExperimentSet.experiments.append(tmpExperiment)
-    print(tmpExperimentSet.experiments[0].experimentComponents[0].concentrationTime)
-    tmpGauss = Fit_Gauss(tmpExperimentSet)
-    feed = tmpGauss.experiments[0].experimentComponents[0].concentrationTime.iloc[:, 1].to_numpy()
-    """
-    # using scipy.interpolate.CubicSpline to smooth out input feed
-    bp = 0
-    tmpTimeStep = time/(Nt//1)
-    tmpFeed = np.linspace(0, time, Nt//1)
-    for i in range(0, Nt//1):
-        if i*tmpTimeStep < feedTime:
-            tmpFeed[i] = feedConc
-        else:
-            tmpFeed[i] = 0
-            if bp == 0:
-                bp = i
+    # Preparation of the solution matrix
+    c = np.zeros((len(t), len(x)))
+    # Initial conditions
+    c0 = np.zeros(len(x))
 
-    tmpFeedTime = np.linspace(0, time, Nt//1)
-    rmList = [range(bp-150, bp+149)]
-    tmpFeed = np.delete(tmpFeed, rmList)
-    tmpFeedTime = np.delete(tmpFeedTime, rmList)
-    cs = CubicSpline(x=tmpFeedTime, y=tmpFeed, bc_type='natural')
-    plt.plot(tmpFeedTime, tmpFeed)
-    plt.show()
-    feed = cs(np.linspace(0, time, Nt))
-    plt.plot(np.linspace(0, time, Nt), feed)
-    plt.show()
+    # ________________________________________________________________________
+    # DISCRETIZATION
 
+    # Following function evaluates each function in the resulting system
+    # of nonlinear algebraic equations. The solution of this system is that c1
+    # which corresponds to vector f filled with zeros. c1 is unknown next time step.
+    # c0 is previous calculated time step. For time 0 c0 in zeros (initial condition)
+    def function(c1, c0, feedCur, porosity, langmuirConst, saturCoef, disperCoef, flowSpeed):
+        f = np.zeros(len(c0))  # Preparation of solution vector - will be optimized to 0
+        for i in range(0, len(c0)):  # Main loop trough all the vector's elements
+            if i == 0:  # Left boundary
+                f[0] = ((((c0[1] - c0[0]) / dx) + ((c1[1] - c1[0]) / dx)) / 2) - (flowSpeed * (c1[0] - feedCur))
+            elif i > 0 and i < Nx - 1:
+                denominator0 = ((1 - porosity) * saturCoef * langmuirConst) / (
+                            (((-langmuirConst * c0[i] + 1) ** 2) * porosity) + 1)
+                denominator1 = ((1 - porosity) * saturCoef * langmuirConst) / (
+                            (((-langmuirConst * c1[i] + 1) ** 2) * porosity) + 1)
+                secondDer0 = (c0[i - 1] - 2 * c0[i] + c0[i + 1]) / (dx ** 2)
+                secondDer1 = (c1[i - 1] - 2 * c1[i] + c1[i + 1]) / (dx ** 2)
+                firstDer0 = (c0[i + 1] - c0[i - 1]) / (dx * 2)
+                firstDer1 = (c1[i + 1] - c1[i - 1]) / (dx * 2)
+                timeDer = (c1[i] - c0[i]) / dt
+                disperElem = ((disperCoef / denominator0 * secondDer0) + (disperCoef / denominator1 * secondDer1)) / 2
+                convElem = ((flowSpeed / denominator0 * firstDer0) + (flowSpeed / denominator1 * firstDer1)) / 2
+                f[i] = disperElem - convElem - timeDer
+            elif i == Nx - 1:  # Right boundary
+                # f[Nx-1] = c0[Nx-1] - c0[Nx-2] - (c1[Nx-1] - c1[Nx-2])
+                f[Nx - 1] = (((c0[Nx - 1] - c0[Nx - 2]) / dx) + ((c1[Nx - 1] - c1[Nx - 2]) / dx)) / 2
+                # f[i] = (((c0[i]-c0[i-1])/dx)+((c1[i]-c1[i-2])/dx))/2
+        return f
 
-    # Implementing discretization
-    for j in range(1, Nt-1):  # Advance in time
-        # ----------------------------------------------------------------------
-        # Feed pulse implementation
-        cIn = feed[j]
-        for i in range(1, Nx-2):
-            divident1 = dt*disperCoef*(c[j-1, i+1] - 2*c[j-1, i] + c[j-1, i-1])
-            divisor1 = (((1 - porosity)*saturationConst*langmuirConst)/(((-langmuirConst*c[j-1, i] + 1)**2)*porosity) + 1)*(dx**2)
-            divident2 = dt*flowSpeed*(c[j-1, i+1] - c[j-1, i-1])
-            divisor2 = (((1 - porosity)*saturationConst*langmuirConst)/(((-langmuirConst*c[j-1, i] + 1)**2)*porosity) + 1)*(dx*2)
-            c[j, i] = (divident1/divisor1) - (divident2/divisor2) + c[j-1, i]
-        c[j, 0] = (c[j, 1] + dx*flowSpeed*cIn)/(1 + dx*flowSpeed)
-        c[j, Nx-1] = c[j, Nx-2]
+    # ________________________________________________________________________
+    # SOLUTION ALGORITHM
+
+    residuals = np.zeros(Nt)  # Initialize a vector to store the residuals
+
+    for i in range(1, Nt):
+        if debugPrint:
+            if i == 1:
+                print('Solution algorithm has been started:')
+            if i % (Nt // 20) == 0:
+                print(str(i) + ' steps has been finished ... ' +
+                      str(Nt - i) + ' steps remain.')
+
+        sol = optimize.root(fun=function,
+                            x0=c[i - 1, :],
+                            method='hybr',
+                            args=(c[i - 1, :], feed[i], porosity, langmuirConst, saturCoef, disperCoef, flowSpeed))
+        c[i, :] = sol.x
+        residuals[i] = np.linalg.norm(sol.fun)  # Save the L2-norm of the residuals at each time step
+    # ________________________________________________________________________
+    # MASS BALANCE CHECK
+
     feedMass = feedVol * feedConc  # Calculating teoretical mass fed into system
     massCumulOut = 0  # Mass cumulation over time in outlet from the column
     massCumulIn = 0  # Mass cumulation over time in inlet to the column
@@ -157,19 +141,74 @@ def Nonlin_Solver(flowRate = 200, length = 235, diameter = 16, feedVol = 5, feed
     massDifferenceOut = feedMass - massCumulOut
     massDifferenceIn = feedMass - massCumulIn
     # Display mass balance check
-    print('\nFeed Mass:   ' + str(round(feedMass, 2)) + ' mg')
-    print('Outlet Mass:   ' + str(round(massCumulOut, 2)) + ' mg')
-    print('Difference:   ' + str(round(-(massDifferenceOut), 2)) + ' mg   '
-          + str(round((massDifferenceOut * 100 / feedMass), 2)) + ' %\n')
-    fig1 = plt.figure(1)
-    ax1 = fig1.add_subplot(projection='3d')
-    X, Y = np.meshgrid(x, t)
-    Z = c
-    ax1.plot_surface(X, Y, Z)
-    ax1.set_xlabel('Lenght [mm]')
-    ax1.set_ylabel('Time [s]')
-    ax1.set_zlabel('Concentration [mg/mL]')
-    plt.savefig('3D_surface_plot_' + str(Nt) + 'x' + str(Nx) + '_' + str(int(round(Nt / Nx, 0))) \
-                + '.png')
-    plt.show()
+    if debugPrint:
+        print('\nFeed Mass:   ' + str(round(feedMass, 2)) + ' mg')
+        print('Outlet Mass:   ' + str(round(massCumulOut, 2)) + ' mg')
+        print('Difference:   ' + str(round(-(massDifferenceOut), 2)) + ' mg   '
+              + str(round((massDifferenceOut * 100 / feedMass), 2)) + ' %\n')
+
+    if debugPrint:
+        results = pd.DataFrame(c)
+        print('Complete results mesh of size')
+        print('Number of Elements: ' + str(results.size))
+        print('Shape of the solution matrix: ' + str(results.shape))
+
+    # ________________________________________________________________________
+    # PLOTTING
+
+    # Plotting solution 3D mesh
+    if debugGraph:
+        fig1 = plt.figure(1)
+        ax1 = fig1.add_subplot(projection='3d')
+        X, Y = np.meshgrid(x, t)
+        Z = c
+        ax1.plot_surface(X, Y, Z)
+        ax1.set_xlabel('Lenght [mm]')
+        ax1.set_ylabel('Time [s]')
+        ax1.set_zlabel('Concentration [mg/mL]')
+        plt.savefig('3D_surface_plot_' + str(Nt) + 'x' + str(Nx) + '_' + str(int(round(Nt / Nx, 0))) \
+                    + '.png')
+        plt.show()
+
+        # Ploting concentration-time curve in the column outlet
+        x_plot = np.round(np.linspace(0, Nx, 10)).astype(int)
+        fig2 = plt.figure(2)
+        plt.plot(t, c[:, -1])
+        plt.title('Outlet ooncentration-time')
+        # plt.savefig('plot_' + str(Nt)+ 'x' +str(Nx) + '_' + str(int(round(Nt/Nx,0)))\
+        #            + '.png')
+        plt.show()
+
+        # Ploting concentration-time curve in the column inlet
+        fig3 = plt.figure(3)
+        plt.plot(t, c[:, 0])
+        plt.title('Input concentration-time')
+        # plt.savefig('plot_' + str(Nt)+ 'x' +str(Nx) + '_' + str(int(round(Nt/Nx,0)))\
+        #            + '.png')
+        plt.show()
+
+        # Ploting concentration time-curve in the outlet from the column
+        x_plot = np.round(np.linspace(0, Nx, 10)).astype(int)
+        fig2 = plt.figure(2)
+        plt.plot(t, feed, label='feed')
+        plt.plot(t, c[:, 0], label=(str(round(x_plot[0] * dx, 0)) + ' mm'))
+        plt.plot(t, c[:, (x_plot[1])], label=(str(round(x_plot[1] * dx, 0)) + ' mm'))
+        plt.plot(t, c[:, (x_plot[2])], label=(str(round(x_plot[2] * dx, 0)) + ' mm'))
+        plt.plot(t, c[:, (x_plot[3])], label=(str(round(x_plot[3] * dx, 0)) + ' mm'))
+        plt.plot(t, c[:, (x_plot[4])], label=(str(round(x_plot[4] * dx, 0)) + ' mm'))
+        plt.plot(t, c[:, (x_plot[5])], label=(str(round(x_plot[5] * dx, 0)) + ' mm'))
+        plt.plot(t, c[:, (x_plot[6])], label=(str(round(x_plot[6] * dx, 0)) + ' mm'))
+        plt.plot(t, c[:, (x_plot[7])], label=(str(round(x_plot[7] * dx, 0)) + ' mm'))
+        plt.plot(t, c[:, (x_plot[8])], label=(str(round(x_plot[8] * dx, 0)) + ' mm'))
+        plt.plot(t, c[:, -1], label=(str(round(Nx * dx, 0)) + ' mm'))
+        plt.legend()
+        plt.savefig('Concentration_time_plot_' + str(Nt) + 'x' + str(Nx) + '_' + str(int(round(Nt / Nx, 0))) \
+                    + '.png')
+        plt.show()
+
+        # Plotting iteration residuals
+        plt.plot(t, residuals)  # Plot the residuals over time
+        plt.xlabel('Time [s]')
+        plt.ylabel('Residuals')
+        plt.show()
     return c

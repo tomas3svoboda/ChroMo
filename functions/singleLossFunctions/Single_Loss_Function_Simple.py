@@ -7,10 +7,9 @@ def Single_Loss_Function_Simple(params, experimentComp, solver, factor):
     errSum = 0
     df = experimentComp.concentrationTime
     modelCurve = Solver_Choice(solver, params, experimentComp)[:, -1]
-    # TODO remove hard wired time val
     minTime = df.iat[0, 0]
     maxTime = df.iat[-1, 0]
-    time = np.linspace(minTime, maxTime, 2000)
+    time = np.linspace(minTime, maxTime, modelCurve.size)
     f = interp1d(time, modelCurve)
     modelCurveInterpolated = f(df.iloc[:, 0].to_numpy())
     tmpErrSum = 0
