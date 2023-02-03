@@ -66,5 +66,5 @@ def Web_Server():
         </form>
         '''
 
-    api.run()
+    api.run(debug=True)
 
