@@ -5,6 +5,7 @@ from os import walk
 import os
 import datetime
 import time
+import json
 from objects.ExperimentSet import ExperimentSet
 from objects.ExperimentComponent import ExperimentComponent
 from objects.Experiment import Experiment
@@ -253,6 +254,31 @@ class Operator:
                 plt.legend()
                 plt.savefig(graphName)
         plt.close("all")
+
+    def Load_Experimet_JSON(self, experimentSet, jsonString):
+        jsonDict = json.loads(jsonString)
+        description = jsonDict["description"]
+        experimentDate = jsonDict["experimentDate"]
+        columnLength = float(jsonDict["columnLength"])
+        columnDiameter = float(jsonDict["columnDiameter"])
+        flowRate = float(jsonDict["flowRate"])
+        feedVolume = float(jsonDict["feedVolume"])
+        experiment = Experiment()
+        experiment.metadata.date = experimentDate
+        experiment.metadata.description = description
+        experiment.metadata.path = jsonDict["name"]
+        experiment.experimentCondition.flowRate = float(flowRate)
+        experiment.experimentCondition.feedVolume = float(feedVolume)
+        experiment.experimentCondition.columnLength = float(columnLength)
+        experiment.experimentCondition.columnDiameter = float(columnDiameter)
+        for compDict in jsonDict["components"]:
+            experimentComponent = ExperimentComponent()
+            experimentComponent.concentrationTime = pd.read_json(compDict["concentrationTime"], orient="split")
+            experimentComponent.name = compDict["name"]
+            experimentComponent.feedConcentration = float(compDict["feedConcentration"])
+            experimentComponent.experiment = experiment
+            experiment.experimentComponents.append(experimentComponent)
+        experimentSet.experiments.append(experiment)
 
 
     def Load_Experiment_Set(self, path):
