@@ -20,7 +20,7 @@ def Solver_Choice(choice, params, experimentComp):
                             params[0],
                             params[1],
                             params[2])
-    if choice == 'Nonlin':
+    elif choice == 'Nonlin':
         res = Nonlin_Solver(experimentComp.experiment.experimentCondition.flowRate,
                             experimentComp.experiment.experimentCondition.columnLength,
                             experimentComp.experiment.experimentCondition.columnDiameter,
@@ -31,5 +31,5 @@ def Solver_Choice(choice, params, experimentComp):
                             params[2],
                             params[3])
     else:
-        raise Exception('Unknown Solver in Solver_Choice')
+        raise Exception(str(choice) + ' - Unknown Solver in Solver_Choice')
     return res

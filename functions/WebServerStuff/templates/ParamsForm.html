@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>W3.CSS Template</title>
+  {% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+  {% endfor %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="CSS/index.css">
+<script src="Javascript/index.js"></script>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="w3-top">
+  <div class="w3-bar w3-red w3-card w3-left-align w3-large">
+    <a class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large w3-red" href="javascript:void(0);" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
+    <a href="{{ url_for('get_main_page') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white">Home</a>
+    <a href="{{ url_for('upload_file_page') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white">Upload</a>
+    <a href="#" class="w3-bar-item w3-button w3-hide-small w3-padding-large  w3-white">Parameters</a>
+  </div>
+
+  <!-- Navbar on small screens -->
+  <div id="navDemo" class="w3-bar-block w3-white w3-hide w3-hide-large w3-hide-medium w3-large">
+    <a href="#" class="w3-bar-item w3-button w3-padding-large">Upload</a>
+  </div>
+</div>
+
+<!-- First Grid -->
+<div class="w3-row-padding w3-padding-64 w3-container">
+  <div class="w3-content">
+     <h1>Set Experiment Parameters</h1>
+     <form method=post enctype=multipart/form-data>
+        <label for="gauss">Replace with Gauss curve:</label>
+        <input type="checkbox" name="gauss" value="True" id="gauss"><br>
+        <label for="retCorr">Retention time correction:</label>
+        <input type="checkbox" name="retCorr" value="True" id="retCorr"><br>
+        <label for="massBal">Mass balance correction:</label>
+        <input type="checkbox" name="massBal" value="True" id="massBal"><br>
+        <label for="lossFunc">Choose a loss function:</label>
+        <select name="lossFunc" id="lossFunc">
+          <option value="Simple">Simple</option>
+          <option value="Squares">Squares</option>
+          <option value="LogSimple">LogSimple</option>
+          <option value="LogSquares">LogSquares</option>
+        </select><br>
+        <label for="solver">Choose a solver:</label>
+        <select name="solver" id="solver" oninput="formSolverChange()">
+          <option value="Lin">Linear</option>
+          <option value="Nonlin">Non linear</option>
+        </select><br>
+        <label for="factor">Choose a factor:</label>
+        <select name="factor" id="factor">
+          <option value="1">1</option>
+          <option value="2">1/maximalOutputConc</option>
+          <option value="3">1/maximalOutputConc^2</option>
+          <option value="4">1/feedConc</option>
+          <option value="5">1/feedConc^2</option>
+          <option value="6">1/feedMass</option>
+          <option value="7">1/feedMass^2</option>
+        </select><br><br>
+        <label for="porosityStart">Choose a porosity interval:</label>
+        [ <input type="number" value="porosityStart" id="porosityStart" name="porosityStart" min="0.01" max="1" step="0.01">, <input type="number" value="porosityEnd" id="porosityEnd" name="porosityEnd" min="0.01" max="1" step="0.01"> ]<br>
+        <label for="porosityInit">Choose a initial guess for Porosity:</label>
+        <input type="number" value="porosityInit" id="porosityInit" name="porosityInit" min="0.01" max="1" step="0.01"}><br><br>
+         {% for comp in compList %}
+         <div class="variableParams {{comp}}">
+            <label for="{{comp}}KStart">Choose a Henry constant interval for {{comp}}:</label>
+            [ <input type="number" value="{{comp}}KStart" id="{{comp}}KStart" name="{{comp}}KStart" min="0" step="1">, <input type="number" value="{{comp}}KEnd" id="{{comp}}KEnd" name="{{comp}}KEnd" min="0" step="1"> ]<br>
+            <label for="{{comp}}KInit">Choose a Henry constant initial guess for {{comp}}:</label>
+            <input type="number" value="{{comp}}KInit" id="{{comp}}KInit" name="{{comp}}KInit" min="0" step="1"><br>
+            <label for="{{comp}}DStart">Choose a Dispersion coeficient interval for {{comp}}:</label>
+            [ <input type="number" value="{{comp}}DStart" id="{{comp}}DStart" name="{{comp}}DStart" min="0" step="1">, <input type="number" value="{{comp}}DEnd" id="{{comp}}DEnd" name="{{comp}}DEnd" min="0" step="1"> ]<br>
+            <label for="{{comp}}DInit">Choose a Dispersion coeficient initial guess for {{comp}}:</label>
+            <input type="number" value="{{comp}}DInit" id="{{comp}}DInit" name="{{comp}}DInit" min="0" step="1"><br>
+        </div><br>
+        {% endfor %}
+
+        <input type=submit value=Upload>
+    </form>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="w3-container w3-padding-64 w3-center w3-opacity">
+  <div class="w3-xlarge w3-padding-32">
+    <i class="fa fa-facebook-official w3-hover-opacity"></i>
+    <i class="fa fa-instagram w3-hover-opacity"></i>
+    <i class="fa fa-snapchat w3-hover-opacity"></i>
+    <i class="fa fa-pinterest-p w3-hover-opacity"></i>
+    <i class="fa fa-twitter w3-hover-opacity"></i>
+    <i class="fa fa-linkedin w3-hover-opacity"></i>
+ </div>
+ <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
+</footer>
+</body>
+</html>

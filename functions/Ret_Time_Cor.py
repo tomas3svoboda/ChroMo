@@ -6,6 +6,7 @@ import os
 def Ret_Time_Cor(experimentSet, experimentClustersExp, writeToFile = False):
     if writeToFile:
         filePath = experimentSet.metadata.path + "\\Time_Shifts.txt"
+        print(filePath)
         file = Handle_File_Creation(filePath)
 
     # calculate maximum negative shifts for each experiment to not lose non-zero values, again as temporary property

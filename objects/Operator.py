@@ -162,6 +162,35 @@ class Operator:
                 resultDF.to_csv(filePath, index=False, compression=None)
                 chromatogramSelection = input("More Chromatograms?[Y - yes, N - no]")
 
+    def Web_Start(self, experimentSet, path, gauss, retTime, massBal, lossFunc, solver, factor, porosityStart, porosityEnd, porosityInit, KDQDict) :
+        currentExperimentSet = Deep_Copy_ExperimentSet(experimentSet)
+        if gauss:
+            currentExperimentSet = Fit_Gauss(currentExperimentSet)
+            self.Save_Graphs_To_Directory(experimentSet, currentExperimentSet, path)
+            print("Graphs of Gauss Curves Created.")
+        else:
+            print("Fitting Gauss Curve skipped.")
+        if retTime:
+            experimentClusterExp = self.Cluster_By_Experiment(currentExperimentSet)
+            currentExperimentSet = Ret_Time_Cor(currentExperimentSet, experimentClusterExp, True)
+            print("File with Time Corrections Created.")
+        else:
+            print("Retention Time Correction skipped.")
+        if massBal:
+            currentExperimentSet = Mass_Balance_Cor(currentExperimentSet, True)
+            print("File with Mass Corrections Created.")
+        else:
+            print("Mass Balance Correction skipped.")
+        experimentClusterComp = self.Cluster_By_Component(currentExperimentSet)
+        lossFunctionSelection = lossFunc
+        solverSelection = solver
+        factorSelection = factor
+        porosityDict = dict()
+        porosityDict["init"] = porosityInit
+        porosityDict["range"] = [porosityStart, porosityEnd]
+        result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, porosityDict, KDQDict, lossFunctionSelection, factorSelection, solverSelection)
+        self.Save_Result(result, path)
+
 
 
     #Start for testing purposes
