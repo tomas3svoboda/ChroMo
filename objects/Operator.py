@@ -91,6 +91,7 @@ class Operator:
         intervalSelection = input("Print graphs to help select intervals?[Y - yes, N - no]")
         while intervalSelection == "Y":
             porosity = float(input("Select Porosity: "))
+            satur = 0
             if solverSelection == "Nonlin":
                 satur = float(input("Select Saturation Coefficient: "))
             Kstart = float(input("Select Start for K interval: "))
