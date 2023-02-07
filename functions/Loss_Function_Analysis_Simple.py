@@ -22,7 +22,8 @@ def Loss_Function_Analysis_Simple(experimentClusterComp,
                             satur,
                             lossFunctionChoice = "Squares",
                             factor = 1,
-                            solver = "Lin"):
+                            solver = "Lin",
+                            webMode = False):
     experimentCluster = experimentClusterComp.clusters[component]
     x = 0
     resultArr = np.zeros((len(np.arange(xstart, xend, xstep)), len(np.arange(ystart, yend, ystep))))
@@ -44,20 +45,21 @@ def Loss_Function_Analysis_Simple(experimentClusterComp,
     ax.set_ylabel('Henry Constant')
     ax.set_zlabel('Loss Function Value')
     ax.set_title('porosity = ' + str(porosity))
-    xindex = np.argwhere(resultArr == np.min(resultArr))[0][0]
-    yindex = np.argwhere(resultArr == np.min(resultArr))[0][1]
-    print("Minimum:")
-    print("Hentry Constant = " + str(xstart + (xindex*xstep)))
-    print("Dispersion Coeficient = " + str(ystart + (yindex*ystep)))
-    plt.show()
-    save = input("Save the plot?[Y - yes]:")
-    if save == "Y":
-        fileName = input("Enter filename:")
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        ax.plot_surface(X, Y, Z)
-        ax.set_xlabel('Dispersion Coeficient')
-        ax.set_ylabel('Henry Constant')
-        ax.set_zlabel('Loss Function Value')
-        ax.set_title('porosity = ' + str(porosity))
-        plt.savefig(path + "\\" + fileName)
+    if not webMode:
+        xindex = np.argwhere(resultArr == np.min(resultArr))[0][0]
+        yindex = np.argwhere(resultArr == np.min(resultArr))[0][1]
+        print("Minimum:")
+        print("Hentry Constant = " + str(xstart + (xindex*xstep)))
+        print("Dispersion Coeficient = " + str(ystart + (yindex*ystep)))
+        plt.show()
+        save = input("Save the plot?[Y - yes]:")
+        if save == "Y":
+            fileName = input("Enter filename:")
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            ax.plot_surface(X, Y, Z)
+            ax.set_xlabel('Dispersion Coeficient')
+            ax.set_ylabel('Henry Constant')
+            ax.set_zlabel('Loss Function Value')
+            ax.set_title('porosity = ' + str(porosity))
+            plt.savefig(path + "\\" + fileName)

@@ -14,9 +14,7 @@ function formSolverChange(){
     solver = document.getElementById("solver").value
     if(solver == "Nonlin"){
         divs = document.getElementsByClassName("variableParams")
-        console.log(divs)
         for(i=0; i < divs.length; i++){
-            console.log(divs[i].classList[1])
             comp = divs[i].classList[1]
             innerHTML = divs[i].innerHTML
             innerHTML = innerHTML.replaceAll("Henry","Langmuir")
@@ -35,10 +33,25 @@ function formSolverChange(){
     else if(solver == "Lin"){
         divs = document.getElementsByClassName("variableParams")
         for(i=0; i < divs.length; i++){
-            comp = divs[i].classList[1]
             divs[i].innerHTML = divs[i].innerHTML.replaceAll("Langmuir","Henry")
             document.getElementById("saturConst").remove()
-            divs[i].innerHTML = innerHTML
         }
+    }
+}
+
+function formSolverChangeForTest(){
+    solver = document.getElementById("solverTest").value
+    div = document.getElementById("nonLinTest")
+    params = document.getElementById("paramsTest")
+    if(solver == "Nonlin"){
+        div.innerHTML =`
+                <label for="saturationTest">Choose a Saturation:</label>
+                <input type="number" value="saturationTest" id="saturationTest" name="saturationTest" min="0" step="1"><br>
+           `
+        params.innerHTML = params.innerHTML.replaceAll("Henry","Langmuir")
+    }
+    else if(solver == "Lin"){
+        div.innerHTML = ""
+        params.innerHTML = params.innerHTML.replaceAll("Langmuir","Henry")
     }
 }

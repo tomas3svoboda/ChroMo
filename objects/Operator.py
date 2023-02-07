@@ -162,25 +162,8 @@ class Operator:
                 resultDF.to_csv(filePath, index=False, compression=None)
                 chromatogramSelection = input("More Chromatograms?[Y - yes, N - no]")
 
-    def Web_Start(self, experimentSet, path, gauss, retTime, massBal, lossFunc, solver, factor, porosityStart, porosityEnd, porosityInit, KDQDict) :
-        currentExperimentSet = Deep_Copy_ExperimentSet(experimentSet)
-        if gauss:
-            currentExperimentSet = Fit_Gauss(currentExperimentSet)
-            self.Save_Graphs_To_Directory(experimentSet, currentExperimentSet, path)
-            print("Graphs of Gauss Curves Created.")
-        else:
-            print("Fitting Gauss Curve skipped.")
-        if retTime:
-            experimentClusterExp = self.Cluster_By_Experiment(currentExperimentSet)
-            currentExperimentSet = Ret_Time_Cor(currentExperimentSet, experimentClusterExp, True)
-            print("File with Time Corrections Created.")
-        else:
-            print("Retention Time Correction skipped.")
-        if massBal:
-            currentExperimentSet = Mass_Balance_Cor(currentExperimentSet, True)
-            print("File with Mass Corrections Created.")
-        else:
-            print("Mass Balance Correction skipped.")
+    def Web_Start(self, experimentSet, path, gauss, retCorr, massBal, lossFunc, solver, factor, porosityStart, porosityEnd, porosityInit, KDQDict) :
+        currentExperimentSet = self.Preprocess(experimentSet, gauss, retCorr, massBal)
         experimentClusterComp = self.Cluster_By_Component(currentExperimentSet)
         lossFunctionSelection = lossFunc
         solverSelection = solver
@@ -351,6 +334,16 @@ class Operator:
             experimentSet.experiments.append(experiment)
         return experimentSet
 
+    def Preprocess(self, experimentSet, gauss, retCorr, massBal):
+        currExperimentSet = Deep_Copy_ExperimentSet(experimentSet)
+        if gauss:
+            currExperimentSet = Fit_Gauss(currExperimentSet)
+        if retCorr:
+            experimentClusterExp = self.Cluster_By_Experiment(currExperimentSet)
+            currExperimentSet = Ret_Time_Cor(currExperimentSet, experimentClusterExp)
+        if massBal:
+            currExperimentSet = Mass_Balance_Cor(currExperimentSet)
+        return currExperimentSet
     def Cluster_By_Component(self, experimentSet):
         componentDict = {}
         for experiment in experimentSet.experiments:

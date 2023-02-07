@@ -1,3 +1,0 @@
-Experiment: TestExperiment3, Shift: -0.0
-Experiment: TestExperiment4, Shift: 0.00025
-Experiment: TestExperiment7, Shift: 0.0

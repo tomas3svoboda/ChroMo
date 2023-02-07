@@ -30,3 +30,41 @@ body,h1,h2,h3,h4,h5,h6 {
 .control-group.success .fileupload .uneditable-input{color:#468847;border-color:#468847;}
 .control-group.success .fileupload .fileupload-preview{color:#468847;}
 .control-group.success .fileupload .thumbnail{border-color:#468847;}
+
+input[type=checkbox]{
+    box-sizing: border-box;
+
+    width: 24px;
+    height: 24px;
+
+    /* Interaction/Dark/Deep Blue 85 */
+
+    background: #262648;
+    /* Secondary Colors/Deep Blue 30 */
+
+    border: 2px solid #B3B3BE;
+
+    /* Inside auto layout */
+
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+}
+
+input[type=checkbox]:hover{
+/* Interaction/Dark/Bold Green 12 DB */
+
+background: #001F39;
+/* Primary colors/Solids/Bold Green */
+
+border: 2px solid #00FFB9;
+}
+
+input[type=checkbox]:checked{
+/* Interaction/Dark/Bold Green 12 DB */
+
+background: #001F39;
+/* Primary colors/Solids/Bold Green */
+
+border: 2px solid #00FFB9;
+}

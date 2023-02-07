@@ -1,0 +1,74 @@
+{% extends "Layout.html" %}
+{% block title %}Parameter Form{% endblock %}
+{% block navbar %}
+<!-- Navbar -->
+<div class="w3-top">
+  <div class="w3-bar w3-blue w3-card w3-left-align w3-large">
+    <a class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large w3-blue" href="javascript:void(0);" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
+    <a href="{{ url_for('get_main_page') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white">Home</a>
+    <a href="{{ url_for('upload_file_page') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white">Upload</a>
+    <a href="#" class="w3-bar-item w3-button w3-hide-small w3-padding-large  w3-white">Test</a>
+  </div>
+</div>
+{% endblock %}
+{% block body %}
+<!-- First Grid -->
+<div class="w3-row-padding w3-padding-64 w3-container">
+  <div class="w3-content">
+     <h1>Set Test Parameters</h1>
+      <form method=post enctype=multipart/form-data>
+                <label for="gaussTest">Replace with Gauss curve:</label>
+                <input type="checkbox" name="gaussTest" value="True" id="gaussTest"><br>
+                <label for="retCorrTest">Retention time correction:</label>
+                <input type="checkbox" name="retCorrTest" value="True" id="retCorrTest"><br>
+                <label for="massBalTest">Mass balance correction:</label>
+                <input type="checkbox" name="massBalTest" value="True" id="massBalTest"><br>
+                <label for="lossFuncTest">Choose a loss function:</label>
+                <select name="lossFuncTest" id="lossFuncTest">
+                  <option value="Simple">Simple</option>
+                  <option value="Squares">Squares</option>
+                  <option value="LogSimple">LogSimple</option>
+                  <option value="LogSquares">LogSquares</option>
+                </select><br>
+                <label for="solverTest">Choose a solver:</label>
+                <select name="solverTest" id="solverTest" oninput="formSolverChangeForTest()">
+                  <option value="Lin">Linear</option>
+                  <option value="Nonlin">Non linear</option>
+                </select><br>
+                <label for="factorTest">Choose a factor:</label>
+                <select name="factorTest" id="factorTest">
+                  <option value="1">1</option>
+                  <option value="2">1/maximalOutputConc</option>
+                  <option value="3">1/maximalOutputConc^2</option>
+                  <option value="4">1/feedConc</option>
+                  <option value="5">1/feedConc^2</option>
+                  <option value="6">1/feedMass</option>
+                  <option value="7">1/feedMass^2</option>
+                </select><br><br>
+                <label for="porosityTest">Choose a Porosity:</label>
+                <input type="number" value="porosityTest" id="porosityTest" name="porosityTest" min="0.01" max="1" step="0.01"><br>
+                  <div id="nonLinTest"></div>
+                <label for="componentTest">Choose a Component:</label>
+                 <select name="componentTest" id="componentTest">
+                  {% for comp in compList %}
+                     <option value="{{comp}}">{{comp}}</option>
+                  {% endfor%}
+                </select><br>
+                  <div id="paramsTest">
+                      <label for="KStartTest">Choose a Henry constant interval:</label>
+                      [ <input type="number" value="KStartTest" id="KStartTest" name="KStartTest" min="0" step="1">, <input type="number" value="KEndTest" id="KEndTest" name="KEndTest" min="0" step="1"> ]<br>
+                      <label for="KStepTest">Choose a Henry constant step:</label>
+                      <input type="number" value="KStepTest" id="KStepTest" name="KStepTest" min="0" step="1"><br>
+                      <label for="DStartTest">Choose a Dispersion coeficient interval:</label>
+                      [ <input type="number" value="DStartTest" id="DStartTest" name="DStartTest" min="0" step="1">, <input type="number" value="DEndTest" id="DEndTest" name="DEndTest" min="0" step="1"> ]<br>
+                      <label for="DStepTest">Choose a Dispersion coeficient initial guess for {{comp}}:</label>
+                      <input type="number" value="DStepTest" id="DStepTest" name="DStepTest" min="0" step="1"><br>
+                  </div>
+                <input type=submit value=Start>
+      </form>
+      {% if plotUrl %}
+      <img src={{ plotUrl }} alt="Chart" height="480" width="640">
+      {% endif %}
+  </div>
+</div>
+{% endblock %}

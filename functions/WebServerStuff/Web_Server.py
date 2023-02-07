@@ -1,8 +1,9 @@
 import os
 from flask import Flask, flash, request, redirect, url_for, send_file, render_template, json
 from werkzeug.utils import secure_filename
+import matplotlib.pyplot as plt
 from functions.WebServerStuff.Serialize_File_To_JSON import Serialize_File_To_JSON
-import time
+from functions.Loss_Function_Analysis_Simple import Loss_Function_Analysis_Simple
 import random
 from objects.Operator import Operator
 from objects.ExperimentSet import ExperimentSet
@@ -11,12 +12,13 @@ from os import walk
 def Web_Server():
     projects = {}
 
+    plotFileCounter = 1
     experimentSet = ExperimentSet()
     compList = []
     operator = Operator()
 
-    UPLOAD_FOLDER = 'C:\\Users\\Adam\\ChroMo\\docu\\TestUploadFolder'
-    BASE_FOLDER = 'C:\\Users\\Adam\\ChroMo'
+    UPLOAD_FOLDER = 'C:\\Users\\Z004PTSU\\PycharmProjects\\ChroMo\\docu\\TestUploadFolder'
+    BASE_FOLDER = 'C:\\Users\\Z004PTSU\\PycharmProjects\\ChroMo'
     ALLOWED_EXTENSIONS = {'xlsx', 'xls', 'csv'}
 
     api = Flask(__name__)
@@ -41,6 +43,42 @@ def Web_Server():
     def allowed_file(filename):
         return '.' in filename and \
                filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+    @api.route('/projects/test', methods=['GET'])
+    def get_projects_test():
+        nonlocal experimentSet, compList
+        experimentSet = operator.Load_Experiment_Set(UPLOAD_FOLDER)
+        experimentClusterComp = operator.Cluster_By_Component(experimentSet)
+        compList = experimentClusterComp.clusters.keys()
+        return render_template('ParamsTestForm.html', compList = compList)
+
+    @api.route('/projects/test', methods=['POST'])
+    def post_projects_test():
+        nonlocal experimentSet, compList, plotFileCounter
+        gauss = bool(request.form.get("gaussTest"))
+        retCorr = bool(request.form.get("retCorrTest"))
+        massBal = bool(request.form.get("massBalTest"))
+        currExperimentSet = operator.Preprocess(experimentSet, gauss, retCorr, massBal)
+        lossFunc = str(request.form.get("lossFuncTest"))
+        solver = str(request.form.get("solverTest"))
+        factor = int(request.form.get("factorTest"))
+        porosity = float(request.form.get("porosityTest"))
+        saturation = 0
+        if solver == "Nonlin":
+            saturation = float(request.form.get("saturationTest"))
+        comp = str(request.form.get("componentTest"))
+        KStart = float(request.form.get("KStartTest"))
+        KEnd = float(request.form.get("KEndTest"))
+        KStep = float(request.form.get("KStepTest"))
+        DStart = float(request.form.get("DStartTest"))
+        DEnd = float(request.form.get("DEndTest"))
+        DStep = float(request.form.get("DStepTest"))
+        experimentClusterComp = operator.Cluster_By_Component(currExperimentSet)
+        filename = "plot" + str(plotFileCounter) + ".png"
+        plotFileCounter += 1
+        Loss_Function_Analysis_Simple(experimentClusterComp, comp, "", KStart, DStart, KEnd, DEnd, KStep, DStep, porosity, saturation, lossFunc, factor, solver, True)
+        plt.savefig('functions/WebServerStuff/static/images/' + filename)
+        return render_template('ParamsTestForm.html', compList = compList, plotUrl = url_for('static', filename='images/'+filename))
 
     @api.route('/projects/params', methods=['GET'])
     def get_projects_params():
@@ -81,7 +119,6 @@ def Web_Server():
                 tmpDict["qinit"] = 0
                 tmpDict["qrange"] = [0, 0]
             KDQDict[comp] = tmpDict
-        print(experimentSet.metadata.path)
         operator.Web_Start(experimentSet, UPLOAD_FOLDER, gauss, retCorr, massBal, lossFunc, solver, factor,
                            porosityStart, porosityEnd, porosityInit, KDQDict)
         return redirect(url_for('get_projects_params'))
