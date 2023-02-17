@@ -15,6 +15,7 @@ def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, 
     gl.porosityRange = porosityIntervals["range"]
     Lev1_Optim(experimentClustersComp, lossFunction, factor, solver)
     result = dict()
+    result["solver"] = solver
     result["porosity"] = gl.porosity
     result["lv1lossfunctionval"] = gl.lv1LossFunctionVal
     result["compparams"] = gl.compParamDict

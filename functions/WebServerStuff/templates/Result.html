@@ -1,0 +1,28 @@
+<p id="finalPorosity">Final porosity: <div class="boldText">{{result["porosity"]}}</div></p>
+    <p id="finalLossFuncVal">Final loss function value: <div class="boldText">{{result["lv1lossfunctionval"]}}</div></p><br>
+      <table>
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>K</th>
+            <th>D</th>
+            {% if result["solver"] == "Nonlin" %}
+            <th>Q</th>
+            {% endif %}
+            <th>Loss Function Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for comp in compList %}
+          <tr>
+            <td>{{comp}}</td>
+            <td>{{result["compparams"][comp][0]|round(2)}}</td>
+            <td>{{result["compparams"][comp][1]|round(2)}}</td>
+            {% if result["solver"] == "Nonlin" %}
+            <td>{{result["compparams"][comp][2]|round(2)}}</td>
+            {% endif %}
+            <td>{{result["lv2lossfunctionvals"][comp]|round(2)}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>

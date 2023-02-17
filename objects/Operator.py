@@ -18,6 +18,7 @@ from functions.Mass_Balance_Cor import Mass_Balance_Cor
 from functions.Select_Iso_Exp import Select_Iso_Exp
 from functions.Loss_Function_Analysis import Loss_Function_Analysis
 from functions.Loss_Function_Analysis_Simple import Loss_Function_Analysis_Simple
+from functions.Model_Analysis import Model_Analysis
 from functions.Solver_Analysis import Solver_Analysis
 from functions.Loss_Function_Porosity_Analysis import Loss_Function_Porosity_Analysis
 from functions.Iso_Decision import Iso_Decision
@@ -101,8 +102,33 @@ class Operator:
             Dend = float(input("Select End for D interval: "))
             Dstep = float(input("Select Step for D interval: "))
             comp = input("Select Component [" + compSelectString + "]: ")
-            Loss_Function_Analysis_Simple(experimentClusterComp, comp, path, Kstart, Dstart, Kend, Dend, Kstep, Dstep, porosity, satur, lossFunctionSelection, factorSelection, solverSelection)
+            next(Loss_Function_Analysis_Simple(experimentClusterComp, comp, path, Kstart, Dstart, Kend, Dend, Kstep, Dstep, porosity, satur, lossFunctionSelection, factorSelection, solverSelection))
             intervalSelection = input("Continue with graphs?[Y - yes, N - no]")
+
+
+        modelAnalysisSelection = input("Print solver graph?[Y - yes, N - no]")
+        while modelAnalysisSelection == "Y":
+            component = input("Select Component [" + compSelectString + "]: ")
+            experimentString = "Select Experiment:\n"
+            index = 0
+            for comp in experimentClusterComp.clusters[component]:
+                index += 1
+                head, tail = os.path.split(comp.experiment.metadata.path)
+                experimentString += str(index) + " - " + tail + "\n"
+            experimentSelection = int(input(experimentString))
+            paramSelection = "Y"
+            while paramSelection == "Y":
+                porosity = float(input("Select Porosity: "))
+                satur = 0
+                if solverSelection == "Nonlin":
+                    satur = float(input("Select Saturation Coefficient: "))
+                K = float(input("Select K: "))
+                D = float(input("Select D: "))
+                params = [porosity, K, D, satur]
+                Model_Analysis(experimentClusterComp.clusters[component][experimentSelection-1], solverSelection, params)
+                paramSelection = input("Try different parameters?[Y - yes, N - no]")
+            modelAnalysisSelection = input("Continue with graphs?[Y - yes, N - no]")
+
         porosityDict = dict()
         KDQDict = dict()
         porosityStart = float(input("Select Start for Porosity interval: "))
@@ -124,6 +150,9 @@ class Operator:
                 QEnd = float(input("Select End for Q interval for component " + key + ": "))
                 tmpDict["qinit"] = float(input("Select Initial guess for Q interval for component " + key + ": "))
                 tmpDict["qrange"] = [QStart, QEnd]
+            else:
+                tmpDict["qinit"] = 0
+                tmpDict["qrange"] = [0, 0]
             KDQDict[key] = tmpDict
         result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, porosityDict, KDQDict, lossFunctionSelection, factorSelection, solverSelection)
         self.Save_Result(result, path)
@@ -149,13 +178,16 @@ class Operator:
                                                 str(compObj.experiment.experimentCondition.flowRate) + \
                                                 "\n"
                 conditionSelection = int(input(conditionSelectionString)) - 1
+                saturVal = 0
+                if solverSelection == "Nonlin":
+                    saturVal = result["compparams"][comp][2]
                 solverOutput = Solver_Choice(solverSelection,
-                                             [result["porosity"], result["compparams"][comp][0], result["compparams"][comp][1], result["compparams"][comp][2]],
+                                             [result["porosity"], result["compparams"][comp][0], result["compparams"][comp][1], saturVal],
                                              experimentClusterComp.clusters[comp][conditionSelection])[:, -1]
                 df = experimentClusterComp.clusters[comp][conditionSelection].concentrationTime
                 minTime = df.iat[0, 0]
                 maxTime = df.iat[-1, 0]
-                time = np.linspace(minTime, maxTime, 2000)
+                time = np.linspace(minTime, maxTime, 500)
                 resultDF = pd.DataFrame({'time': time, 'concentration': solverOutput})
                 fileName = "chromatogram_" + comp + "_" + str(conditionSelection)
                 filePath = dirPath + "\\" + fileName + ".csv"
@@ -172,7 +204,7 @@ class Operator:
         porosityDict["init"] = porosityInit
         porosityDict["range"] = [porosityStart, porosityEnd]
         result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, porosityDict, KDQDict, lossFunctionSelection, factorSelection, solverSelection)
-        self.Save_Result(result, path)
+        return result
 
 
 
@@ -243,6 +275,8 @@ class Operator:
             file.write("For component " + comp + ":\n")
             file.write("    Final K value: " + str(result["compparams"][comp][0]) + "\n")
             file.write("    Final D value: " + str(result["compparams"][comp][1]) + "\n")
+            if len(result["compparams"][comp]) > 2 and result["compparams"][comp][2] != 0:
+                file.write("    Final Q value: " + str(result["compparams"][comp][2]) + "\n")
             file.write("    Final Lv2 Loss Function Value: " + str(result["lv2lossfunctionvals"][comp]) + "\n\n")
         file.close()
 

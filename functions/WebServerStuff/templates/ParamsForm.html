@@ -1,23 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<title>W3.CSS Template</title>
-  {% for message in get_flashed_messages() %}
-    <div class="flash">{{ message }}</div>
-  {% endfor %}
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="{{ url_for('static', filename='CSS/index.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='CSS/popup.css') }}">
-<script src="{{ url_for('static', filename='Javascript/index.js') }}"></script>
-<script src="{{ url_for('static', filename='Javascript/popup.js') }}"></script>
-</head>
-<body>
-
+{% extends "Layout.html" %}
+{% block title %}Parameter Form{% endblock %}
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/form.css') }}">
+{% endblock %}
+{% block navbar %}
 <!-- Navbar -->
 <div class="w3-top">
   <div class="w3-bar w3-blue w3-card w3-left-align w3-large">
@@ -25,81 +12,105 @@
     <a href="{{ url_for('get_main_page') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white">Home</a>
     <a href="{{ url_for('upload_file_page') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white">Upload</a>
     <a href="#" class="w3-bar-item w3-button w3-hide-small w3-padding-large  w3-white">Parameters</a>
-  </div>
-
-  <!-- Navbar on small screens -->
-  <div id="navDemo" class="w3-bar-block w3-white w3-hide w3-hide-large w3-hide-medium w3-large">
-    <a href="#" class="w3-bar-item w3-button w3-padding-large">Upload</a>
+    {% if user %}
+    <div class="w3-bar-item w3-button w3-hide-small w3-padding-large  w3-white bar-right">{{user}}</div>
+    <a href="{{ url_for('logout') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white bar-right">Logout</a>
+    {% endif %}
   </div>
 </div>
-
+{% endblock %}
+{% block body %}
 <!-- First Grid -->
 <div class="w3-row-padding w3-padding-64 w3-container">
   <div class="w3-content">
      <h1>Set Experiment Parameters</h1>
-     <form method=post enctype=multipart/form-data>
-        <label for="gauss">Replace with Gauss curve:</label>
-        <input type="checkbox" name="gauss" value="True" id="gauss"><br>
-        <label for="retCorr">Retention time correction:</label>
-        <input type="checkbox" name="retCorr" value="True" id="retCorr"><br>
-        <label for="massBal">Mass balance correction:</label>
-        <input type="checkbox" name="massBal" value="True" id="massBal"><br>
-        <label for="lossFunc">Choose a loss function:</label>
+     <form method=post enctype=multipart/form-data class="form-style-1">
+        <label for="expName">Experiment name <div class="required">*</div></label>
+        <input type="text" name="expName" id="expName" {% if formInfo and formInfo['expName'] %}value="{{formInfo['expName']}}"{% endif %}><br>
+        <label for="gauss">Replace with Gauss curve <div class="required">*</div></label>
+        <input type="checkbox" name="gauss" value="True" id="gauss" {% if formInfo and formInfo['gauss'] == True %}checked{% endif %}><br>
+        <label for="retCorr">Retention time correction <div class="required">*</div></label>
+        <input type="checkbox" name="retCorr" value="True" id="retCorr" {% if formInfo and formInfo['retCorr'] == True %}checked{% endif %}><br>
+        <label for="massBal">Mass balance correction <div class="required">*</div></label>
+        <input type="checkbox" name="massBal" value="True" id="massBal" {% if formInfo and formInfo['massBal'] == True %}checked{% endif %}><br>
+        <label for="lossFunc">Choose a loss function <div class="required">*</div></label>
         <select name="lossFunc" id="lossFunc">
-          <option value="Simple">Simple</option>
-          <option value="Squares">Squares</option>
-          <option value="LogSimple">LogSimple</option>
-          <option value="LogSquares">LogSquares</option>
+          <option value="Simple" {% if formInfo and formInfo['lossFunc'] == "Simple" %}selected{% endif %}>Simple</option>
+          <option value="Squares" {% if formInfo and formInfo['lossFunc'] == "Squares" %}selected{% endif %}>Squares</option>
+          <option value="LogSimple" {% if formInfo and formInfo['lossFunc'] == "LogSimple" %}selected{% endif %}>LogSimple</option>
+          <option value="LogSquares" {% if formInfo and formInfo['lossFunc'] == "LogSquares" %}selected{% endif %}>LogSquares</option>
         </select><br>
-        <label for="solver">Choose a solver:</label>
+        <label for="solver">Choose a solver <div class="required">*</div></label>
         <select name="solver" id="solver" oninput="formSolverChange()">
-          <option value="Lin">Linear</option>
-          <option value="Nonlin">Non linear</option>
+          <option value="Lin" {% if formInfo and formInfo['solver'] == "Lin" %}selected{% endif %}>Linear</option>
+          <option value="Nonlin" {% if formInfo and formInfo['solver'] == "Nonlin" %}selected{% endif %}>Non linear</option>
         </select><br>
-        <label for="factor">Choose a factor:</label>
+        <label for="factor">Choose a factor <div class="required">*</div></label>
         <select name="factor" id="factor">
-          <option value="1">1</option>
-          <option value="2">1/maximalOutputConc</option>
-          <option value="3">1/maximalOutputConc^2</option>
-          <option value="4">1/feedConc</option>
-          <option value="5">1/feedConc^2</option>
-          <option value="6">1/feedMass</option>
-          <option value="7">1/feedMass^2</option>
+          <option value="1" {% if formInfo and formInfo['factor'] == 1 %}selected{% endif %}>1</option>
+          <option value="2" {% if formInfo and formInfo['factor'] == 2 %}selected{% endif %}>1/maximalOutputConc</option>
+          <option value="3" {% if formInfo and formInfo['factor'] == 3 %}selected{% endif %}>1/maximalOutputConc^2</option>
+          <option value="4" {% if formInfo and formInfo['factor'] == 4 %}selected{% endif %}>1/feedConc</option>
+          <option value="5" {% if formInfo and formInfo['factor'] == 5 %}selected{% endif %}>1/feedConc^2</option>
+          <option value="6" {% if formInfo and formInfo['factor'] == 6 %}selected{% endif %}>1/feedMass</option>
+          <option value="7" {% if formInfo and formInfo['factor'] == 7 %}selected{% endif %}>1/feedMass^2</option>
         </select><br><br>
-        <label for="porosityStart">Choose a porosity interval:</label>
-        [ <input type="number" value="porosityStart" id="porosityStart" name="porosityStart" min="0.01" max="1" step="0.01">, <input type="number" value="porosityEnd" id="porosityEnd" name="porosityEnd" min="0.01" max="1" step="0.01"> ]<br>
-        <label for="porosityInit">Choose a initial guess for Porosity:</label>
-        <input type="number" value="porosityInit" id="porosityInit" name="porosityInit" min="0.01" max="1" step="0.01"}><br><br>
+        <label for="porosityStart">Choose a porosity interval <div class="required">*</div></label>
+        <input type="number" value="porosityStart" id="porosityStart" name="porosityStart" min="0.01" max="1" step="0.01" required> - <input type="number" value="porosityEnd" id="porosityEnd" name="porosityEnd" min="0.01" max="1" step="0.01" required><br>
+        <label for="porosityInit">Choose a initial guess for Porosity <div class="required">*</div></label>
+        <input type="number" value="porosityInit" id="porosityInit" name="porosityInit" min="0.01" max="1" step="0.01" required><br><br>
          {% for comp in compList %}
          <div class="variableParams {{comp}}">
-            <label for="{{comp}}KStart">Choose a Henry constant interval for {{comp}}:</label>
-            [ <input type="number" value="{{comp}}KStart" id="{{comp}}KStart" name="{{comp}}KStart" min="0" step="1">, <input type="number" value="{{comp}}KEnd" id="{{comp}}KEnd" name="{{comp}}KEnd" min="0" step="1"> ]<br>
-            <label for="{{comp}}KInit">Choose a Henry constant initial guess for {{comp}}:</label>
-            <input type="number" value="{{comp}}KInit" id="{{comp}}KInit" name="{{comp}}KInit" min="0" step="1"><br>
-            <label for="{{comp}}DStart">Choose a Dispersion coeficient interval for {{comp}}:</label>
-            [ <input type="number" value="{{comp}}DStart" id="{{comp}}DStart" name="{{comp}}DStart" min="0" step="1">, <input type="number" value="{{comp}}DEnd" id="{{comp}}DEnd" name="{{comp}}DEnd" min="0" step="1"> ]<br>
-            <label for="{{comp}}DInit">Choose a Dispersion coeficient initial guess for {{comp}}:</label>
-            <input type="number" value="{{comp}}DInit" id="{{comp}}DInit" name="{{comp}}DInit" min="0" step="1"><br>
+            <label for="{{comp}}KStart">Choose a Henry constant interval for {{comp}} <div class="required">*</div></label>
+            <input type="number" value="{{comp}}KStart" id="{{comp}}KStart" name="{{comp}}KStart" min="0" step="1" required> - <input type="number" value="{{comp}}KEnd" id="{{comp}}KEnd" name="{{comp}}KEnd" min="0" step="1" required><br>
+            <label for="{{comp}}KInit">Choose a Henry constant initial guess for {{comp}} <div class="required">*</div></label>
+            <input type="number" value="{{comp}}KInit" id="{{comp}}KInit" name="{{comp}}KInit" min="0" step="1" required><br>
+            <label for="{{comp}}DStart">Choose a Dispersion coeficient interval for {{comp}} <div class="required">*</div></label>
+            <input type="number" value="{{comp}}DStart" id="{{comp}}DStart" name="{{comp}}DStart" min="0" step="1" required> - <input type="number" value="{{comp}}DEnd" id="{{comp}}DEnd" name="{{comp}}DEnd" min="0" step="1" required><br>
+            <label for="{{comp}}DInit">Choose a Dispersion coeficient initial guess for {{comp}} <div class="required">*</div></label>
+            <input type="number" value="{{comp}}DInit" id="{{comp}}DInit" name="{{comp}}DInit" min="0" step="1" required><br>
+            <div class="nonLinParam">
+                <label for="{{comp}}QStart">Choose a Saturation coeficient interval for {{comp}}:</label>
+                <input type="number" value="{{comp}}QStart" id="{{comp}}QStart" name="{{comp}}QStart" min="0" step="1" required> - <input type="number" value="{{comp}}QEnd" id="{{comp}}QEnd" name="{{comp}}QEnd" min="0" step="1" required><br>
+                <label for="{{comp}}QInit">Choose a Saturation coeficient initial guess for {{comp}}:</label>
+                <input type="number" value="{{comp}}QInit" id="{{comp}}QInit" name="{{comp}}QInit" min="0" step="1" required><br>
+            </div>
         </div><br>
         {% endfor %}
 
         <input class="w3-button w3-black w3-padding-large w3-large w3-margin-top" type=submit value=Start>
     </form>
-    <a href="{{ url_for('get_projects_test') }}" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Test</a>
   </div>
 </div>
-
-<!-- Footer -->
-<footer class="w3-container w3-padding-64 w3-center w3-opacity">
-  <div class="w3-xlarge w3-padding-32">
-    <i class="fa fa-facebook-official w3-hover-opacity"></i>
-    <i class="fa fa-instagram w3-hover-opacity"></i>
-    <i class="fa fa-snapchat w3-hover-opacity"></i>
-    <i class="fa fa-pinterest-p w3-hover-opacity"></i>
-    <i class="fa fa-twitter w3-hover-opacity"></i>
-    <i class="fa fa-linkedin w3-hover-opacity"></i>
- </div>
- <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
-</footer>
-</body>
-</html>
+<script type="text/javascript">
+    formSolverChange()
+    {% if formInfo %}
+        {% if formInfo['porosity'] %}
+            document.getElementById("porosityInit").value = {{formInfo['porosity']}}
+        {% endif %}
+        {% for comp in compList %}
+                {% if formInfo[comp + 'KStart'] %}
+                    document.getElementById("{{comp}}KStart").value = {{formInfo[comp + 'KStart']}}
+                {% endif %}
+                {% if formInfo[comp + 'KEnd'] %}
+                    document.getElementById("{{comp}}KEnd").value = {{formInfo[comp + 'KEnd']}}
+                {% endif %}
+                {% if formInfo[comp + 'DStart'] %}
+                    document.getElementById("{{comp}}DStart").value = {{formInfo[comp + 'DStart']}}
+                {% endif %}
+                {% if formInfo[comp + 'DEnd'] %}
+                    document.getElementById("{{comp}}DEnd").value = {{formInfo[comp + 'DEnd']}}
+                {% endif %}
+                {% if formInfo['saturation'] %}
+                    document.getElementById("{{comp}}QInit").value = {{formInfo['saturation']}}
+                {% endif %}
+                {% if formInfo[comp + 'K'] %}
+                    document.getElementById("{{comp}}KInit").value = {{formInfo[comp + 'K']}}
+                {% endif %}
+                {% if formInfo[comp + 'D'] %}
+                    document.getElementById("{{comp}}DInit").value = {{formInfo[comp + 'D']}}
+                {% endif %}
+        {% endfor %}
+    {% endif %}
+</script>
+{% endblock %}
