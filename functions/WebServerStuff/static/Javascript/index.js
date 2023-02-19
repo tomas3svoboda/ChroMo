@@ -58,13 +58,15 @@ function formSolverChangeForTest(){
     }
 }
 
-function formCompChangeForTest2(){
-    comp = document.getElementById("componentTest").value
-    divs = document.getElementsByClassName("expListDiv")
+function formCompChangeForTest2(c = "componentTest", d = "expListDiv"){
+    comp = document.getElementById(c).value
+    divs = document.getElementsByClassName(d)
     for(i=0; i<divs.length; i++){
         divs[i].style.display = "none"
     }
-    div = document.getElementById("expListDiv" + comp).style.display = "block"
+    if( comp != "all" ){
+        div = document.getElementById(d + comp).style.display = "block"
+    }
 }
 
 function sleep(ms) {
@@ -78,6 +80,9 @@ async function showGraph(){
     let data = new FormData(form)
     for (const key of data.keys()){
         if(data.get(key) == ""){
+            if(key == "retCorrThreshold" && !(data.get("retCorrTest") || data.get("retCorr"))){
+                continue
+            }
             window.alert("Field " + key + " not filled!")
             return
         }
@@ -87,16 +92,16 @@ async function showGraph(){
         "body": data,
     })
     let path = await resp.text()
-    let content = "0%"
+    let content = "Estimated time remaining: "
     do{
         await sleep(500)
         let resp2 = await fetch(path)
         content = await resp2.text()
         document.getElementById("imgdiv").innerHTML = content
-        if(!content.endsWith("%"))
+        if(!content.startsWith("Estimated time remaining: "))
             document.getElementById("newAngleButton").style.display = "inline-block"
             document.getElementById("downloadMatrixButton").style.display = "inline-block"
-    }while(content.endsWith("%"))
+    }while(content.startsWith("Estimated time remaining: "))
 }
 
 async function newAngle(){
@@ -106,16 +111,21 @@ async function newAngle(){
     document.getElementById("imgdiv").innerHTML = content
 }
 
-async function showGraph2(){
-    let form = document.getElementById("mainform")
+async function showGraph2(f = "mainform", aurl = "", i = "imgdiv", showEl = ""){
+    if(showEl)
+        document.getElementById(showEl).style.display = "none"
+    let form = document.getElementById(f)
     let data = new FormData(form)
     for (const key of data.keys()){
         if(data.get(key) == ""){
+            if(key == "retCorrThreshold" && !(data.get("retCorrTest") || data.get("retCorr"))){
+                continue
+            }
             window.alert("Field " + key + " not filled!")
             return
         }
     }
-    let resp = await fetch(window.location.href, {
+    let resp = await fetch(window.location.href + aurl, {
         "method": "POST",
         "body": data,
     })
@@ -124,9 +134,12 @@ async function showGraph2(){
         await sleep(500)
         let resp2 = await fetch(path)
         let content = await resp2.text()
-        document.getElementById("imgdiv").innerHTML = content
-        if(content != "")
+        document.getElementById(i).innerHTML = content
+        if(content != ""){
+            if(showEl)
+                document.getElementById(showEl).style.display = "inline-block"
             break
+        }
     }
 }
 
@@ -145,19 +158,48 @@ async function getResult(){
     while(1){
         let resp = await fetch(window.location.href + "/progress")
         let result = await resp.text()
-        if(result != "-"){
-            document.getElementById("resultDiv").innerHTML = result
+        document.getElementById("resultDiv").innerHTML = result
+        if(!result.startsWith("Time elapsed: ")){
+            document.location.reload()
             break
         }
-        document.getElementById("dotsDiv").innerHTML += "."
-        if(document.getElementById("dotsDiv").innerHTML.length > 3)
-            document.getElementById("dotsDiv").innerHTML = "."
         await sleep(500)
     }
 }
 
-function downloadMatrix(){
-    let url = document.getElementById("graphImg").getAttribute('durl')
+function downloadMatrix(picId = "graphImg"){
+    let url = document.getElementById(picId).getAttribute('durl')
     document.getElementById('invis_iframe').src = url;
+}
+
+function retTimeTresholdInput(){
+    let div = document.getElementById("retCorrTresholdDiv")
+    let check = document.getElementById("retCorrTest")
+    if(check == null)
+        check = document.getElementById("retCorr")
+    let val = check.checked
+    if(val){
+        div.style.display = "block"
+    }
+    else{
+        div.style.display = "none"
+    }
+}
+
+async function showGraph3(f = "mainform", aurl = "/prograph", i = "imgdiv"){
+    let form = document.getElementById(f)
+    let data = new FormData(form)
+    for (const key of data.keys()){
+        if(data.get(key) == ""){
+            window.alert("Field " + key + " not filled!")
+            return
+        }
+    }
+    let resp = await fetch(window.location.href + aurl, {
+        "method": "POST",
+        "body": data,
+    })
+    let content = await resp.text()
+    document.getElementById(i).innerHTML = content
 }
 

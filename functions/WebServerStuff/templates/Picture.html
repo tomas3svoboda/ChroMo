@@ -1,1 +1,1 @@
-<img src="{{ pictureURL }}" alt={{ alt }} height="{{ height }}" width="{{ width }}" id="graphImg" {% if newAngleUrl %}url="{{newAngleUrl}}"{% endif%} {% if downloadUrl %}durl="{{downloadUrl}}"{% endif%}>
+<img src="{{ pictureURL }}" alt={{ alt }} height="{{ height }}" width="{{ width }}" id={% if picId %}"{{picId}}"{% else %}"graphImg"{% endif%} {% if newAngleUrl %}url="{{newAngleUrl}}"{% endif%} {% if downloadUrl %}durl="{{downloadUrl}}"{% endif%}>

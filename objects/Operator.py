@@ -61,9 +61,9 @@ class Operator:
             print("Fitting Gauss Curve skipped.")
         retTimeSelection = input("Correct for retention time?[Y - yes, N - no]")
         if retTimeSelection == "Y":
-            #experimentClusterCompCond = self.Cluster_By_Condition2(currentExperimentSet)
+            retTimeThresholdSelection = float(input("Select zero threshold for retention time correction."))
             experimentClusterExp = self.Cluster_By_Experiment(currentExperimentSet)
-            currentExperimentSet = Ret_Time_Cor(currentExperimentSet, experimentClusterExp, True)
+            currentExperimentSet = Ret_Time_Cor(currentExperimentSet, experimentClusterExp, retTimeThresholdSelection, True)
             print("File with Time Corrections Created.")
         else:
             print("Retention Time Correction skipped.")
@@ -194,8 +194,8 @@ class Operator:
                 resultDF.to_csv(filePath, index=False, compression=None)
                 chromatogramSelection = input("More Chromatograms?[Y - yes, N - no]")
 
-    def Web_Start(self, experimentSet, path, gauss, retCorr, massBal, lossFunc, solver, factor, porosityStart, porosityEnd, porosityInit, KDQDict) :
-        currentExperimentSet = self.Preprocess(experimentSet, gauss, retCorr, massBal)
+    def Web_Start(self, experimentSet, path, gauss, retCorr, massBal, lossFunc, solver, factor, porosityStart, porosityEnd, porosityInit, KDQDict, optimId, retThreshold=0) :
+        currentExperimentSet = self.Preprocess(experimentSet, gauss, retCorr, massBal, retThreshold)
         experimentClusterComp = self.Cluster_By_Component(currentExperimentSet)
         lossFunctionSelection = lossFunc
         solverSelection = solver
@@ -203,7 +203,7 @@ class Operator:
         porosityDict = dict()
         porosityDict["init"] = porosityInit
         porosityDict["range"] = [porosityStart, porosityEnd]
-        result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, porosityDict, KDQDict, lossFunctionSelection, factorSelection, solverSelection)
+        result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, porosityDict, KDQDict, lossFunctionSelection, factorSelection, solverSelection, optimId)
         return result
 
 
@@ -368,16 +368,17 @@ class Operator:
             experimentSet.experiments.append(experiment)
         return experimentSet
 
-    def Preprocess(self, experimentSet, gauss, retCorr, massBal):
+    def Preprocess(self, experimentSet, gauss, retCorr, massBal, retThreshold = 0):
         currExperimentSet = Deep_Copy_ExperimentSet(experimentSet)
         if gauss:
             currExperimentSet = Fit_Gauss(currExperimentSet)
         if retCorr:
             experimentClusterExp = self.Cluster_By_Experiment(currExperimentSet)
-            currExperimentSet = Ret_Time_Cor(currExperimentSet, experimentClusterExp)
+            currExperimentSet = Ret_Time_Cor(currExperimentSet, experimentClusterExp, threshold=retThreshold)
         if massBal:
             currExperimentSet = Mass_Balance_Cor(currExperimentSet)
         return currExperimentSet
+
     def Cluster_By_Component(self, experimentSet):
         componentDict = {}
         for experiment in experimentSet.experiments:

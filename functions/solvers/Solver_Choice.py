@@ -10,7 +10,6 @@ Other choices will raise an exception
 IN PROGRESS - needs add more solvers
 '''
 def Solver_Choice(choice, params, experimentComp):
-    res = 0
     if choice == 'Lin':
         res = Lin_Solver(experimentComp.experiment.experimentCondition.flowRate,
                             experimentComp.experiment.experimentCondition.columnLength,

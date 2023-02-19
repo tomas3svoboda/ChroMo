@@ -30,7 +30,11 @@
         <label for="gauss">Replace with Gauss curve <div class="required">*</div></label>
         <input type="checkbox" name="gauss" value="True" id="gauss" {% if formInfo and formInfo['gauss'] == True %}checked{% endif %}><br>
         <label for="retCorr">Retention time correction <div class="required">*</div></label>
-        <input type="checkbox" name="retCorr" value="True" id="retCorr" {% if formInfo and formInfo['retCorr'] == True %}checked{% endif %}><br>
+        <input type="checkbox" name="retCorr" value="True" id="retCorr" oninput="retTimeTresholdInput()" {% if formInfo and formInfo['retCorr'] == True %}checked{% endif %}>
+         <div id="retCorrTresholdDiv" style="display: none;">
+            <label for="retCorrThreshold">Retention time zero threshold<div class="required">*</div></label>
+            <input type="number" id="retCorrThreshold" name="retCorrThreshold" step="0.000001">
+         </div><br>
         <label for="massBal">Mass balance correction <div class="required">*</div></label>
         <input type="checkbox" name="massBal" value="True" id="massBal" {% if formInfo and formInfo['massBal'] == True %}checked{% endif %}><br>
         <label for="lossFunc">Choose a loss function <div class="required">*</div></label>
@@ -56,24 +60,24 @@
           <option value="7" {% if formInfo and formInfo['factor'] == 7 %}selected{% endif %}>1/feedMass^2</option>
         </select><br><br>
         <label for="porosityStart">Choose a porosity interval <div class="required">*</div></label>
-        <input type="number" value="porosityStart" id="porosityStart" name="porosityStart" min="0.01" max="1" step="0.01" required> - <input type="number" value="porosityEnd" id="porosityEnd" name="porosityEnd" min="0.01" max="1" step="0.01" required><br>
+        <input type="number" id="porosityStart" name="porosityStart" min="0.01" max="1" step="0.01" required> - <input type="number" id="porosityEnd" name="porosityEnd" min="0.01" max="1" step="0.01" required><br>
         <label for="porosityInit">Choose a initial guess for Porosity <div class="required">*</div></label>
-        <input type="number" value="porosityInit" id="porosityInit" name="porosityInit" min="0.01" max="1" step="0.01" required><br><br>
+        <input type="number" id="porosityInit" name="porosityInit" min="0.01" max="1" step="0.01" required><br><br>
          {% for comp in compList %}
          <div class="variableParams {{comp}}">
             <label for="{{comp}}KStart">Choose a Henry constant interval for {{comp}} <div class="required">*</div></label>
-            <input type="number" value="{{comp}}KStart" id="{{comp}}KStart" name="{{comp}}KStart" min="0" step="1" required> - <input type="number" value="{{comp}}KEnd" id="{{comp}}KEnd" name="{{comp}}KEnd" min="0" step="1" required><br>
+            <input type="number" id="{{comp}}KStart" name="{{comp}}KStart" min="0" step="1" required> - <input type="number" id="{{comp}}KEnd" name="{{comp}}KEnd" min="0" step="1" required><br>
             <label for="{{comp}}KInit">Choose a Henry constant initial guess for {{comp}} <div class="required">*</div></label>
-            <input type="number" value="{{comp}}KInit" id="{{comp}}KInit" name="{{comp}}KInit" min="0" step="1" required><br>
+            <input type="number" id="{{comp}}KInit" name="{{comp}}KInit" min="0" step="1" required><br>
             <label for="{{comp}}DStart">Choose a Dispersion coeficient interval for {{comp}} <div class="required">*</div></label>
-            <input type="number" value="{{comp}}DStart" id="{{comp}}DStart" name="{{comp}}DStart" min="0" step="1" required> - <input type="number" value="{{comp}}DEnd" id="{{comp}}DEnd" name="{{comp}}DEnd" min="0" step="1" required><br>
+            <input type="number" id="{{comp}}DStart" name="{{comp}}DStart" min="0" step="1" required> - <input type="number" id="{{comp}}DEnd" name="{{comp}}DEnd" min="0" step="1" required><br>
             <label for="{{comp}}DInit">Choose a Dispersion coeficient initial guess for {{comp}} <div class="required">*</div></label>
-            <input type="number" value="{{comp}}DInit" id="{{comp}}DInit" name="{{comp}}DInit" min="0" step="1" required><br>
+            <input type="number" id="{{comp}}DInit" name="{{comp}}DInit" min="0" step="1" required><br>
             <div class="nonLinParam">
                 <label for="{{comp}}QStart">Choose a Saturation coeficient interval for {{comp}}:</label>
-                <input type="number" value="{{comp}}QStart" id="{{comp}}QStart" name="{{comp}}QStart" min="0" step="1" required> - <input type="number" value="{{comp}}QEnd" id="{{comp}}QEnd" name="{{comp}}QEnd" min="0" step="1" required><br>
+                <input type="number" id="{{comp}}QStart" name="{{comp}}QStart" min="0" step="1" required> - <input type="number" id="{{comp}}QEnd" name="{{comp}}QEnd" min="0" step="1" required><br>
                 <label for="{{comp}}QInit">Choose a Saturation coeficient initial guess for {{comp}}:</label>
-                <input type="number" value="{{comp}}QInit" id="{{comp}}QInit" name="{{comp}}QInit" min="0" step="1" required><br>
+                <input type="number" id="{{comp}}QInit" name="{{comp}}QInit" min="0" step="1" required><br>
             </div>
         </div><br>
         {% endfor %}
@@ -84,11 +88,15 @@
 </div>
 <script type="text/javascript">
     formSolverChange()
+    retTimeTresholdInput()
     {% if formInfo %}
         {% if formInfo['porosity'] %}
             document.getElementById("porosityInit").value = {{formInfo['porosity']}}
         {% endif %}
         {% for comp in compList %}
+        {% if formInfo['retCorrThreshold'] %}
+            document.getElementById("retCorrThreshold").value = {{formInfo['retCorrThreshold']}}
+        {% endif %}
                 {% if formInfo[comp + 'KStart'] %}
                     document.getElementById("{{comp}}KStart").value = {{formInfo[comp + 'KStart']}}
                 {% endif %}

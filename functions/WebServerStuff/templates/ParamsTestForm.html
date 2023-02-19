@@ -28,7 +28,11 @@
                 <label for="gaussTest">Replace with Gauss curve <div class="required">*</div></label>
                 <input type="checkbox" name="gaussTest" value="True" id="gaussTest" {% if formInfo and formInfo['gauss'] == True %}checked{% endif %}><br>
                 <label for="retCorrTest">Retention time correction <div class="required">*</div></label>
-                <input type="checkbox" name="retCorrTest" value="True" id="retCorrTest" {% if formInfo and formInfo['retCorr'] == True %}checked{% endif %}><br>
+                <input type="checkbox" name="retCorrTest" value="True" id="retCorrTest" oninput="retTimeTresholdInput()" {% if formInfo and formInfo['retCorr'] == True %}checked{% endif %}>
+                <div id="retCorrTresholdDiv" style="display: none;">
+                    <label for="retCorrThreshold">Retention time zero threshold<div class="required">*</div></label>
+                    <input type="number" id="retCorrThreshold" name="retCorrThreshold" step="0.000001">
+                </div><br>
                 <label for="massBalTest">Mass balance correction <div class="required">*</div></label>
                 <input type="checkbox" name="massBalTest" value="True" id="massBalTest" {% if formInfo and formInfo['massBal'] == True %}checked{% endif %}><br>
                 <label for="lossFuncTest">Choose a loss function <div class="required">*</div></label>
@@ -54,7 +58,7 @@
                   <option value="7" {% if formInfo and formInfo['factor'] == 7 %}selected{% endif %}>1/feedMass^2</option>
                 </select><br><br>
                 <label for="porosityTest">Choose a Porosity <div class="required">*</div></label>
-                <input type="number" value="porosityTest" id="porosityTest" name="porosityTest" min="0.01" max="1" step="0.01"><br>
+                <input type="number" id="porosityTest" name="porosityTest" min="0.01" max="1" step="0.01"><br>
                   <div id="nonLinTest"></div>
                 <label for="componentTest">Choose a Component <div class="required">*</div></label>
                  <select name="componentTest" id="componentTest">
@@ -64,13 +68,13 @@
                 </select><br>
                   <div id="paramsTest">
                       <label for="KStartTest">Choose a Henry constant interval <div class="required">*</div></label>
-                      <input type="number" value="KStartTest" id="KStartTest" name="KStartTest" min="0" step="1"> - <input type="number" value="KEndTest" id="KEndTest" name="KEndTest" min="0" step="1"><br>
+                      <input type="number" id="KStartTest" name="KStartTest" min="0" step="1"> - <input type="number" id="KEndTest" name="KEndTest" min="0" step="1"><br>
                       <label for="KStepTest">Choose a Henry constant step <div class="required">*</div></label>
-                      <input type="number" value="KStepTest" id="KStepTest" name="KStepTest" min="0" step="1"><br>
+                      <input type="number" id="KStepTest" name="KStepTest" min="0" step="1"><br>
                       <label for="DStartTest">Choose a Dispersion coeficient interval <div class="required">*</div></label>
-                      <input type="number" value="DStartTest" id="DStartTest" name="DStartTest" min="0" step="1"> - <input type="number" value="DEndTest" id="DEndTest" name="DEndTest" min="0" step="1"><br>
+                      <input type="number" id="DStartTest" name="DStartTest" min="0" step="1"> - <input type="number" id="DEndTest" name="DEndTest" min="0" step="1"><br>
                       <label for="DStepTest">Choose a Dispersion coeficient initial guess for {{comp}} <div class="required">*</div></label>
-                      <input type="number" value="DStepTest" id="DStepTest" name="DStepTest" min="0" step="1"><br>
+                      <input type="number" id="DStepTest" name="DStepTest" min="0" step="1"><br>
                   </div>
           <a type="button" onclick="showGraph()" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Graph</a>
           <a type="button" id="newAngleButton" onclick="newAngle()" class="w3-button w3-black w3-padding-large w3-large w3-margin-top" style="display: none;">New Angle</a>
@@ -85,6 +89,7 @@
 </div>
 <script type="text/javascript">
     formSolverChangeForTest()
+    retTimeTresholdInput()
     {% if formInfo and formInfo['porosity'] %}
         document.getElementById("porosityTest").value = {{formInfo['porosity']}}
     {% endif %}

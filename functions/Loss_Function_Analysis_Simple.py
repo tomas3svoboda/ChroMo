@@ -1,5 +1,7 @@
 import math
 
+import time
+import datetime
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -25,22 +27,31 @@ def Loss_Function_Analysis_Simple(experimentClusterComp,
                             factor = 1,
                             solver = "Lin",
                             webMode = False,
-                            fileName = ""):
+                            optimId = 1):
     experimentCluster = experimentClusterComp.clusters[component]
     x = 0
     resultArr = np.zeros((len(np.arange(xstart, xend, xstep)), len(np.arange(ystart, yend, ystep))))
+    start = time.time()
     for henryLangConst in np.arange(xstart, xend, xstep):
         y = 0
         for disperCoef in np.arange(ystart, yend, ystep):
-            res = Lev2_Loss_Function([henryLangConst, disperCoef, satur], experimentCluster, porosity, lossFunctionChoice, factor, solver)
+            res = Lev2_Loss_Function([henryLangConst, disperCoef, satur], experimentCluster, porosity, lossFunctionChoice, factor, solver, optimId)
             resultArr[x, y] = res
             y += 1
+        elapsed = time.time() - start
         x += 1
         endpoint = xend-((xend-xstart)%xstep)
+        done = (henryLangConst-xstart) / (endpoint-xstart)
+        remain = 1 - done
+        timeEst = 0
+        if done != 0:
+            timeEst = elapsed * (remain / done)
         if webMode:
-            yield str(round((henryLangConst-xstart) / (endpoint-xstart) * 100)) + "%"
+            yield "Estimated time remaining: " + str(datetime.timedelta(seconds=timeEst)) + "<br>Progress: " + \
+                  str(round((henryLangConst-xstart) / (endpoint-xstart) * 100)) + "%"
         else:
-            print(str(round((henryLangConst-xstart) / (endpoint-xstart) * 100)) + "%")
+            print("Estimated time remaining: " + str(datetime.timedelta(seconds=timeEst)))
+            print("Progress: " + str(round((henryLangConst-xstart) / (endpoint-xstart) * 100)) + "%")
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     X, Y = np.meshgrid(np.arange(ystart, yend, ystep), np.arange(xstart, xend, xstep))

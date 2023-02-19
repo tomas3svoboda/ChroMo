@@ -1,8 +1,11 @@
 import os
 import threading
 import time
+import datetime
+from operator import add
 import flask_login
 import pandas as pd
+import numpy as np
 from flask_security import Security, MongoEngineUserDatastore, \
     UserMixin, RoleMixin, login_required
 from flask_security.utils import hash_password
@@ -16,6 +19,7 @@ import matplotlib.pyplot as plt
 from functions.WebServerStuff.Serialize_File_To_JSON import Serialize_File_To_JSON
 from functions.Loss_Function_Analysis_Simple import Loss_Function_Analysis_Simple
 from functions.Model_Analysis import Model_Analysis
+from functions.solvers.Solver_Choice import Solver_Choice
 from objects.Operator import Operator
 from objects.ExperimentSet import ExperimentSet
 from os import walk
@@ -24,10 +28,11 @@ def Web_Server():
     matplotlib.use('Agg')
 
     plotFileCounter = 1
-    threadCounter = 1
     experimentSet = {}
+    clusterComp = {}
     compList = {}
     formInfos = {}
+    timers = {}
     operator = Operator()
 
 
@@ -69,9 +74,13 @@ def Web_Server():
         results = me.ListField()
         experiments = me.ListField()
 
-
     class User(flask_login.UserMixin):
         pass
+
+    tmpcount = DBResult.objects.count()
+    threadCounter = 0
+    if tmpcount > 0:
+        threadCounter = DBResult.objects[tmpcount-1].thr_id + 1
 
     @login_manager.user_loader
     def user_loader(username):
@@ -102,8 +111,9 @@ def Web_Server():
     class MainWorkThread(threading.Thread):
         nonlocal experimentSet, formInfos
 
-        def __init__(self, user_id):
+        def __init__(self, user_id, thr_id):
             self.user_id = user_id
+            self.thr_id = thr_id
             self.result = "-"
             super().__init__()
 
@@ -127,10 +137,10 @@ def Web_Server():
                     experimentSet[self.user_id], UPLOAD_FOLDER + "\\" + self.user_id,
                     formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["lossFunc"],
                     formInfo["solver"], formInfo["factor"], formInfo["porosityStart"], formInfo["porosityEnd"],
-                    formInfo["porosityInit"], KDQDict)
+                    formInfo["porosityInit"], KDQDict, self.thr_id, formInfo["retCorrThreshold"])
 
     class SimpleThread(threading.Thread):
-        nonlocal experimentSet, formInfos
+        nonlocal experimentSet, formInfos, clusterComp
 
         def __init__(self, user_id):
             self.user_id = user_id
@@ -140,7 +150,9 @@ def Web_Server():
         def run(self):
             nonlocal plotFileCounter
             formInfo = formInfos[self.user_id]
-            experimentClusterComp2 = operator.Cluster_By_Component(experimentSet[self.user_id])
+            if not self.user_id in clusterComp:
+                clusterComp[self.user_id] = operator.Cluster_By_Component(experimentSet[self.user_id])
+            experimentClusterComp2 = clusterComp[self.user_id]
             params = [formInfo["porosity"], formInfo[formInfo["comp2"] + "K"], formInfo[formInfo["comp2"] + "D"],
                       formInfo["saturation"]]
             Model_Analysis(experimentClusterComp2.clusters[formInfo["comp2"]][formInfo["exp" + formInfo["comp2"]] - 1],
@@ -149,7 +161,7 @@ def Web_Server():
             plotFileCounter += 1
             plt.savefig('functions/WebServerStuff/static/images/' + filename)
             plt.cla()
-            currExperimentSet = operator.Preprocess(experimentSet[self.user_id], formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"])
+            currExperimentSet = operator.Preprocess(experimentSet[self.user_id], formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["retCorrThreshold"])
             experimentClusterComp = operator.Cluster_By_Component(currExperimentSet)
             Model_Analysis(experimentClusterComp.clusters[formInfo["comp2"]][formInfo["exp" + formInfo["comp2"]] - 1],
                            formInfo["solver"], params, webMode=True, title="Preprocessed data")
@@ -163,13 +175,13 @@ def Web_Server():
         nonlocal experimentSet, formInfos
 
         def __init__(self, user_id):
-            self.progress = "0%"
+            self.progress = "Estimated time remaining: "
             self.user_id = user_id
             super().__init__()
 
         def run(self):
             formInfo = formInfos[self.user_id]
-            currExperimentSet = operator.Preprocess(experimentSet[self.user_id], formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"])
+            currExperimentSet = operator.Preprocess(experimentSet[self.user_id], formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["retCorrThreshold"])
             experimentClusterComp = operator.Cluster_By_Component(currExperimentSet)
             self.generator = Loss_Function_Analysis_Simple(experimentClusterComp, formInfo["comp"], "", formInfo[formInfo["comp"] + "KStart"]
                                       , formInfo[formInfo["comp"] + "DStart"], formInfo[formInfo["comp"] + "KEnd"]
@@ -184,6 +196,20 @@ def Web_Server():
         def new_angle(self):
             self.progress = next(self.generator)
 
+    class SolverThread(threading.Thread):
+        nonlocal experimentSet, formInfos
+
+        def __init__(self, user_id, solver, params, experimentComp):
+            self.user_id = user_id
+            self.solver = solver
+            self.params = params
+            self.comp = experimentComp
+            self.result = "-"
+            super().__init__()
+
+        def run(self):
+            self.result = Solver_Choice(self.solver, self.params, self.comp)
+
 
     def allowed_file(filename):
         return '.' in filename and \
@@ -192,13 +218,15 @@ def Web_Server():
     @api.route('/projects/test2', methods=['GET'])
     @flask_login.login_required
     def get_projects_test2():
-        nonlocal experimentSet, compList, formInfos
+        nonlocal experimentSet, compList, formInfos, clusterComp
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
         formInfo = formInfos[flask_login.current_user.id]
         if not flask_login.current_user.id in experimentSet:
             experimentSet[flask_login.current_user.id] = operator.Load_Experiment_Set(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)
-        experimentClusterComp = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
+        if not flask_login.current_user.id in clusterComp:
+            clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
+        experimentClusterComp = clusterComp[flask_login.current_user.id]
         compList[flask_login.current_user.id] = experimentClusterComp.clusters.keys()
         compExperimentDict = {}
         for comp in compList[flask_login.current_user.id]:
@@ -219,6 +247,9 @@ def Web_Server():
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["gauss"] = bool(request.form.get("gaussTest"))
         formInfo["retCorr"] = bool(request.form.get("retCorrTest"))
+        formInfo["retCorrThreshold"] = 0
+        if formInfo["retCorr"]:
+            formInfo["retCorrThreshold"] = float(request.form.get("retCorrThreshold"))
         formInfo["massBal"] = bool(request.form.get("massBalTest"))
         formInfo["solver"] = str(request.form.get("solverTest"))
         formInfo["porosity"] = float(request.form.get("porosityTest"))
@@ -260,6 +291,9 @@ def Web_Server():
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["gauss"] = bool(request.form.get("gaussTest"))
         formInfo["retCorr"] = bool(request.form.get("retCorrTest"))
+        formInfo["retCorrThreshold"] = 0
+        if formInfo["retCorr"]:
+            formInfo["retCorrThreshold"] = float(request.form.get("retCorrThreshold"))
         formInfo["massBal"] = bool(request.form.get("massBalTest"))
         formInfo["solver"] = str(request.form.get("solverTest"))
         if request.form.get("porosityTest") != "":
@@ -278,13 +312,15 @@ def Web_Server():
     @api.route('/projects/test', methods=['GET'])
     @flask_login.login_required
     def get_projects_test():
-        nonlocal experimentSet, compList, formInfos
+        nonlocal experimentSet, compList, formInfos, clusterComp
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
         formInfo = formInfos[flask_login.current_user.id]
         if not flask_login.current_user.id in experimentSet:
             experimentSet[flask_login.current_user.id] = operator.Load_Experiment_Set(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)
-        experimentClusterComp = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
+        if not flask_login.current_user.id in clusterComp:
+            clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
+        experimentClusterComp = clusterComp[flask_login.current_user.id]
         compList[flask_login.current_user.id] = experimentClusterComp.clusters.keys()
         return render_template('ParamsTestForm.html', compList = compList[flask_login.current_user.id], formInfo=formInfo, user = flask_login.current_user.id)
 
@@ -340,6 +376,9 @@ def Web_Server():
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["gauss"] = bool(request.form.get("gaussTest"))
         formInfo["retCorr"] = bool(request.form.get("retCorrTest"))
+        formInfo["retCorrThreshold"] = 0
+        if formInfo["retCorr"]:
+            formInfo["retCorrThreshold"] = float(request.form.get("retCorrThreshold"))
         formInfo["massBal"] = bool(request.form.get("massBalTest"))
         formInfo["lossFunc"] = str(request.form.get("lossFuncTest"))
         formInfo["solver"] = str(request.form.get("solverTest"))
@@ -373,6 +412,9 @@ def Web_Server():
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["gauss"] = bool(request.form.get("gaussTest"))
         formInfo["retCorr"] = bool(request.form.get("retCorrTest"))
+        formInfo["retCorrThreshold"] = 0
+        if formInfo["retCorr"]:
+            formInfo["retCorrThreshold"] = float(request.form.get("retCorrThreshold"))
         formInfo["massBal"] = bool(request.form.get("massBalTest"))
         formInfo["lossFunc"] = str(request.form.get("lossFuncTest"))
         formInfo["solver"] = str(request.form.get("solverTest"))
@@ -400,13 +442,15 @@ def Web_Server():
     @api.route('/projects/params', methods=['GET'])
     @flask_login.login_required
     def get_projects_params():
-        nonlocal experimentSet, compList, formInfos
+        nonlocal experimentSet, compList, formInfos, clusterComp
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
         formInfo = formInfos[flask_login.current_user.id]
         if not flask_login.current_user.id in experimentSet:
             experimentSet[flask_login.current_user.id] = operator.Load_Experiment_Set(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)
-        experimentClusterComp = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
+        if not flask_login.current_user.id in clusterComp:
+            clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
+        experimentClusterComp = clusterComp[flask_login.current_user.id]
         compList[flask_login.current_user.id] = experimentClusterComp.clusters.keys()
         return render_template('ParamsForm.html', compList = compList[flask_login.current_user.id], formInfo = formInfo, user = flask_login.current_user.id)
 
@@ -420,6 +464,9 @@ def Web_Server():
         formInfo["expName"] = str(request.form.get("expName"))
         formInfo["gauss"] = bool(request.form.get("gauss"))
         formInfo["retCorr"] = bool(request.form.get("retCorr"))
+        formInfo["retCorrThreshold"] = 0
+        if formInfo["retCorr"]:
+            formInfo["retCorrThreshold"] = float(request.form.get("retCorrThreshold"))
         formInfo["massBal"] = bool(request.form.get("massBal"))
         formInfo["lossFunc"] = str(request.form.get("lossFunc"))
         formInfo["solver"] = str(request.form.get("solver"))
@@ -442,40 +489,168 @@ def Web_Server():
         threadCounter += 1
         if not thread_id in exporting_threads:
             print("ID: " + str(thread_id))
-            exporting_threads[thread_id] = MainWorkThread(flask_login.current_user.id)
+            exporting_threads[thread_id] = MainWorkThread(flask_login.current_user.id, thread_id)
             exporting_threads[thread_id].name = formInfo["expName"]
             exporting_threads[thread_id].start()
+            timers[thread_id] = time.time()
         return redirect(url_for('get_projects_params_result', id=thread_id))
 
     @api.route('/projects/params/result/<id>', methods=['GET'])
     @flask_login.login_required
     def get_projects_params_result(id):
-        nonlocal experimentSet, compList
+        nonlocal experimentSet, compList, experimentSet, clusterComp
+        if not flask_login.current_user.id in experimentSet:
+            experimentSet[flask_login.current_user.id] = operator.Load_Experiment_Set(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)
+        if not flask_login.current_user.id in clusterComp:
+            clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
+        experimentClusterComp = clusterComp[flask_login.current_user.id]
         id = int(id)
+        compExperimentDict = {}
+        for comp in compList[flask_login.current_user.id]:
+            expList = []
+            for comp2 in experimentClusterComp.clusters[comp]:
+                head, tail = os.path.split(comp2.experiment.metadata.path)
+                expList.append(tail)
+            compExperimentDict[comp] = expList
         if id in exporting_threads:
-            return render_template('ResultPage.html', compList = compList[flask_login.current_user.id], result = exporting_threads[id].result, user = flask_login.current_user.id, name = exporting_threads[id].name)
+            return render_template('ResultPage.html', compList = compList[flask_login.current_user.id], compExpDict = compExperimentDict, result = exporting_threads[id].result, user = flask_login.current_user.id, name = exporting_threads[id].name, id = id)
         else:
             dbuser = flask_login.current_user.db
             for result in dbuser.results:
                 if result.thr_id == id:
-                    return render_template('ResultPage.html', compList = compList[flask_login.current_user.id], result = result.results, user = flask_login.current_user.id, name = result.name)
+                    return render_template('ResultPage.html', compList = compList[flask_login.current_user.id], compExpDict = compExperimentDict, result = result.results, user = flask_login.current_user.id, name = result.name, id = id)
         return "Result not found"
+
+    @api.route('/projects/params/result/<id>/prograph', methods=['POST'])
+    @api.route('/projects/result/<id>/prograph', methods=['POST'])
+    @flask_login.login_required
+    def post_projects_result_prograph(id):
+        # TODO maybe thread this
+        nonlocal exporting_threads, plotFileCounter
+        id = int(id)
+        if id in exporting_threads:
+            result = exporting_threads[id].result
+        else:
+            dbuser = flask_login.current_user.db
+            for res in dbuser.results:
+                if res.thr_id == id:
+                    result = res.results
+        comp = str(request.form.get("componentTest"))
+        if comp != "all":
+            exp = str(request.form.get("expList" + comp))
+        if comp != "all":
+            if exp != "all":
+                relevantList = result["lossfunctionprogress"][comp][exp]
+            else:
+                firstKey = list(result["lossfunctionprogress"][comp].keys())[0]
+                relevantList = [0] * len(result["lossfunctionprogress"][comp][firstKey])
+                for key in result["lossfunctionprogress"][comp]:
+                    relevantList = list( map(add, relevantList, result["lossfunctionprogress"][comp][key]) )
+        else:
+            firstKey = list(result["lossfunctionprogress"].keys())[0]
+            firstFirstKey = list(result["lossfunctionprogress"][firstKey].keys())[0]
+            relevantList = [0] * len(result["lossfunctionprogress"][firstKey][firstFirstKey])
+            for compkey in result["lossfunctionprogress"]:
+                for expkey in result["lossfunctionprogress"][compkey]:
+                    relevantList = list( map(add, relevantList, result["lossfunctionprogress"][compkey][expkey]) )
+        plt.plot(relevantList)
+        filename = "plot" + str(plotFileCounter) + ".png"
+        plotFileCounter += 1
+        plt.savefig('functions/WebServerStuff/static/images/' + filename)
+        plt.cla()
+        return render_template('Picture.html', pictureURL = url_for('static', filename='images/'+filename), alt="chart", width="640", height="480")
+
+    @api.route('/projects/params/result/<id>/rescomp', methods=['POST'])
+    @api.route('/projects/result/<id>/rescomp', methods=['POST'])
+    @flask_login.login_required
+    def post_projects_result_rescomp(id):
+        nonlocal exporting_threads, plotFileCounter, experimentSet, threadCounter, clusterComp
+        if not flask_login.current_user.id in experimentSet:
+            experimentSet[flask_login.current_user.id] = operator.Load_Experiment_Set(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)
+        if not flask_login.current_user.id in clusterComp:
+            clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
+        experimentClusterComp = clusterComp[flask_login.current_user.id]
+        id = int(id)
+        if id in exporting_threads:
+            result = exporting_threads[id].result
+        else:
+            dbuser = flask_login.current_user.db
+            for res in dbuser.results:
+                if res.thr_id == id:
+                    result = res.results
+        comp = str(request.form.get("componentTest2"))
+        exp = int(request.form.get("expList2" + comp))
+        params = [result["porosity"], result["compparams"][comp][0], result["compparams"][comp][1]]
+        if result["solver"] == "Nonlin":
+            params.append(result["compparams"][comp][2])
+        thread_id = threadCounter
+        threadCounter += 1
+        if not thread_id in exporting_threads:
+            print("ID: " + str(thread_id))
+            exporting_threads[thread_id] = SolverThread(flask_login.current_user.id, result["solver"], params, experimentClusterComp.clusters[comp][exp])
+            exporting_threads[thread_id].start()
+        return url_for('post_projects_result_rescomp_progress', id=thread_id)
+
+    @api.route('/projects/params/result/<id>/rescomp/progress', methods=['GET'])
+    @api.route('/projects/result/<id>/rescomp/progress', methods=['GET'])
+    @flask_login.login_required
+    def post_projects_result_rescomp_progress(id):
+        nonlocal exporting_threads, plotFileCounter
+        thread_id = int(id)
+        if type(exporting_threads[thread_id].result) is str and exporting_threads[thread_id].result == "-":
+            return ""
+        else:
+            result = exporting_threads[thread_id].result
+            df = exporting_threads[thread_id].comp.concentrationTime
+            modelCurve = result[:, -1]
+            minTime = df.iat[0, 0]
+            maxTime = df.iat[-1, 0]
+            time = np.linspace(minTime, maxTime, modelCurve.size)
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            ax.set_title("Result comparison")
+            ax.set_xlabel("Time [s]")
+            ax.set_ylabel("Concentration [mg/mL]")
+            ax.plot(time, modelCurve)
+            ax.scatter(df.iloc[:, 0], df.iloc[:, 1], color='r', marker=',', s=10)
+            filename = "plot" + str(plotFileCounter) + ".png"
+            plotFileCounter += 1
+            plt.savefig('functions/WebServerStuff/static/images/' + filename)
+            plt.cla()
+            return render_template('Picture.html', pictureURL=url_for('static', filename="images/" + filename), picId="graphImg2", alt="chart", width="640", height="480", downloadUrl=url_for("post_projects_result_rescomp_matrix", id=thread_id))
+
+    @api.route('/projects/params/result/<id>/rescomp/matrix', methods=['GET'])
+    @api.route('/projects/result/<id>/rescomp/matrix', methods=['GET'])
+    @flask_login.login_required
+    def post_projects_result_rescomp_matrix(id):
+        nonlocal exporting_threads, plotFileCounter
+        thread_id = int(id)
+        if type(exporting_threads[thread_id].result) is str:
+            return str(exporting_threads[thread_id].result)
+        else:
+            result = pd.DataFrame(exporting_threads[thread_id].result)
+            filename = "table" + str(plotFileCounter) + ".csv"
+            plotFileCounter += 1
+            result.to_csv('functions/WebServerStuff/static/tables/' + filename, index=False)
+            return send_file('static/tables/' + filename)
 
     @api.route('/projects/params/result/<id>/progress', methods=['GET'])
     @flask_login.login_required
     def get_projects_params_result_progress(id):
         nonlocal compList
         id = int(id)
+        timer = time.time() - timers[id]
         if exporting_threads[id].result == "-":
-            return "-"
+            return "Time elapsed: " + str(datetime.timedelta(seconds=timer))
         else:
             thread = exporting_threads[id]
+            timers.pop(id)
             newResult = DBResult(results = thread.result, thr_id=id, name=thread.name)
             newResult.save()
             dbuser = flask_login.current_user.db
             dbuser.results.append(newResult)
             dbuser.save()
-            return render_template('Result.html', compList = compList[flask_login.current_user.id], result = thread.result, user = flask_login.current_user.id)
+            return "DONE"
 
     @api.route('/projects/result', methods=['GET'])
     @flask_login.login_required
@@ -489,16 +664,25 @@ def Web_Server():
     @api.route('/projects/result/<id>', methods=['GET'])
     @flask_login.login_required
     def get_projects_result_list_show(id):
-        nonlocal compList, experimentSet
+        nonlocal compList, experimentSet, clusterComp
         if not flask_login.current_user.id in experimentSet:
             experimentSet[flask_login.current_user.id] = operator.Load_Experiment_Set(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)
-        experimentClusterComp = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
+        if not flask_login.current_user.id in clusterComp:
+            clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
+        experimentClusterComp = clusterComp[flask_login.current_user.id]
         compList[flask_login.current_user.id] = experimentClusterComp.clusters.keys()
         id = int(id)
         dbuser = flask_login.current_user.db
+        compExperimentDict = {}
+        for comp in compList[flask_login.current_user.id]:
+            expList = []
+            for comp2 in experimentClusterComp.clusters[comp]:
+                head, tail = os.path.split(comp2.experiment.metadata.path)
+                expList.append(tail)
+            compExperimentDict[comp] = expList
         for res in dbuser.results:
             if res.thr_id == id:
-                return render_template('ResultPage.html', compList = compList[flask_login.current_user.id], result = res.results, user = flask_login.current_user.id, name = res.name)
+                return render_template('ResultPage.html', compList = compList[flask_login.current_user.id], compExpDict = compExperimentDict, result = res.results, user = flask_login.current_user.id, name = res.name)
         return "Unknown result"
 
     @api.route('/projects/result/<id>', methods=['DELETE'])
@@ -540,6 +724,8 @@ def Web_Server():
     @flask_login.login_required
     def upload_file_page():
         nonlocal uploadedFiles
+        if not os.path.exists(UPLOAD_FOLDER + "\\" + flask_login.current_user.id):
+            os.mkdir(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)
         uploadedFiles[flask_login.current_user.id] = next(walk(UPLOAD_FOLDER + '\\' + flask_login.current_user.id), (None, None, []))[2]
         return render_template('Upload.html', uploadedFilesLen = len(uploadedFiles[flask_login.current_user.id]), uploadedFiles = uploadedFiles[flask_login.current_user.id], user = flask_login.current_user.id)
 

@@ -6,20 +6,25 @@ import functions.global_ as gl
 from functions.solvers.Lin_Solver import Lin_Solver
 
 
-def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, KDIntervals, lossFunction, factor, solver):
+def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, KDIntervals, lossFunction, factor, solver, optimId=1):
     print("Calling Bilevel_Optim!")
+    gl.compParamDict[optimId] = {}
+    gl.compRangeDict[optimId] = {}
+    gl.lossFunctionProgress[optimId] = {}
+    gl.lv2LossFunctionVals[optimId] = {}
     for key in experimentClustersComp.clusters:
-        gl.compParamDict[key] = [KDIntervals[key]["kinit"], KDIntervals[key]["dinit"], KDIntervals[key]["qinit"]]
-        gl.compRangeDict[key] = [KDIntervals[key]["krange"], KDIntervals[key]["drange"], KDIntervals[key]["qrange"]]
-    gl.porosity = porosityIntervals["init"]
-    gl.porosityRange = porosityIntervals["range"]
-    Lev1_Optim(experimentClustersComp, lossFunction, factor, solver)
+        gl.compParamDict[optimId][key] = [KDIntervals[key]["kinit"], KDIntervals[key]["dinit"], KDIntervals[key]["qinit"]]
+        gl.compRangeDict[optimId][key] = [KDIntervals[key]["krange"], KDIntervals[key]["drange"], KDIntervals[key]["qrange"]]
+    gl.porosity[optimId] = porosityIntervals["init"]
+    gl.porosityRange[optimId] = porosityIntervals["range"]
+    Lev1_Optim(experimentClustersComp, lossFunction, factor, solver, optimId)
     result = dict()
     result["solver"] = solver
-    result["porosity"] = gl.porosity
-    result["lv1lossfunctionval"] = gl.lv1LossFunctionVal
-    result["compparams"] = gl.compParamDict
-    result["lv2lossfunctionvals"] = gl.lv2LossFunctionVals
+    result["porosity"] = gl.porosity[optimId]
+    result["lv1lossfunctionval"] = gl.lv1LossFunctionVal[optimId]
+    result["compparams"] = gl.compParamDict[optimId]
+    result["lv2lossfunctionvals"] = gl.lv2LossFunctionVals[optimId]
+    result["lossfunctionprogress"] = gl.lossFunctionProgress[optimId]
 
     '''cond = experimentSetCor3.experiments[0].experimentCondition
     comp = experimentSetCor3.experiments[0].experimentComponents[0]

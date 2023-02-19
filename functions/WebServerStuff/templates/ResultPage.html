@@ -3,6 +3,7 @@
 {% block head %}
     {{ super() }}
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/form.css') }}">
 {% endblock %}
 {% block navbar %}
 <!-- Navbar -->
@@ -55,6 +56,62 @@
     {% else %}
     Working<div id="dotsDiv" class="inline">...</div>
     {% endif %}
+      <br><br>
+
+      <div id="additionalInfoDiv" {% if result == '-' %}style="display: none;"{% endif %}>
+        <h2>Show loss function value progress</h2>
+        <form method=post enctype=multipart/form-data id="mainform" class="form-style-1">
+          <label for="componentTest">Choose a Component</label>
+          <select name="componentTest" id="componentTest" onchange="formCompChangeForTest2()">
+            {% for comp in compList %}
+            <option value="{{comp}}">{{comp}}</option>
+            {% endfor %}
+            <option value="all">All</option>
+          </select><br>
+          {% for comp in compList %}
+          <div id="expListDiv{{comp}}" {% if comp != 'Sac' %}style="display:none;"{% endif %} class="expListDiv">
+            <label for="expList{{comp}}">Select Experiment for {{comp}} <div class="required">*</div></label>
+            <select name="expList{{comp}}" id="expList{{comp}}">
+              {% for exp in compExpDict[comp] %}
+              <option value="{{exp}}">{{exp}}</option>
+              {% endfor %}
+            <option value="all">All</option>
+            </select>
+          </div>
+          {% endfor %}
+          <a type="button" onclick="showGraph3()" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Graph</a>
+        </form>
+      <div id="imgdiv">
+      </div>
+      </div>
+
+    <div id="additionalInfoDiv2" {% if result == '-' %}style="display: none;"{% endif %}>
+        <h2>Compare experimental data with result</h2>
+        <form method=post enctype=multipart/form-data id="mainform2" class="form-style-1">
+          <label for="componentTest2">Choose a Component</label>
+          <select name="componentTest2" id="componentTest2" onchange="formCompChangeForTest2('componentTest2', 'expListDiv2')">
+            {% for comp in compList %}
+            <option value="{{comp}}">{{comp}}</option>
+            {% endfor %}
+          </select><br>
+          {% for comp in compList %}
+          <div id="expListDiv2{{comp}}" {% if comp != 'Sac' %}style="display:none;"{% endif %} class="expListDiv2">
+            <label for="expList2{{comp}}">Select Experiment for {{comp}} <div class="required">*</div></label>
+            <select name="expList2{{comp}}" id="expList2{{comp}}">
+              {% for exp in compExpDict[comp] %}
+              <option value="{{loop.index0}}">{{exp}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endfor %}
+          <a type="button" onclick="showGraph2('mainform2', '/rescomp', 'imgdiv2', 'downloadMatrixButton')" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Graph</a>
+          <a type="button" id="downloadMatrixButton" onclick="downloadMatrix('graphImg2')" class="w3-button w3-black w3-padding-large w3-large w3-margin-top" style="display: none;">Download Result</a>
+          <iframe id="invis_iframe" style="display:none;"></iframe>
+        </form>
+      <div id="imgdiv2">
+      </div>
+      </div>
+
     </div>
   </div>
 </div>

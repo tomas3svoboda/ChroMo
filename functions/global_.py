@@ -1,8 +1,10 @@
 compParamDict = dict()
 compRangeDict = dict()
-porosity = 0
-porosityRange = []
+porosity = dict()
+porosityRange = dict()
 solverChoices = ['Lin']
 lossFunctionChoices = ['Simple', 'Squares', 'LogSimple', 'LogSquares']
 lv2LossFunctionVals = dict()
-lv1LossFunctionVal = 0
+lv1LossFunctionVal = dict()
+index = dict()
+lossFunctionProgress = dict()

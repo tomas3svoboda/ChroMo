@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.optimize import minimize
 import os
 
-def Ret_Time_Cor(experimentSet, experimentClustersExp, writeToFile = False):
+def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold = 0, writeToFile = False):
     if writeToFile:
         filePath = experimentSet.metadata.path + "\\Time_Shifts.txt"
         print(filePath)
@@ -15,7 +15,7 @@ def Ret_Time_Cor(experimentSet, experimentClustersExp, writeToFile = False):
             maxShift = -1
             for comp in exp.experimentComponents:
                 column = pd.to_numeric(comp.concentrationTime[comp.name])
-                firstNonZeroIndex = column.ne(0).idxmax()
+                firstNonZeroIndex = column.gt(threshold).idxmax()
                 firstNonZeroTime = comp.concentrationTime.iloc[firstNonZeroIndex, 0]
                 if maxShift < 0 or firstNonZeroTime < maxShift:
                     maxShift = firstNonZeroTime
