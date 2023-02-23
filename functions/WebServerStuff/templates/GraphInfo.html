@@ -1,0 +1,24 @@
+
+<div id="graphInfoDiv">
+    {% if henryConst or disperCoef %}
+        Minimum at values:<br>
+        {% if henryConst %}
+            Henry constant: <div class="bold">{{henryConst}}</div>
+        {% endif %}
+        {% if disperCoef %}
+            Dispersion coefficient: <div class="bold">{{disperCoef}}</div>
+        {% endif %}
+    <br>
+    {% endif %}
+    {% if shifts %}
+        {% for exp in shifts %}
+            Shift of experiment {{exp}}: <div class="bold">{{shifts[exp]|round(2)}}s</div>
+        {% endfor %}
+    {% endif %}
+    {% if originalFeedTimes %}
+        {% for exp in originalFeedTimes %}
+            Original feed time of {{exp}}: <div class="bold">{{(originalFeedTimes[exp]*3600)|round(2)}}s</div>
+            New feed time of {{exp}}: <div class="bold">{{(newFeedTimes[exp]*3600)|round(2)}}s</div>
+        {% endfor %}
+    {% endif %}
+</div>

@@ -38,7 +38,8 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
                   Nt = 3000,            # Number of time differences - Nt
                   time = 3000,          # Finite time of the experiment [s]
                   debugPrint=False,
-                  debugGraph=False
+                  debugGraph=False,
+                  full=False
                   ):
 
     # Calculation of the feed time [s]
@@ -61,7 +62,7 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
     feedSteps = int(feedTime // dt)  # Whole number of feed iterations
     feedTimeAprox = feedTime % dt  # aproximation of division
     # Rounding iteration step based on defined feed parameters
-    if feedTimeAprox >= 0.5:
+    if feedTimeAprox >= dt/2:
         feedSteps += 1
     # Constructing pulse injection feed vector
     feed = np.linspace(0, time, Nt)
@@ -211,4 +212,6 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
         plt.xlabel('Time [s]')
         plt.ylabel('Residuals')
         plt.show()
+    if full:
+        return [c, feed, residuals]
     return c

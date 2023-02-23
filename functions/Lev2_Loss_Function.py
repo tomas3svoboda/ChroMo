@@ -10,7 +10,7 @@ Loss Function options:
     'LogSimple' - Single_Loss_Function_LogSimple
     'LogSquares' - Single_Loss_Function_LogSquares
 """
-def Lev2_Loss_Function(params, experimentCluster, porosity, lossFunction = 'Simple', factor = 1, solver = "Lin", optimId=1):
+def Lev2_Loss_Function(params, experimentCluster, porosity, lossFunction = 'Simple', factor = 1, solver = "Lin", spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1):
     if solver == "Lin":
         params2 = [porosity, params[0], params[1]]
     elif solver == "Nonlin":
@@ -24,7 +24,7 @@ def Lev2_Loss_Function(params, experimentCluster, porosity, lossFunction = 'Simp
             gl.lossFunctionProgress[optimId][comp.name] = {}
         if not tail in gl.lossFunctionProgress[optimId][comp.name]:
             gl.lossFunctionProgress[optimId][comp.name][tail] = []
-        res = Single_Loss_Function_Choice(lossFunction, params2, comp, solver, factor)
+        res = Single_Loss_Function_Choice(lossFunction, params2, comp, solver, factor, spacialDiff, timeDiff, time)
         if not optimId in gl.index:
             gl.index[optimId] = 0
         if len(gl.lossFunctionProgress[optimId][comp.name][tail]) == gl.index[optimId]:

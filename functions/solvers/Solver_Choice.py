@@ -9,7 +9,7 @@ Choices:
 Other choices will raise an exception
 IN PROGRESS - needs add more solvers
 '''
-def Solver_Choice(choice, params, experimentComp):
+def Solver_Choice(choice, params, experimentComp, spacialDiff = 30, timeDiff = 3000, time = 10800, full=False):
     if choice == 'Lin':
         res = Lin_Solver(experimentComp.experiment.experimentCondition.flowRate,
                             experimentComp.experiment.experimentCondition.columnLength,
@@ -18,7 +18,11 @@ def Solver_Choice(choice, params, experimentComp):
                             experimentComp.feedConcentration,
                             params[0],
                             params[1],
-                            params[2])
+                            params[2],
+                            spacialDiff,
+                            timeDiff,
+                            time,
+                            full=full)
     elif choice == 'Nonlin':
         res = Nonlin_Solver(experimentComp.experiment.experimentCondition.flowRate,
                             experimentComp.experiment.experimentCondition.columnLength,
@@ -28,7 +32,11 @@ def Solver_Choice(choice, params, experimentComp):
                             params[0],
                             params[1],
                             params[2],
-                            params[3])
+                            params[3],
+                            spacialDiff,
+                            timeDiff,
+                            time,
+                            full=full)
     else:
         raise Exception(str(choice) + ' - Unknown Solver in Solver_Choice')
     return res

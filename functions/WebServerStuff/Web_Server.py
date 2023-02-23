@@ -23,6 +23,7 @@ from functions.solvers.Solver_Choice import Solver_Choice
 from objects.Operator import Operator
 from objects.ExperimentSet import ExperimentSet
 from os import walk
+from waitress import serve
 
 def Web_Server():
     matplotlib.use('Agg')
@@ -60,6 +61,7 @@ def Web_Server():
     exporting_threads = {}
 
     class DBExperiment(me.Document):
+        uniquename = me.StringField(required=True, unique=True)
         name = me.StringField(required=True)
         experiment = me.StringField(required=True)
 
@@ -133,11 +135,22 @@ def Web_Server():
                     tmpDict["qinit"] = 0
                     tmpDict["qrange"] = [0, 0]
                 KDQDict[comp] = tmpDict
-            self.result = operator.Web_Start(
+            tmp = operator.Web_Start(
                     experimentSet[self.user_id], UPLOAD_FOLDER + "\\" + self.user_id,
                     formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["lossFunc"],
                     formInfo["solver"], formInfo["factor"], formInfo["porosityStart"], formInfo["porosityEnd"],
-                    formInfo["porosityInit"], KDQDict, self.thr_id, formInfo["retCorrThreshold"])
+                    formInfo["porosityInit"], KDQDict, formInfo["spacialDiff"],
+                    formInfo["timeDiff"], formInfo["time"], self.thr_id, formInfo["retCorrThreshold"])
+            if formInfo["retCorr"]:
+                formInfo["shifts"] = tmp["shifts"]
+            else:
+                formInfo["shifts"] = None
+            if formInfo["massBal"]:
+                formInfo["originalFeedTimes"] = tmp["originalFeedTimes"]
+                formInfo["newFeedTimes"] = tmp["newFeedTimes"]
+            else:
+                formInfo["originalFeedTimes"] = None
+            self.result = tmp
 
     class SimpleThread(threading.Thread):
         nonlocal experimentSet, formInfos, clusterComp
@@ -149,6 +162,7 @@ def Web_Server():
 
         def run(self):
             nonlocal plotFileCounter
+            plt.clf()
             formInfo = formInfos[self.user_id]
             if not self.user_id in clusterComp:
                 clusterComp[self.user_id] = operator.Cluster_By_Component(experimentSet[self.user_id])
@@ -160,34 +174,76 @@ def Web_Server():
             filename = "plot" + str(plotFileCounter) + ".png"
             plotFileCounter += 1
             plt.savefig('functions/WebServerStuff/static/images/' + filename)
-            plt.cla()
+            plt.clf()
             currExperimentSet = operator.Preprocess(experimentSet[self.user_id], formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["retCorrThreshold"])
+            if formInfo["retCorr"]:
+                formInfo["shifts"] = {}
+                for exp in currExperimentSet.experiments:
+                    head, tail = os.path.split(exp.metadata.path)
+                    formInfo["shifts"][tail] = exp.shift
+            else:
+                formInfo["shifts"] = None
+            if formInfo["massBal"]:
+                formInfo["originalFeedTimes"] = {}
+                formInfo["newFeedTimes"] = {}
+                for exp in currExperimentSet.experiments:
+                    head, tail = os.path.split(exp.metadata.path)
+                    formInfo["originalFeedTimes"][tail] = exp.experimentCondition.originalFeedTime
+                    formInfo["newFeedTimes"][tail] = exp.experimentCondition.feedTime
+            else:
+                formInfo["originalFeedTimes"] = None
+                formInfo["newFeedTimes"] = None
             experimentClusterComp = operator.Cluster_By_Component(currExperimentSet)
             Model_Analysis(experimentClusterComp.clusters[formInfo["comp2"]][formInfo["exp" + formInfo["comp2"]] - 1],
-                           formInfo["solver"], params, webMode=True, title="Preprocessed data")
-            filename2 = "plot" + str(plotFileCounter) + ".png"
-            plotFileCounter += 1
-            plt.savefig('functions/WebServerStuff/static/images/' + filename2)
-            plt.cla()
-            self.progress = [filename, filename2]
+                           formInfo["solver"], params, formInfo["spacialDiff"], formInfo["timeDiff"], formInfo["time"],
+                           webMode=True, title="Preprocessed data", full=True)
+            filenames = []
+            fig_nums = plt.get_fignums()
+            figs = [plt.figure(n) for n in fig_nums]
+            for fig in figs:
+                filename2 = "plot" + str(plotFileCounter) + ".png"
+                filenames.append(filename2)
+                plotFileCounter += 1
+                fig.savefig('functions/WebServerStuff/static/images/' + filename2)
+                fig.clf()
+            self.progress = [filename] + filenames
 
     class ExportingThread(threading.Thread):
         nonlocal experimentSet, formInfos
 
-        def __init__(self, user_id):
+        def __init__(self, user_id, thr_id):
             self.progress = "Estimated time remaining: "
             self.user_id = user_id
+            self.thr_id = thr_id
             super().__init__()
 
         def run(self):
             formInfo = formInfos[self.user_id]
             currExperimentSet = operator.Preprocess(experimentSet[self.user_id], formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["retCorrThreshold"])
+            if formInfo["retCorr"]:
+                formInfo["shifts"] = {}
+                for exp in currExperimentSet.experiments:
+                    head, tail = os.path.split(exp.metadata.path)
+                    formInfo["shifts"][tail] = exp.shift
+            else:
+                formInfo["shifts"] = None
+            if formInfo["massBal"]:
+                formInfo["originalFeedTimes"] = {}
+                formInfo["newFeedTimes"] = {}
+                for exp in currExperimentSet.experiments:
+                    head, tail = os.path.split(exp.metadata.path)
+                    formInfo["originalFeedTimes"][tail] = exp.experimentCondition.originalFeedTime
+                    formInfo["newFeedTimes"][tail] = exp.experimentCondition.feedTime
+            else:
+                formInfo["originalFeedTimes"] = None
+                formInfo["newFeedTimes"] = None
             experimentClusterComp = operator.Cluster_By_Component(currExperimentSet)
             self.generator = Loss_Function_Analysis_Simple(experimentClusterComp, formInfo["comp"], "", formInfo[formInfo["comp"] + "KStart"]
                                       , formInfo[formInfo["comp"] + "DStart"], formInfo[formInfo["comp"] + "KEnd"]
                                       , formInfo[formInfo["comp"] + "DEnd"], formInfo[formInfo["comp"] + "KStep"]
                                       , formInfo[formInfo["comp"] + "DStep"], formInfo["porosity"], formInfo["saturation"]
-                                      , formInfo["lossFunc"], formInfo["factor"], formInfo["solver"], True)
+                                      , formInfo["lossFunc"], formInfo["factor"], formInfo["solver"], formInfo["spacialDiff"]
+                                      ,formInfo["timeDiff"], formInfo["time"], True, self.thr_id)
             for res in self.generator:
                 self.progress = res
                 if not type(res) is str:
@@ -208,7 +264,8 @@ def Web_Server():
             super().__init__()
 
         def run(self):
-            self.result = Solver_Choice(self.solver, self.params, self.comp)
+            formInfo = formInfos[self.user_id]
+            self.result = Solver_Choice(self.solver, self.params, self.comp, formInfo["spacialDiff"], formInfo["timeDiff"], formInfo["time"])
 
 
     def allowed_file(filename):
@@ -221,6 +278,9 @@ def Web_Server():
         nonlocal experimentSet, compList, formInfos, clusterComp
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         if not flask_login.current_user.id in experimentSet:
             experimentSet[flask_login.current_user.id] = operator.Load_Experiment_Set(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)
@@ -241,9 +301,12 @@ def Web_Server():
     @flask_login.login_required
     def post_projects_test2():
         nonlocal experimentSet, plotFileCounter, formInfos, threadCounter
-        plt.cla()
+        plt.clf()
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["gauss"] = bool(request.form.get("gaussTest"))
         formInfo["retCorr"] = bool(request.form.get("retCorrTest"))
@@ -265,22 +328,28 @@ def Web_Server():
         if not thread_id in exporting_threads:
             print("ID: " + str(thread_id))
             exporting_threads[thread_id] = SimpleThread(flask_login.current_user.id)
-            plt.cla()
+            plt.clf()
             exporting_threads[thread_id].start()
         return url_for("post_projects_test2_progress", id=thread_id)
 
     @api.route('/projects/test2/<id>/progress', methods=['GET'])
     @flask_login.login_required
     def post_projects_test2_progress(id):
-        nonlocal exporting_threads, plotFileCounter
+        nonlocal exporting_threads, plotFileCounter, formInfos
+        formInfo = formInfos[flask_login.current_user.id]
         thread_id = int(id)
         if exporting_threads[thread_id].progress == "-":
             return ""
         else:
-            return render_template('Picture.html', pictureURL=url_for('static', filename='images/' + exporting_threads[thread_id].progress[0]),
-                                   alt="chart", width="640", height="480") + \
-                   render_template('Picture.html', pictureURL=url_for('static', filename='images/' + exporting_threads[thread_id].progress[1]),
+            returnString = ""
+            for idx, filename in enumerate(exporting_threads[thread_id].progress):
+                returnString += render_template('Picture.html', pictureURL=url_for('static', filename='images/' + filename),
                                    alt="chart", width="640", height="480")
+                if idx == 0:
+                    returnString += render_template('GraphInfo.html', shifts=formInfo["shifts"],
+                                    originalFeedTimes=formInfo["originalFeedTimes"],
+                                    newFeedTimes=formInfo["newFeedTimes"])
+            return returnString
 
     @api.route('/projects/test2/continue', methods=['POST'])
     @flask_login.login_required
@@ -288,6 +357,9 @@ def Web_Server():
         nonlocal formInfos
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["gauss"] = bool(request.form.get("gaussTest"))
         formInfo["retCorr"] = bool(request.form.get("retCorrTest"))
@@ -315,6 +387,9 @@ def Web_Server():
         nonlocal experimentSet, compList, formInfos, clusterComp
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         if not flask_login.current_user.id in experimentSet:
             experimentSet[flask_login.current_user.id] = operator.Load_Experiment_Set(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)
@@ -327,20 +402,23 @@ def Web_Server():
     @api.route('/projects/test/<id>/newAngle', methods=['GET'])
     @flask_login.login_required
     def post_projects_test_new_angle(id):
-        nonlocal exporting_threads, plotFileCounter
+        nonlocal exporting_threads, plotFileCounter, formInfos
+        formInfo = formInfos[flask_login.current_user.id]
         thread_id = int(id)
         exporting_threads[thread_id].new_angle()
         progress = exporting_threads[thread_id].progress
         filename = "plot" + str(plotFileCounter) + ".png"
         plotFileCounter += 1
         plt.savefig('functions/WebServerStuff/static/images/' + filename)
-        return  "<div>Minimum:<br>Henry constant: " + str(progress[0]) + "<br>Dispersion coefficient: " + str(progress[1]) + "</div>" + \
-                render_template('Picture.html', pictureURL = url_for('static', filename='images/'+filename), alt="chart", width="640", height="480", newAngleUrl=url_for('post_projects_test_new_angle', id=id))
+        returnString = render_template('Picture.html', pictureURL = url_for('static', filename='images/'+filename), alt="chart", width="640", height="480", newAngleUrl=url_for('post_projects_test_new_angle', id=id)) + \
+                       render_template('GraphInfo.html', henryConst=progress[0], disperCoef=progress[1], shifts=formInfo["shifts"], originalFeedTimes=formInfo["originalFeedTimes"], newFeedTimes=formInfo["newFeedTimes"] )
+        return  returnString
 
     @api.route('/projects/test/<id>/progress', methods=['GET'])
     @flask_login.login_required
     def post_projects_test_progress(id):
-        nonlocal exporting_threads, plotFileCounter
+        nonlocal exporting_threads, plotFileCounter, formInfos
+        formInfo = formInfos[flask_login.current_user.id]
         thread_id = int(id)
         if type(exporting_threads[thread_id].progress) is str:
             return str(exporting_threads[thread_id].progress)
@@ -349,8 +427,13 @@ def Web_Server():
             filename = "plot" + str(plotFileCounter) + ".png"
             plotFileCounter += 1
             plt.savefig('functions/WebServerStuff/static/images/' + filename)
-            return "<div>Minimum:<br>Henry constant: " + str(progress[0]) + "<br>Dispersion coefficient: " + str(progress[1]) + "</div>" + \
-                   render_template('Picture.html', pictureURL = url_for('static', filename='images/'+filename), alt="chart", width="640", height="480", newAngleUrl=url_for('post_projects_test_new_angle', id=id), downloadUrl = url_for('get_projects_test_matrix', id=id))
+            returnString = render_template('Picture.html', pictureURL = url_for('static', filename='images/'+filename),
+                                           alt="chart", width="640", height="480", newAngleUrl=url_for('post_projects_test_new_angle', id=id),
+                                           downloadUrl = url_for('get_projects_test_matrix', id=id)) + \
+                           render_template('GraphInfo.html', henryConst=progress[0], disperCoef=progress[1], shifts=formInfo["shifts"],
+                                           originalFeedTimes=formInfo["originalFeedTimes"], newFeedTimes=formInfo["newFeedTimes"] )
+            return returnString
+
 
     @api.route('/projects/test/<id>/matrix', methods=['GET'])
     @flask_login.login_required
@@ -373,6 +456,9 @@ def Web_Server():
         nonlocal formInfos, exporting_threads, threadCounter
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["gauss"] = bool(request.form.get("gaussTest"))
         formInfo["retCorr"] = bool(request.form.get("retCorrTest"))
@@ -398,8 +484,8 @@ def Web_Server():
         threadCounter += 1
         if not thread_id in exporting_threads:
             print("ID: " + str(thread_id))
-            exporting_threads[thread_id] = ExportingThread(flask_login.current_user.id)
-            plt.cla()
+            exporting_threads[thread_id] = ExportingThread(flask_login.current_user.id, thread_id)
+            plt.clf()
             exporting_threads[thread_id].start()
         return url_for("post_projects_test_progress", id=thread_id)
 
@@ -409,6 +495,9 @@ def Web_Server():
         nonlocal formInfos
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["gauss"] = bool(request.form.get("gaussTest"))
         formInfo["retCorr"] = bool(request.form.get("retCorrTest"))
@@ -445,6 +534,9 @@ def Web_Server():
         nonlocal experimentSet, compList, formInfos, clusterComp
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         if not flask_login.current_user.id in experimentSet:
             experimentSet[flask_login.current_user.id] = operator.Load_Experiment_Set(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)
@@ -460,6 +552,9 @@ def Web_Server():
         nonlocal experimentSet, compList, formInfos, threadCounter
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["expName"] = str(request.form.get("expName"))
         formInfo["gauss"] = bool(request.form.get("gauss"))
@@ -557,7 +652,7 @@ def Web_Server():
         filename = "plot" + str(plotFileCounter) + ".png"
         plotFileCounter += 1
         plt.savefig('functions/WebServerStuff/static/images/' + filename)
-        plt.cla()
+        plt.clf()
         return render_template('Picture.html', pictureURL = url_for('static', filename='images/'+filename), alt="chart", width="640", height="480")
 
     @api.route('/projects/params/result/<id>/rescomp', methods=['POST'])
@@ -616,7 +711,7 @@ def Web_Server():
             filename = "plot" + str(plotFileCounter) + ".png"
             plotFileCounter += 1
             plt.savefig('functions/WebServerStuff/static/images/' + filename)
-            plt.cla()
+            plt.clf()
             return render_template('Picture.html', pictureURL=url_for('static', filename="images/" + filename), picId="graphImg2", alt="chart", width="640", height="480", downloadUrl=url_for("post_projects_result_rescomp_matrix", id=thread_id))
 
     @api.route('/projects/params/result/<id>/rescomp/matrix', methods=['GET'])
@@ -659,7 +754,7 @@ def Web_Server():
         resList = []
         for res in dbuser.results:
             resList.append(res)
-        return render_template('ResultList.html', resList=resList)
+        return render_template('ResultList.html', resList=resList, user=flask_login.current_user.id)
 
     @api.route('/projects/result/<id>', methods=['GET'])
     @flask_login.login_required
@@ -691,13 +786,35 @@ def Web_Server():
         nonlocal compList
         id = int(id)
         dbuser = flask_login.current_user.db
-        for exp in dbuser.results:
-            if exp.thr_id == id:
-                dbuser.results.remove(exp)
-                exp.delete()
+        for res in dbuser.results:
+            if res.thr_id == id:
+                dbuser.results.remove(res)
+                res.delete()
                 dbuser.save()
                 return redirect(url_for('get_projects_result_list'))
         return "Unknown result"
+
+    @api.route('/projects/solver', methods=['GET'])
+    @flask_login.login_required
+    def get_projects_solver():
+        nonlocal formInfos
+        if not flask_login.current_user.id in formInfos:
+            formInfos[flask_login.current_user.id] = {}
+            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["time"] = 10800
+        formInfo = formInfos[flask_login.current_user.id]
+        return render_template('SolverSettings.html', formInfo=formInfo, user = flask_login.current_user.id)
+
+    @api.route('/projects/solver', methods=['POST'])
+    @flask_login.login_required
+    def post_projects_solver():
+        nonlocal formInfos
+        formInfo = formInfos[flask_login.current_user.id]
+        formInfo["time"] = float(request.form.get("time"))
+        formInfo["spacialDiff"] = int(request.form.get("spacialDiff"))
+        formInfo["timeDiff"] = int(request.form.get("timeDiff"))
+        return redirect(url_for("upload_file_page"))
 
     @api.route('/projects', methods=['POST'])
     @flask_login.login_required
@@ -713,12 +830,34 @@ def Web_Server():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(api.config['UPLOAD_FOLDER']  + '\\' + flask_login.current_user.id, filename))
-            newExperiment = DBExperiment(name=filename, experiment=Serialize_File_To_JSON(BASE_FOLDER + "\\docu\\TestUploadFolder\\" + flask_login.current_user.id + "\\" + filename))
+            newExperiment = DBExperiment(uniquename=flask_login.current_user.id + "/" + filename, name=filename, experiment=Serialize_File_To_JSON(BASE_FOLDER + "\\docu\\TestUploadFolder\\" + flask_login.current_user.id + "\\" + filename))
             newExperiment.save()
             flask_login.current_user.db.experiments.append(newExperiment)
             flask_login.current_user.db.save()
             uploadedFiles[flask_login.current_user.id] = next(walk(UPLOAD_FOLDER + "\\" + flask_login.current_user.id), (None, None, []))[2]
+            experimentSet[flask_login.current_user.id] = operator.Load_Experiment_Set(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)
+            clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
+            compList[flask_login.current_user.id] = clusterComp[flask_login.current_user.id].clusters.keys()
             return redirect(url_for('upload_file_page'))
+
+    @api.route('/projects/<file>', methods=['DELETE'])
+    @flask_login.login_required
+    def delete_file(file):
+        nonlocal uploadedFiles
+        dbuser = flask_login.current_user.db
+        for exp in dbuser.experiments:
+            if exp.uniquename == flask_login.current_user.id + "/" + file:
+                dbuser.experiments.remove(exp)
+                exp.delete()
+                dbuser.save()
+                os.remove(UPLOAD_FOLDER + "\\" + flask_login.current_user.id + "\\" + file)
+                uploadedFiles[flask_login.current_user.id] = next(walk(UPLOAD_FOLDER + "\\" + flask_login.current_user.id), (None, None, []))[2]
+                experimentSet[flask_login.current_user.id] = operator.Load_Experiment_Set(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)
+                clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
+                compList[flask_login.current_user.id] = clusterComp[flask_login.current_user.id].clusters.keys()
+                return redirect(url_for('upload_file_page'))
+        return "Unknown result"
+
 
     @api.route('/projects', methods=['GET'])
     @flask_login.login_required
@@ -754,6 +893,9 @@ def Web_Server():
             if flask_login.current_user.is_authenticated:
                 if not flask_login.current_user.id in formInfos:
                     formInfos[flask_login.current_user.id] = {}
+                    formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+                    formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+                    formInfos[flask_login.current_user.id]["time"] = 10800
                 return render_template('Index.html', user = flask_login.current_user.id)
             return render_template('Index.html')
         username = request.form['username']
@@ -769,5 +911,7 @@ def Web_Server():
                 return redirect(url_for('upload_file_page'))
 
         return render_template('Index.html', badLogin=True)
-    api.run(debug=True)
+
+    print("localhost:6969")
+    serve(api, listen='*:6969', threads=4)
 

@@ -13,16 +13,16 @@ Choices:
     'LogSquares' - Single_Loss_Function_LogSquares
 Other choices will raise an exception
 '''
-def Single_Loss_Function_Choice(choice, params, experimentComp, solver = 'Lin', factor = 1):
+def Single_Loss_Function_Choice(choice, params, experimentComp, solver = 'Lin', factor = 1, spacialDiff = 30, timeDiff = 3000, time = 10800):
     res = 0
     if choice == 'Simple':
-        res = Single_Loss_Function_Simple(params, experimentComp, solver, factor)
+        res = Single_Loss_Function_Simple(params, experimentComp, solver, factor, spacialDiff, timeDiff, time)
     elif choice == 'Squares':
-        res = Single_Loss_Function_Squares(params, experimentComp, solver, factor)
+        res = Single_Loss_Function_Squares(params, experimentComp, solver, factor, spacialDiff, timeDiff, time)
     elif choice == 'LogSimple':
-        res = Single_Loss_Function_LogSimple(params, experimentComp, solver, factor)
+        res = Single_Loss_Function_LogSimple(params, experimentComp, solver, factor, spacialDiff, timeDiff, time)
     elif choice == 'LogSquares':
-        res = Single_Loss_Function_LogSquares(params, experimentComp, solver, factor)
+        res = Single_Loss_Function_LogSquares(params, experimentComp, solver, factor, spacialDiff, timeDiff, time)
     else:
         raise Exception('Unknown Loss function in Single_Loss_Function_Choice')
     return res

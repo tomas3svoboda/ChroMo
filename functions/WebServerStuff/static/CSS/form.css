@@ -83,3 +83,13 @@ select{
 	display: inline-block;
 	color:red;
 }
+
+#graphInfoDiv{
+    display: inline-block;
+    margin: 20px 0px 0px 0px;
+    font: 13px "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+#graphInfoDiv .bold{
+    font-weight: bold;
+}

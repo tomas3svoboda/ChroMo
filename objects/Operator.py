@@ -194,7 +194,7 @@ class Operator:
                 resultDF.to_csv(filePath, index=False, compression=None)
                 chromatogramSelection = input("More Chromatograms?[Y - yes, N - no]")
 
-    def Web_Start(self, experimentSet, path, gauss, retCorr, massBal, lossFunc, solver, factor, porosityStart, porosityEnd, porosityInit, KDQDict, optimId, retThreshold=0) :
+    def Web_Start(self, experimentSet, path, gauss, retCorr, massBal, lossFunc, solver, factor, porosityStart, porosityEnd, porosityInit, KDQDict, spacialDiff, timeDiff, time, optimId, retThreshold=0) :
         currentExperimentSet = self.Preprocess(experimentSet, gauss, retCorr, massBal, retThreshold)
         experimentClusterComp = self.Cluster_By_Component(currentExperimentSet)
         lossFunctionSelection = lossFunc
@@ -203,7 +203,18 @@ class Operator:
         porosityDict = dict()
         porosityDict["init"] = porosityInit
         porosityDict["range"] = [porosityStart, porosityEnd]
-        result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, porosityDict, KDQDict, lossFunctionSelection, factorSelection, solverSelection, optimId)
+        result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, porosityDict, KDQDict, lossFunctionSelection, factorSelection, solverSelection, spacialDiff, timeDiff, time, optimId)
+        if retCorr:
+            result["shifts"] = {}
+            for exp in currentExperimentSet.experiments:
+                head, tail = os.path.split(exp.metadata.path)
+                result["shifts"][tail] = exp.shift
+        if massBal:
+            result["originalFeedTimes"] = {}
+            for exp in currentExperimentSet.experiments:
+                head, tail = os.path.split(exp.metadata.path)
+                result["originalFeedTimes"][tail] = exp.experimentCondition.shift
+                result["newFeedTimes"][tail] = exp.experimentCondition.feedTime
         return result
 
 

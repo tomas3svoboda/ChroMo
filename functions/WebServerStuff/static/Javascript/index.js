@@ -98,9 +98,10 @@ async function showGraph(){
         let resp2 = await fetch(path)
         content = await resp2.text()
         document.getElementById("imgdiv").innerHTML = content
-        if(!content.startsWith("Estimated time remaining: "))
+        if(!content.startsWith("Estimated time remaining: ")){
             document.getElementById("newAngleButton").style.display = "inline-block"
             document.getElementById("downloadMatrixButton").style.display = "inline-block"
+        }
     }while(content.startsWith("Estimated time remaining: "))
 }
 

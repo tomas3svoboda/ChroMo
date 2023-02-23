@@ -16,10 +16,27 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
                henryConst=1.9,      # Henry's constant of the linear isotherm [-]
                disperCoef=12,       # Axial dispersion coefficient [mm^2/s]
                Nx = 30,             # Number of spatial differences
-               Nt = 500,            # Number of time differences
+               Nt = 3000,            # Number of time differences
                time=10800,          # Finite time of the experiment [s]
                debugPrint=False,
-               debugGraph=False):
+               debugGraph=False,
+               full=False):
+
+    '''
+    print("flowRate: " + str(flowRate))
+    print("length: " + str(length))
+    print("diameter: " + str(diameter))
+    print("feedVol: " + str(feedVol))
+    print("feedTime: " + str(feedTime))
+    print("feedConc: " + str(feedConc))
+    print("flowSpeed: " + str(flowSpeed))
+    print("porosity: " + str(porosity))
+    print("henryConst: " + str(henryConst))
+    print("disperCoef: " + str(disperCoef))
+    print("Nx: " + str(Nx))
+    print("Nt: " + str(Nt))
+    print("time: " + str(time))
+    '''
 
     def diagonal_form(a, lower=1, upper=1):
         # Transforms banded matrix into diagonal ordered form
@@ -47,6 +64,7 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
     # 1 h = 3600 s
     # 1 mL = 1000 mm^3
 
+
     # Defining constants
     a = disperCoef/((((1-porosity)*henryConst)/porosity)+1)  # *** !!! PODLE DOKUMENTU
     b = flowSpeed/((((1-porosity)*henryConst)/porosity)+1)  # *** !!! PODLE DOKUMENTU
@@ -57,11 +75,14 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
     t = np.linspace(0, time, Nt)  # Preparation of time vector
     dt = time / Nt  # Calculating time step [mm]
 
+    if dt > feedTime/10:
+        print("WARNING: discretization time step is more than 1/10 of feed time!")
+
     feedSteps = feedTime // dt  # Whole number of feed iterations
     feedTimeAprox = feedTime % dt  # approximation of division
 
     # Rounding iteration step based on defined feed parameters
-    if feedTimeAprox >= 0.5:
+    if feedTimeAprox >= dt/2:
         feedSteps += 1
     # Constructing pulse injection feed vector
     feed = np.linspace(0, time, Nt)
@@ -154,4 +175,6 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
         '''
         plt.plot(t,c[:,-1])
         plt.show()
+    if full:
+        return [c, feed]
     return c

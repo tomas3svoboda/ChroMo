@@ -26,6 +26,9 @@ def Loss_Function_Analysis_Simple(experimentClusterComp,
                             lossFunctionChoice = "Squares",
                             factor = 1,
                             solver = "Lin",
+                            spacialDiff = 30,
+                            timeDiff = 3000,
+                            expTime = 10800,
                             webMode = False,
                             optimId = 1):
     experimentCluster = experimentClusterComp.clusters[component]
@@ -35,7 +38,8 @@ def Loss_Function_Analysis_Simple(experimentClusterComp,
     for henryLangConst in np.arange(xstart, xend, xstep):
         y = 0
         for disperCoef in np.arange(ystart, yend, ystep):
-            res = Lev2_Loss_Function([henryLangConst, disperCoef, satur], experimentCluster, porosity, lossFunctionChoice, factor, solver, optimId)
+            res = Lev2_Loss_Function([henryLangConst, disperCoef, satur], experimentCluster, porosity, lossFunctionChoice,
+                                     factor, solver, spacialDiff=spacialDiff, timeDiff=timeDiff, time=expTime, optimId=optimId)
             resultArr[x, y] = res
             y += 1
         elapsed = time.time() - start

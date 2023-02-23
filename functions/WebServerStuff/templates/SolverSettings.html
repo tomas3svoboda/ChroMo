@@ -1,0 +1,48 @@
+{% extends "Layout.html" %}
+{% block title %}Upload{% endblock %}
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/form.css') }}">
+{% endblock %}
+{% block navbar %}
+<!-- Navbar -->
+<div class="w3-top">
+  <div class="w3-bar w3-blue w3-card w3-left-align w3-large">
+    <a class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large w3-blue" href="javascript:void(0);" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
+    <a href="{{ url_for('get_main_page') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white">Home</a>
+    {% if user %}
+    <div class="w3-bar-item w3-button w3-hide-small w3-padding-large  w3-white bar-right">{{user}}</div>
+    <a href="{{ url_for('logout') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white bar-right">Logout</a>
+    <a href="#" class="w3-bar-item w3-button w3-hide-small w3-padding-large  w3-white bar-right">Solver</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block body %}
+<!-- First Grid -->
+<div class="w3-row-padding w3-padding-64 w3-container">
+  <div class="w3-content">
+     <h1>Set Solver Settings</h1>
+     <form method=post enctype=multipart/form-data class="form-style-1">
+         <label for="time">Choose a time [s] (set this to match experiment data) <div class="required">*</div></label>
+         <input type="number" id="time" name="time"><br>
+         <label for="spacialDiff">Choose number of spacial differences<div class="required">*</div></label>
+         <input type="number" id="spacialDiff" name="spacialDiff"><br>
+         <label for="timeDiff">Choose number of time differences<div class="required">*</div></label>
+         <input type="number" id="timeDiff" name="timeDiff"><br>
+         <input type="submit" value="Submit" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">
+    </form>
+    </div>
+</div>
+<script type="text/javascript">
+    {% if formInfo and formInfo['spacialDiff'] %}
+        document.getElementById("spacialDiff").value = {{formInfo['spacialDiff']}}
+    {% endif %}
+    {% if formInfo and formInfo['timeDiff'] %}
+        document.getElementById("timeDiff").value = {{formInfo['timeDiff']}}
+    {% endif %}
+    {% if formInfo and formInfo['time'] %}
+        document.getElementById("time").value = {{formInfo['time']}}
+    {% endif %}
+</script>
+{% endblock %}

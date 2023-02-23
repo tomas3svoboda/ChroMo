@@ -14,3 +14,4 @@ class Experiment:
         self.metadata = Metadata()
         self.experimentCondition = ExperimentCondition()
         self.experimentComponents = list()
+        self.shift = 0

@@ -6,7 +6,7 @@ import functions.global_ as gl
 from functions.solvers.Lin_Solver import Lin_Solver
 
 
-def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, KDIntervals, lossFunction, factor, solver, optimId=1):
+def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, KDIntervals, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1):
     print("Calling Bilevel_Optim!")
     gl.compParamDict[optimId] = {}
     gl.compRangeDict[optimId] = {}
@@ -17,7 +17,7 @@ def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, 
         gl.compRangeDict[optimId][key] = [KDIntervals[key]["krange"], KDIntervals[key]["drange"], KDIntervals[key]["qrange"]]
     gl.porosity[optimId] = porosityIntervals["init"]
     gl.porosityRange[optimId] = porosityIntervals["range"]
-    Lev1_Optim(experimentClustersComp, lossFunction, factor, solver, optimId)
+    Lev1_Optim(experimentClustersComp, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId)
     result = dict()
     result["solver"] = solver
     result["porosity"] = gl.porosity[optimId]

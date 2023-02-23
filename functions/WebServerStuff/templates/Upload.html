@@ -10,6 +10,7 @@
     {% if user %}
     <div class="w3-bar-item w3-button w3-hide-small w3-padding-large  w3-white bar-right">{{user}}</div>
     <a href="{{ url_for('logout') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white bar-right">Logout</a>
+    <a href="{{ url_for('get_projects_solver') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white bar-right">Solver</a>
     {% endif %}
   </div>
 </div>
@@ -18,24 +19,30 @@
 <!-- First Grid -->
 <div class="w3-row-padding w3-padding-64 w3-container">
   <div class="w3-content">
-    <div class="w3-twothird">
      <h1>Upload experiment file</h1>
-     <form method=post enctype=multipart/form-data>
+     <form method=post enctype=multipart/form-data class="fileupload">
         <input type=file name=file id="fileInput" multiple>
         <input type=submit value=Upload>
          {% if uploadedFilesLen > 0 %}
             <ul>
                 {% for i in range(0, uploadedFilesLen) %}
-                <li>{{ uploadedFiles[i] }}</li>
+                <li>{{ uploadedFiles[i] }} &emsp; <a href="javascript:void(0)" onclick="deleteExperiment('{{ url_for('delete_file', file=uploadedFiles[i]) }}')">remove</a></li>
                 {% endfor %}
             </ul>
          {% endif %}
     </form>
-    <a href="{{ url_for('get_projects_test') }}" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Test</a>
-    <a href="{{ url_for('get_projects_test2') }}" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Test2</a>
-    <a href="{{ url_for('get_projects_params') }}" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Continue</a>
+    <a href="{{ url_for('get_projects_test') }}" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Loss Function Analysis</a>
+    <a href="{{ url_for('get_projects_test2') }}" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Manual Estimation</a>
+    <a href="{{ url_for('get_projects_params') }}" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Optimalization</a>
     <a href="{{ url_for('get_projects_result_list') }}" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Results</a>
     </div>
-  </div>
 </div>
+<script type="text/javascript">
+  async function deleteExperiment(url){
+      const response = await fetch(url, {
+            method: 'DELETE'
+        })
+      location.reload()
+  }
+</script>
 {% endblock %}

@@ -56,6 +56,7 @@ def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold = 0, writeToFil
                 df = comp.concentrationTime
                 df.iloc[:, 0] += res.x[idx]
                 df.drop(df[df['Time'] < 0].index, inplace=True)
+            exp.shift = res.x[idx]
             if writeToFile:
                 head2, tail2 = os.path.split(exp.metadata.path)
                 experimentName, extesion = os.path.splitext(tail2)

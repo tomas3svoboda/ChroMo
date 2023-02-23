@@ -13,6 +13,7 @@
     {% if user %}
     <div class="w3-bar-item w3-button w3-hide-small w3-padding-large  w3-white bar-right">{{user}}</div>
     <a href="{{ url_for('logout') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white bar-right">Logout</a>
+    <a href="{{ url_for('get_projects_solver') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white bar-right">Solver</a>
     {% else %}
     <a href="{{ url_for('get_registration') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white bar-right">Register</a>
     {% endif %}

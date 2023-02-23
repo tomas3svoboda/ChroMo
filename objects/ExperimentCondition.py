@@ -14,6 +14,7 @@ class ExperimentCondition:
         self._feedVolume = -1.0
         self._feedTime = -1.0
         self._flowRate = -1.0
+        self.originalFeedTime = -1.0
 
     @property
     def feedTime(self):
