@@ -124,12 +124,12 @@ def Web_Server():
             KDQDict = {}
             for comp in compList[self.user_id]:
                 tmpDict = {}
-                tmpDict["kinit"] = formInfo[comp + "KInit"]
+                tmpDict["kinit"] = formInfo[comp + "K"]
                 tmpDict["krange"] = [formInfo[comp + "KStart"], formInfo[comp + "KEnd"]]
-                tmpDict["dinit"] = formInfo[comp + "DInit"]
+                tmpDict["dinit"] = formInfo[comp + "D"]
                 tmpDict["drange"] = [formInfo[comp + "DStart"], formInfo[comp + "DEnd"]]
                 if formInfo["solver"] == "Nonlin":
-                    tmpDict["qinit"] = float(request.form.get(comp + "QInit"))
+                    tmpDict["qinit"] = formInfo[comp + "Q"]
                     tmpDict["qrange"] = [formInfo[comp + "QStart"], formInfo[comp + "QEnd"]]
                 else:
                     tmpDict["qinit"] = 0
@@ -139,8 +139,9 @@ def Web_Server():
                     experimentSet[self.user_id], UPLOAD_FOLDER + "\\" + self.user_id,
                     formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["lossFunc"],
                     formInfo["solver"], formInfo["factor"], formInfo["porosityStart"], formInfo["porosityEnd"],
-                    formInfo["porosityInit"], KDQDict, formInfo["spacialDiff"],
-                    formInfo["timeDiff"], formInfo["time"], self.thr_id, formInfo["retCorrThreshold"])
+                    formInfo["porosity"], KDQDict, formInfo["spacialDiff"],
+                    formInfo["timeDiff"], formInfo["time"], self.thr_id, formInfo["retCorrThreshold"],
+                    formInfo["lvl1optimsettings"], formInfo["lvl2optimsettings"])
             if formInfo["retCorr"]:
                 formInfo["shifts"] = tmp["shifts"]
             else:
@@ -278,8 +279,11 @@ def Web_Server():
         nonlocal experimentSet, compList, formInfos, clusterComp
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+        if not "spacialDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+        if not "timeDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+        if not "time" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         if not flask_login.current_user.id in experimentSet:
@@ -304,8 +308,11 @@ def Web_Server():
         plt.clf()
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+        if not "spacialDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+        if not "timeDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+        if not "time" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["gauss"] = bool(request.form.get("gaussTest"))
@@ -357,8 +364,11 @@ def Web_Server():
         nonlocal formInfos
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+        if not "spacialDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+        if not "timeDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+        if not "time" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["gauss"] = bool(request.form.get("gaussTest"))
@@ -387,8 +397,11 @@ def Web_Server():
         nonlocal experimentSet, compList, formInfos, clusterComp
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+        if not "spacialDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+        if not "timeDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+        if not "time" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         if not flask_login.current_user.id in experimentSet:
@@ -456,8 +469,11 @@ def Web_Server():
         nonlocal formInfos, exporting_threads, threadCounter
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+        if not "spacialDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+        if not "timeDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+        if not "time" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["gauss"] = bool(request.form.get("gaussTest"))
@@ -495,8 +511,11 @@ def Web_Server():
         nonlocal formInfos
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+        if not "spacialDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+        if not "timeDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+        if not "time" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["gauss"] = bool(request.form.get("gaussTest"))
@@ -534,8 +553,11 @@ def Web_Server():
         nonlocal experimentSet, compList, formInfos, clusterComp
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+        if not "spacialDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+        if not "timeDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+        if not "time" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         if not flask_login.current_user.id in experimentSet:
@@ -544,6 +566,8 @@ def Web_Server():
             clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
         experimentClusterComp = clusterComp[flask_login.current_user.id]
         compList[flask_login.current_user.id] = experimentClusterComp.clusters.keys()
+        print(formInfo["lvl1optimsettings"])
+        print(formInfo["lvl2optimsettings"])
         return render_template('ParamsForm.html', compList = compList[flask_login.current_user.id], formInfo = formInfo, user = flask_login.current_user.id)
 
     @api.route('/projects/params', methods=['POST'])
@@ -552,8 +576,11 @@ def Web_Server():
         nonlocal experimentSet, compList, formInfos, threadCounter
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+        if not "spacialDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+        if not "timeDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+        if not "time" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["expName"] = str(request.form.get("expName"))
@@ -568,18 +595,62 @@ def Web_Server():
         formInfo["factor"] = int(request.form.get("factor"))
         formInfo["porosityStart"] = float(request.form.get("porosityStart"))
         formInfo["porosityEnd"] = float(request.form.get("porosityEnd"))
-        formInfo["porosityInit"] = float(request.form.get("porosityInit"))
+        formInfo["porosity"] = float(request.form.get("porosityInit"))
         for comp in compList[flask_login.current_user.id]:
             formInfo[comp + "KStart"] = float(request.form.get(comp + "KStart"))
             formInfo[comp + "KEnd"] = float(request.form.get(comp + "KEnd"))
-            formInfo[comp + "KInit"] = float(request.form.get(comp + "KInit"))
+            formInfo[comp + "K"] = float(request.form.get(comp + "KInit"))
             formInfo[comp + "DStart"] = float(request.form.get(comp + "DStart"))
             formInfo[comp + "DEnd"] = float(request.form.get(comp + "DEnd"))
-            formInfo[comp + "DInit"] = float(request.form.get(comp + "DInit"))
+            formInfo[comp + "D"] = float(request.form.get(comp + "DInit"))
             if formInfo["solver"] == "Nonlin":
                 formInfo[comp + "QStart"] = float(request.form.get(comp + "QStart"))
                 formInfo[comp + "QEnd"] = float(request.form.get(comp + "QEnd"))
-                formInfo[comp + "QInit"] = float(request.form.get(comp + "QInit"))
+                formInfo[comp + "Q"] = float(request.form.get(comp + "QInit"))
+        formInfo["lvl1optimsettings"] = {}
+        formInfo["lvl2optimsettings"] = {}
+        formInfo["lvl1optimsettings"]["algorithm"] = request.form.get("lvl1alg")
+        formInfo["lvl2optimsettings"]["algorithm"] = request.form.get("lvl2alg")
+        formInfo["lvl1optimsettings"]["settings"] ={}
+        formInfo["lvl2optimsettings"]["settings"] ={}
+        if formInfo["lvl1optimsettings"]["algorithm"] == "1":
+            formInfo["lvl1optimsettings"]["settings"]["Ns"] = request.form.get("lvl1bruteforceNs")
+        elif formInfo["lvl1optimsettings"]["algorithm"] == "2":
+            formInfo["lvl1optimsettings"]["settings"]["maxiter"] = request.form.get("lvl1neldermeadmaxiter")
+            formInfo["lvl1optimsettings"]["settings"]["maxfev"] = request.form.get("lvl1neldermeadmaxfev")
+            formInfo["lvl1optimsettings"]["settings"]["xatol"] = request.form.get("lvl1neldermeadxatol")
+            formInfo["lvl1optimsettings"]["settings"]["fatol"] = request.form.get("lvl1neldermeadfatol")
+            formInfo["lvl1optimsettings"]["settings"]["aptive"] = request.form.get("lvl1neldermeadadaptive")
+        elif formInfo["lvl1optimsettings"]["algorithm"] == "3":
+            formInfo["lvl1optimsettings"]["settings"]["n"] = request.form.get("lvl1shgon")
+            formInfo["lvl1optimsettings"]["settings"]["iters"] = request.form.get("lvl1shgoiters")
+            formInfo["lvl1optimsettings"]["settings"]["maxev"] = request.form.get("lvl1shgomaxev")
+            formInfo["lvl1optimsettings"]["settings"]["maxiter"] = request.form.get("lvl1shgomaxiter")
+            formInfo["lvl1optimsettings"]["settings"]["maxfev"] = request.form.get("lvl1shgomaxfev")
+            formInfo["lvl1optimsettings"]["settings"]["maxtime"] = request.form.get("lvl1shgomaxtime")
+            formInfo["lvl1optimsettings"]["settings"]["f_tol"] = request.form.get("lvl1shgof_tol")
+            formInfo["lvl1optimsettings"]["settings"]["f_min"] = request.form.get("lvl1shgof_min")
+        elif formInfo["lvl1optimsettings"]["algorithm"] == "4":
+            formInfo["lvl1optimsettings"]["settings"]["maxiter"] = request.form.get("lvl1powellmaxiter")
+        if formInfo["lvl2optimsettings"]["algorithm"] == "1":
+            formInfo["lvl2optimsettings"]["settings"]["Ns"] = request.form.get("lvl2bruteforceNs")
+        elif formInfo["lvl2optimsettings"]["algorithm"] == "2":
+            formInfo["lvl2optimsettings"]["settings"]["maxiter"] = request.form.get("lvl2neldermeadmaxiter")
+            formInfo["lvl2optimsettings"]["settings"]["maxfev"] = request.form.get("lvl2neldermeadmaxfev")
+            formInfo["lvl2optimsettings"]["settings"]["xatol"] = request.form.get("lvl2neldermeadxatol")
+            formInfo["lvl2optimsettings"]["settings"]["fatol"] = request.form.get("lvl2neldermeadfatol")
+            formInfo["lvl2optimsettings"]["settings"]["aptive"] = request.form.get("lvl2neldermeadadaptive")
+        elif formInfo["lvl2optimsettings"]["algorithm"] == "3":
+            formInfo["lvl2optimsettings"]["settings"]["n"] = request.form.get("lvl2shgon")
+            formInfo["lvl2optimsettings"]["settings"]["iters"] = request.form.get("lvl2shgoiters")
+            formInfo["lvl2optimsettings"]["settings"]["maxev"] = request.form.get("lvl2shgomaxev")
+            formInfo["lvl2optimsettings"]["settings"]["maxiter"] = request.form.get("lvl2shgomaxiter")
+            formInfo["lvl2optimsettings"]["settings"]["maxfev"] = request.form.get("lvl2shgomaxfev")
+            formInfo["lvl2optimsettings"]["settings"]["maxtime"] = request.form.get("lvl2shgomaxtime")
+            formInfo["lvl2optimsettings"]["settings"]["f_tol"] = request.form.get("lvl2shgof_tol")
+            formInfo["lvl2optimsettings"]["settings"]["f_min"] = request.form.get("lvl2shgof_min")
+        elif formInfo["lvl2optimsettings"]["algorithm"] == "4":
+            formInfo["lvl2optimsettings"]["settings"]["maxiter"] = request.form.get("lvl2powellmaxiter")
         thread_id = threadCounter
         threadCounter += 1
         if not thread_id in exporting_threads:
@@ -676,13 +747,13 @@ def Web_Server():
         comp = str(request.form.get("componentTest2"))
         exp = int(request.form.get("expList2" + comp))
         params = [result["porosity"], result["compparams"][comp][0], result["compparams"][comp][1]]
-        if result["solver"] == "Nonlin":
+        if result["optimparams"]["solver"] == "Nonlin":
             params.append(result["compparams"][comp][2])
         thread_id = threadCounter
         threadCounter += 1
         if not thread_id in exporting_threads:
             print("ID: " + str(thread_id))
-            exporting_threads[thread_id] = SolverThread(flask_login.current_user.id, result["solver"], params, experimentClusterComp.clusters[comp][exp])
+            exporting_threads[thread_id] = SolverThread(flask_login.current_user.id, result["optimparams"]["solver"], params, experimentClusterComp.clusters[comp][exp])
             exporting_threads[thread_id].start()
         return url_for('post_projects_result_rescomp_progress', id=thread_id)
 
@@ -756,6 +827,50 @@ def Web_Server():
             resList.append(res)
         return render_template('ResultList.html', resList=resList, user=flask_login.current_user.id)
 
+
+    @api.route('/projects/result/<id>/params', methods=['GET'])
+    @flask_login.login_required
+    def get_projects_result_params(id):
+        nonlocal formInfos
+        if not flask_login.current_user.id in formInfos:
+            formInfos[flask_login.current_user.id] = {}
+        formInfo = formInfos[flask_login.current_user.id]
+        dbuser = flask_login.current_user.db
+        optimparams = {}
+        for res in dbuser.results:
+            if res.thr_id == int(id):
+                formInfo["expName"] = res.name
+                optimparams = res.results["optimparams"]
+                break
+        if not optimparams:
+            return "Unknown result"
+        formInfo["gauss"] = optimparams["gauss"]
+        formInfo["retCorr"] = optimparams["retCorr"]
+        formInfo["retCorrThreshold"] = optimparams["retThreshold"]
+        formInfo["massBal"] = optimparams["massBal"]
+        formInfo['lossFunc'] = optimparams["lossFunction"]
+        formInfo['solver'] = optimparams["solver"]
+        formInfo['factor'] = optimparams["factor"]
+        formInfo["porosityStart"] = optimparams["porosityIntervals"]["range"][0]
+        formInfo["porosityEnd"] = optimparams["porosityIntervals"]["range"][1]
+        formInfo['porosity'] = optimparams["porosityIntervals"]["init"]
+        cmpList = []
+        for comp in optimparams["KDIntervals"]:
+            cmpList.append(comp)
+            formInfo[comp + "KStart"] = optimparams["KDIntervals"][comp]["krange"][0]
+            formInfo[comp + "KEnd"] = optimparams["KDIntervals"][comp]["krange"][1]
+            formInfo[comp + "K"] = optimparams["KDIntervals"][comp]["kinit"]
+            formInfo[comp + "DStart"] = optimparams["KDIntervals"][comp]["drange"][0]
+            formInfo[comp + "DEnd"] = optimparams["KDIntervals"][comp]["drange"][1]
+            formInfo[comp + "D"] = optimparams["KDIntervals"][comp]["dinit"]
+            if formInfo["solver"] == "Nonlin":
+                formInfo[comp + "QStart"] = optimparams["KDIntervals"][comp]["qrange"][0]
+                formInfo[comp + "QEnd"] = optimparams["KDIntervals"][comp]["qrange"][1]
+                formInfo[comp + "Q"] = optimparams["KDIntervals"][comp]["qinit"]
+        formInfo["lvl1optimsettings"] = optimparams["lvl1optim"]
+        formInfo["lvl2optimsettings"] = optimparams["lvl2optim"]
+        return redirect(url_for("get_projects_params"))
+
     @api.route('/projects/result/<id>', methods=['GET'])
     @flask_login.login_required
     def get_projects_result_list_show(id):
@@ -800,8 +915,11 @@ def Web_Server():
         nonlocal formInfos
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
+        if not "spacialDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+        if not "timeDiff" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+        if not "time" in formInfos[flask_login.current_user.id]:
             formInfos[flask_login.current_user.id]["time"] = 10800
         formInfo = formInfos[flask_login.current_user.id]
         return render_template('SolverSettings.html', formInfo=formInfo, user = flask_login.current_user.id)
@@ -893,8 +1011,11 @@ def Web_Server():
             if flask_login.current_user.is_authenticated:
                 if not flask_login.current_user.id in formInfos:
                     formInfos[flask_login.current_user.id] = {}
+                if not "spacialDiff" in formInfos[flask_login.current_user.id]:
                     formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+                if not "timeDiff" in formInfos[flask_login.current_user.id]:
                     formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+                if not "time" in formInfos[flask_login.current_user.id]:
                     formInfos[flask_login.current_user.id]["time"] = 10800
                 return render_template('Index.html', user = flask_login.current_user.id)
             return render_template('Index.html')
@@ -913,5 +1034,6 @@ def Web_Server():
         return render_template('Index.html', badLogin=True)
 
     print("localhost:6969")
-    serve(api, listen='*:6969', threads=4)
+    api.run(debug=True)
+    #serve(api, listen='*:6969', threads=4)
 

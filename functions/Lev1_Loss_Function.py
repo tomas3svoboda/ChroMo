@@ -3,10 +3,10 @@
 from functions.Lev2_Optim import Lev2_Optim
 import functions.global_ as gl
 
-def Lev1_Loss_Function(porosity, experimentClustersComp, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1):
+def Lev1_Loss_Function(porosity, experimentClustersComp, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, lvl2optim=None):
     sum = 0
     for key in experimentClustersComp.clusters:
-        res = Lev2_Optim(porosity[0], experimentClustersComp.clusters[key], key, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId)
+        res = Lev2_Optim(porosity[0], experimentClustersComp.clusters[key], key, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl2optim)
         sum += res
     print('_________________________________________________________________________________________________')
     print('porosity: ' + str(porosity.round(2)))

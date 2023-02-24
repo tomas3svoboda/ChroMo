@@ -187,14 +187,14 @@ class Operator:
                 df = experimentClusterComp.clusters[comp][conditionSelection].concentrationTime
                 minTime = df.iat[0, 0]
                 maxTime = df.iat[-1, 0]
-                time = np.linspace(minTime, maxTime, 500)
+                time = np.linspace(minTime, maxTime, 3000)
                 resultDF = pd.DataFrame({'time': time, 'concentration': solverOutput})
                 fileName = "chromatogram_" + comp + "_" + str(conditionSelection)
                 filePath = dirPath + "\\" + fileName + ".csv"
                 resultDF.to_csv(filePath, index=False, compression=None)
                 chromatogramSelection = input("More Chromatograms?[Y - yes, N - no]")
 
-    def Web_Start(self, experimentSet, path, gauss, retCorr, massBal, lossFunc, solver, factor, porosityStart, porosityEnd, porosityInit, KDQDict, spacialDiff, timeDiff, time, optimId, retThreshold=0) :
+    def Web_Start(self, experimentSet, path, gauss, retCorr, massBal, lossFunc, solver, factor, porosityStart, porosityEnd, porosityInit, KDQDict, spacialDiff, timeDiff, time, optimId, retThreshold, lvl1optim, lvl2optim) :
         currentExperimentSet = self.Preprocess(experimentSet, gauss, retCorr, massBal, retThreshold)
         experimentClusterComp = self.Cluster_By_Component(currentExperimentSet)
         lossFunctionSelection = lossFunc
@@ -203,7 +203,7 @@ class Operator:
         porosityDict = dict()
         porosityDict["init"] = porosityInit
         porosityDict["range"] = [porosityStart, porosityEnd]
-        result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, porosityDict, KDQDict, lossFunctionSelection, factorSelection, solverSelection, spacialDiff, timeDiff, time, optimId)
+        result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, porosityDict, KDQDict, lossFunctionSelection, factorSelection, solverSelection, spacialDiff, timeDiff, time, optimId, lvl1optim, lvl2optim)
         if retCorr:
             result["shifts"] = {}
             for exp in currentExperimentSet.experiments:
@@ -211,10 +211,15 @@ class Operator:
                 result["shifts"][tail] = exp.shift
         if massBal:
             result["originalFeedTimes"] = {}
+            result["newFeedTimes"] = {}
             for exp in currentExperimentSet.experiments:
                 head, tail = os.path.split(exp.metadata.path)
-                result["originalFeedTimes"][tail] = exp.experimentCondition.shift
+                result["originalFeedTimes"][tail] = exp.experimentCondition.originalFeedTime
                 result["newFeedTimes"][tail] = exp.experimentCondition.feedTime
+        result["optimparams"]["gauss"] = gauss
+        result["optimparams"]["retCorr"] = retCorr
+        result["optimparams"]["retThreshold"] = retThreshold
+        result["optimparams"]["massBal"] = massBal
         return result
 
 

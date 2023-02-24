@@ -1,0 +1,23 @@
+Final Porosity: 0.32
+Final Lv2 Loss Function Value: 250.64440534631535
+
+For component Sac:
+    Final K value: 1.0
+    Final D value: 1.0
+    Final Lv2 Loss Function Value: 36.02913463170723
+
+For component Glc:
+    Final K value: 1.0
+    Final D value: 1.0
+    Final Lv2 Loss Function Value: 64.74846117337592
+
+For component Fru:
+    Final K value: 1.0
+    Final D value: 1.0
+    Final Lv2 Loss Function Value: 60.693915480136724
+
+For component ManOH:
+    Final K value: 1.0
+    Final D value: 1.0
+    Final Lv2 Loss Function Value: 89.17289406109549
+

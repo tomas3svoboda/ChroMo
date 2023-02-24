@@ -32,23 +32,23 @@
                 <input type="checkbox" name="retCorrTest" value="True" id="retCorrTest" oninput="retTimeTresholdInput()" {% if formInfo and formInfo['retCorr'] == True %}checked{% endif %}>
                 <div id="retCorrTresholdDiv" style="display: none;">
                     <label for="retCorrThreshold">Retention time zero threshold<div class="required">*</div></label>
-                    <input type="number" id="retCorrThreshold" name="retCorrThreshold" step="0.000001">
+                    <input type="number" id="retCorrThreshold" name="retCorrThreshold" step="any">
                 </div><br>
                 <label for="massBalTest">Mass balance correction <div class="required">*</div></label>
                 <input type="checkbox" name="massBalTest" value="True" id="massBalTest" {% if formInfo and formInfo['massBal'] == True %}checked{% endif %}><br>
-                <label for="lossFuncTest">Choose a loss function <div class="required">*</div></label>
+                <label for="lossFuncTest">Loss function <div class="required">*</div></label>
                 <select name="lossFuncTest" id="lossFuncTest">
                   <option value="Simple" {% if formInfo and formInfo['lossFunc'] == "Simple" %}selected{% endif %}>Simple</option>
                   <option value="Squares" {% if formInfo and formInfo['lossFunc'] == "Squares" %}selected{% endif %}>Squares</option>
                   <option value="LogSimple" {% if formInfo and formInfo['lossFunc'] == "LogSimple" %}selected{% endif %}>LogSimple</option>
                   <option value="LogSquares" {% if formInfo and formInfo['lossFunc'] == "LogSquares" %}selected{% endif %}>LogSquares</option>
                 </select><br>
-                <label for="solverTest">Choose a solver <div class="required">*</div></label>
+                <label for="solverTest">Solver <div class="required">*</div></label>
                 <select name="solverTest" id="solverTest" oninput="formSolverChangeForTest()">
                   <option value="Lin" {% if formInfo and formInfo['solver'] == "Lin" %}selected{% endif %}>Linear</option>
                   <option value="Nonlin" {% if formInfo and formInfo['solver'] == "Nonlin" %}selected{% endif %}>Non linear</option>
                 </select><br>
-                <label for="factorTest">Choose a factor <div class="required">*</div></label>
+                <label for="factorTest">Factor <div class="required">*</div></label>
                 <select name="factorTest" id="factorTest">
                   <option value="1" {% if formInfo and formInfo['factor'] == 1 %}selected{% endif %}>1</option>
                   <option value="2" {% if formInfo and formInfo['factor'] == 2 %}selected{% endif %}>1/maximalOutputConc</option>
@@ -58,24 +58,24 @@
                   <option value="6" {% if formInfo and formInfo['factor'] == 6 %}selected{% endif %}>1/feedMass</option>
                   <option value="7" {% if formInfo and formInfo['factor'] == 7 %}selected{% endif %}>1/feedMass^2</option>
                 </select><br><br>
-                <label for="porosityTest">Choose a Porosity <div class="required">*</div></label>
-                <input type="number" id="porosityTest" name="porosityTest" min="0.01" max="1" step="0.01"><br>
+                <label for="porosityTest">Porosity <div class="required">*</div></label>
+                <input type="number" id="porosityTest" name="porosityTest" min="0.01" max="1" step="any"><br>
                   <div id="nonLinTest"></div>
-                <label for="componentTest">Choose a Component <div class="required">*</div></label>
+                <label for="componentTest">Component <div class="required">*</div></label>
                  <select name="componentTest" id="componentTest">
                   {% for comp in compList %}
                      <option value="{{comp}}">{{comp}}</option>
                   {% endfor%}
                 </select><br>
                   <div id="paramsTest">
-                      <label for="KStartTest">Choose a Henry constant interval <div class="required">*</div></label>
-                      <input type="number" id="KStartTest" name="KStartTest" min="0" step="1"> - <input type="number" id="KEndTest" name="KEndTest" min="0" step="1"><br>
-                      <label for="KStepTest">Choose a Henry constant step <div class="required">*</div></label>
-                      <input type="number" id="KStepTest" name="KStepTest" min="0" step="1"><br>
-                      <label for="DStartTest">Choose a Dispersion coeficient interval <div class="required">*</div></label>
-                      <input type="number" id="DStartTest" name="DStartTest" min="0" step="1"> - <input type="number" id="DEndTest" name="DEndTest" min="0" step="1"><br>
-                      <label for="DStepTest">Choose a Dispersion coeficient initial guess for {{comp}} <div class="required">*</div></label>
-                      <input type="number" id="DStepTest" name="DStepTest" min="0" step="1"><br>
+                      <label for="KStartTest">Henry constant interval <div class="required">*</div></label>
+                      <input type="number" id="KStartTest" name="KStartTest" min="0" step="any"> - <input type="number" id="KEndTest" name="KEndTest" min="0" step="any"><br>
+                      <label for="KStepTest">Henry constant step <div class="required">*</div></label>
+                      <input type="number" id="KStepTest" name="KStepTest" min="0" step="any"><br>
+                      <label for="DStartTest">Dispersion coefficient interval <div class="required">*</div></label>
+                      <input type="number" id="DStartTest" name="DStartTest" min="0" step="any"> - <input type="number" id="DEndTest" name="DEndTest" min="0" step="any"><br>
+                      <label for="DStepTest">Dispersion coefficient initial guess for {{comp}} <div class="required">*</div></label>
+                      <input type="number" id="DStepTest" name="DStepTest" min="0" step="any"><br>
                   </div>
           <a type="button" onclick="showGraph()" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Graph</a>
           <a type="button" id="newAngleButton" onclick="newAngle()" class="w3-button w3-black w3-padding-large w3-large w3-margin-top" style="display: none;">New Angle</a>

@@ -22,22 +22,6 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
                debugGraph=False,
                full=False):
 
-    '''
-    print("flowRate: " + str(flowRate))
-    print("length: " + str(length))
-    print("diameter: " + str(diameter))
-    print("feedVol: " + str(feedVol))
-    print("feedTime: " + str(feedTime))
-    print("feedConc: " + str(feedConc))
-    print("flowSpeed: " + str(flowSpeed))
-    print("porosity: " + str(porosity))
-    print("henryConst: " + str(henryConst))
-    print("disperCoef: " + str(disperCoef))
-    print("Nx: " + str(Nx))
-    print("Nt: " + str(Nt))
-    print("time: " + str(time))
-    '''
-
     def diagonal_form(a, lower=1, upper=1):
         # Transforms banded matrix into diagonal ordered form
         # allows to use scipy.linalg.solve_banded
@@ -64,6 +48,19 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
     # 1 h = 3600 s
     # 1 mL = 1000 mm^3
 
+    '''print("flowRate: " + str(flowRate))
+    print("length: " + str(length))
+    print("diameter: " + str(diameter))
+    print("feedVol: " + str(feedVol))
+    print("feedTime: " + str(feedTime))
+    print("feedConc: " + str(feedConc))
+    print("flowSpeed: " + str(flowSpeed))
+    print("porosity: " + str(porosity))
+    print("henryConst: " + str(henryConst))
+    print("disperCoef: " + str(disperCoef))
+    print("Nx: " + str(Nx))
+    print("Nt: " + str(Nt))
+    print("time: " + str(time))'''
 
     # Defining constants
     a = disperCoef/((((1-porosity)*henryConst)/porosity)+1)  # *** !!! PODLE DOKUMENTU
@@ -75,8 +72,8 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
     t = np.linspace(0, time, Nt)  # Preparation of time vector
     dt = time / Nt  # Calculating time step [mm]
 
-    if dt > feedTime/10:
-        print("WARNING: discretization time step is more than 1/10 of feed time!")
+    '''if dt > feedTime/10:
+        print("WARNING: discretization time step is more than 1/10 of feed time!")'''
 
     feedSteps = feedTime // dt  # Whole number of feed iterations
     feedTimeAprox = feedTime % dt  # approximation of division

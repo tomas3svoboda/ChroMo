@@ -6,20 +6,31 @@ import functions.global_ as gl
 from functions.solvers.Lin_Solver import Lin_Solver
 
 
-def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, KDIntervals, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1):
+def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, KDIntervals, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, lvl1optim = None, lvl2optim = None):
     print("Calling Bilevel_Optim!")
     gl.compParamDict[optimId] = {}
     gl.compRangeDict[optimId] = {}
     gl.lossFunctionProgress[optimId] = {}
     gl.lv2LossFunctionVals[optimId] = {}
     for key in experimentClustersComp.clusters:
-        gl.compParamDict[optimId][key] = [KDIntervals[key]["kinit"], KDIntervals[key]["dinit"], KDIntervals[key]["qinit"]]
-        gl.compRangeDict[optimId][key] = [KDIntervals[key]["krange"], KDIntervals[key]["drange"], KDIntervals[key]["qrange"]]
+        if solver == "Lin":
+            gl.compParamDict[optimId][key] = [KDIntervals[key]["kinit"], KDIntervals[key]["dinit"]]
+            gl.compRangeDict[optimId][key] = [KDIntervals[key]["krange"], KDIntervals[key]["drange"]]
+        elif solver == "Nonlin":
+            gl.compParamDict[optimId][key] = [KDIntervals[key]["kinit"], KDIntervals[key]["dinit"], KDIntervals[key]["qinit"]]
+            gl.compRangeDict[optimId][key] = [KDIntervals[key]["krange"], KDIntervals[key]["drange"], KDIntervals[key]["qrange"]]
     gl.porosity[optimId] = porosityIntervals["init"]
     gl.porosityRange[optimId] = porosityIntervals["range"]
-    Lev1_Optim(experimentClustersComp, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId)
-    result = dict()
-    result["solver"] = solver
+    Lev1_Optim(experimentClustersComp, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl1optim, lvl2optim)
+    result = {}
+    result["optimparams"] = {}
+    result["optimparams"]["porosityIntervals"] = porosityIntervals
+    result["optimparams"]["KDIntervals"] = KDIntervals
+    result["optimparams"]["lossFunction"] = lossFunction
+    result["optimparams"]["factor"] = factor
+    result["optimparams"]["solver"] = solver
+    result["optimparams"]["lvl1optim"] = lvl1optim
+    result["optimparams"]["lvl2optim"] = lvl2optim
     result["porosity"] = gl.porosity[optimId]
     result["lv1lossfunctionval"] = gl.lv1LossFunctionVal[optimId]
     result["compparams"] = gl.compParamDict[optimId]

@@ -34,23 +34,23 @@
         <input type="checkbox" name="retCorr" value="True" id="retCorr" oninput="retTimeTresholdInput()" {% if formInfo and formInfo['retCorr'] == True %}checked{% endif %}>
          <div id="retCorrTresholdDiv" style="display: none;">
             <label for="retCorrThreshold">Retention time zero threshold<div class="required">*</div></label>
-            <input type="number" id="retCorrThreshold" name="retCorrThreshold" step="0.000001">
+            <input type="number" id="retCorrThreshold" name="retCorrThreshold" step="any">
          </div><br>
         <label for="massBal">Mass balance correction <div class="required">*</div></label>
         <input type="checkbox" name="massBal" value="True" id="massBal" {% if formInfo and formInfo['massBal'] == True %}checked{% endif %}><br>
-        <label for="lossFunc">Choose a loss function <div class="required">*</div></label>
+        <label for="lossFunc">Loss function <div class="required">*</div></label>
         <select name="lossFunc" id="lossFunc">
           <option value="Simple" {% if formInfo and formInfo['lossFunc'] == "Simple" %}selected{% endif %}>Simple</option>
           <option value="Squares" {% if formInfo and formInfo['lossFunc'] == "Squares" %}selected{% endif %}>Squares</option>
           <option value="LogSimple" {% if formInfo and formInfo['lossFunc'] == "LogSimple" %}selected{% endif %}>LogSimple</option>
           <option value="LogSquares" {% if formInfo and formInfo['lossFunc'] == "LogSquares" %}selected{% endif %}>LogSquares</option>
         </select><br>
-        <label for="solver">Choose a solver <div class="required">*</div></label>
+        <label for="solver">Solver <div class="required">*</div></label>
         <select name="solver" id="solver" oninput="formSolverChange()">
           <option value="Lin" {% if formInfo and formInfo['solver'] == "Lin" %}selected{% endif %}>Linear</option>
           <option value="Nonlin" {% if formInfo and formInfo['solver'] == "Nonlin" %}selected{% endif %}>Non linear</option>
         </select><br>
-        <label for="factor">Choose a factor <div class="required">*</div></label>
+        <label for="factor">Factor <div class="required">*</div></label>
         <select name="factor" id="factor">
           <option value="1" {% if formInfo and formInfo['factor'] == 1 %}selected{% endif %}>1</option>
           <option value="2" {% if formInfo and formInfo['factor'] == 2 %}selected{% endif %}>1/maximalOutputConc</option>
@@ -60,29 +60,129 @@
           <option value="6" {% if formInfo and formInfo['factor'] == 6 %}selected{% endif %}>1/feedMass</option>
           <option value="7" {% if formInfo and formInfo['factor'] == 7 %}selected{% endif %}>1/feedMass^2</option>
         </select><br><br>
-        <label for="porosityStart">Choose a porosity interval <div class="required">*</div></label>
-        <input type="number" id="porosityStart" name="porosityStart" min="0.01" max="1" step="0.01" required> - <input type="number" id="porosityEnd" name="porosityEnd" min="0.01" max="1" step="0.01" required><br>
-        <label for="porosityInit">Choose a initial guess for Porosity <div class="required">*</div></label>
-        <input type="number" id="porosityInit" name="porosityInit" min="0.01" max="1" step="0.01" required><br><br>
+        <label for="porosityStart">Porosity interval <div class="required">*</div></label>
+        <input type="number" id="porosityStart" name="porosityStart" min="0.01" max="1" step="any" required> - <input type="number" id="porosityEnd" name="porosityEnd" min="0.01" max="1" step="any" required><br>
+        <label for="porosityInit">Porosity initial guess<div class="required">*</div></label>
+        <input type="number" id="porosityInit" name="porosityInit" min="0.01" max="1" step="any" required><br><br>
          {% for comp in compList %}
          <div class="variableParams {{comp}}">
-            <label for="{{comp}}KStart">Choose a Henry constant interval for {{comp}} <div class="required">*</div></label>
-            <input type="number" id="{{comp}}KStart" name="{{comp}}KStart" min="0" step="1" required> - <input type="number" id="{{comp}}KEnd" name="{{comp}}KEnd" min="0" step="1" required><br>
-            <label for="{{comp}}KInit">Choose a Henry constant initial guess for {{comp}} <div class="required">*</div></label>
-            <input type="number" id="{{comp}}KInit" name="{{comp}}KInit" min="0" step="1" required><br>
-            <label for="{{comp}}DStart">Choose a Dispersion coeficient interval for {{comp}} <div class="required">*</div></label>
-            <input type="number" id="{{comp}}DStart" name="{{comp}}DStart" min="0" step="1" required> - <input type="number" id="{{comp}}DEnd" name="{{comp}}DEnd" min="0" step="1" required><br>
-            <label for="{{comp}}DInit">Choose a Dispersion coeficient initial guess for {{comp}} <div class="required">*</div></label>
-            <input type="number" id="{{comp}}DInit" name="{{comp}}DInit" min="0" step="1" required><br>
+            <label for="{{comp}}KStart">Henry constant interval for {{comp}} <div class="required">*</div></label>
+            <input type="number" id="{{comp}}KStart" name="{{comp}}KStart" min="0" step="any" required> - <input type="number" id="{{comp}}KEnd" name="{{comp}}KEnd" min="0" step="any" required><br>
+            <label for="{{comp}}KInit">Henry constant initial guess for {{comp}} <div class="required">*</div></label>
+            <input type="number" id="{{comp}}KInit" name="{{comp}}KInit" min="0" step="any" required><br>
+            <label for="{{comp}}DStart">Dispersion coefficient interval for {{comp}} <div class="required">*</div></label>
+            <input type="number" id="{{comp}}DStart" name="{{comp}}DStart" min="0" step="any" required> - <input type="number" id="{{comp}}DEnd" name="{{comp}}DEnd" min="0" step="any" required><br>
+            <label for="{{comp}}DInit">Dispersion coefficient initial guess for {{comp}} <div class="required">*</div></label>
+            <input type="number" id="{{comp}}DInit" name="{{comp}}DInit" min="0" step="any" required><br>
             <div class="nonLinParam">
-                <label for="{{comp}}QStart">Choose a Saturation coeficient interval for {{comp}}:</label>
-                <input type="number" id="{{comp}}QStart" name="{{comp}}QStart" min="0" step="1" required> - <input type="number" id="{{comp}}QEnd" name="{{comp}}QEnd" min="0" step="1" required><br>
-                <label for="{{comp}}QInit">Choose a Saturation coeficient initial guess for {{comp}}:</label>
-                <input type="number" id="{{comp}}QInit" name="{{comp}}QInit" min="0" step="1" required><br>
+                <label for="{{comp}}QStart">Saturation coefficient interval for {{comp}}:</label>
+                <input type="number" id="{{comp}}QStart" name="{{comp}}QStart" min="0" step="any" required> - <input type="number" id="{{comp}}QEnd" name="{{comp}}QEnd" min="0" step="any" required><br>
+                <label for="{{comp}}QInit">Saturation coefficient initial guess for {{comp}}:</label>
+                <input type="number" id="{{comp}}QInit" name="{{comp}}QInit" min="0" step="any" required><br>
             </div>
         </div><br>
         {% endfor %}
-
+        <h3>Optimization Options</h3>
+        <div id="lvl1optimsettings">
+            <label for="lvl1alg">Level 1 algorithm <div class="required">*</div></label>
+            <select name="lvl1alg" id="lvl1alg" oninput="changeOptimSettings(1)">
+              <option value="2" {% if formInfo and formInfo['lvl1optimsettings'] and formInfo['lvl1optimsettings']['algorithm'] == '2'%}selected{% endif %}>Nelder-Mead</option>
+              <option value="1" {% if formInfo and formInfo['lvl1optimsettings'] and formInfo['lvl1optimsettings']['algorithm'] == '1'%}selected{% endif %}>Brute Force</option>
+              <option value="3" {% if formInfo and formInfo['lvl1optimsettings'] and formInfo['lvl1optimsettings']['algorithm'] == '3'%}selected{% endif %}>SHGO</option>
+              <option value="4" {% if formInfo and formInfo['lvl1optimsettings'] and formInfo['lvl1optimsettings']['algorithm'] == '4'%}selected{% endif %}>Powell</option>
+            </select><br><br>
+             <div id="lvl1bruteforce">
+                <label for="lvl1bruteforceNs">Number of grid points</label>
+                <input type="number" id="lvl1bruteforceNs" name="lvl1bruteforceNs" min="1" step="1"><br>
+             </div>
+             <div id="lvl1neldermead">
+                <label for="lvl1neldermeadmaxiter">Maximum number of iteration</label>
+                <input type="number" id="lvl1neldermeadmaxiter" name="lvl1neldermeadmaxiter" min="1" step="1"><br>
+                <label for="lvl1neldermeadmaxfev">Maximum number of function evaluations</label>
+                <input type="number" id="lvl1neldermeadmaxfev" name="lvl1neldermeadmaxfev" min="1" step="1"><br>
+                <label for="lvl1neldermeadxatol">Absolute error in variable acceptable for convergence</label>
+                <input type="number" id="lvl1neldermeadxatol" name="lvl1neldermeadxatol" min="0" step="any"><br>
+                <label for="lvl1neldermeadfatol">Absolute error in function acceptable for convergence</label>
+                <input type="number" id="lvl1neldermeadfatol" name="lvl1neldermeadfatol" min="0" step="any"><br>
+                <label for="lvl1neldermeadadaptive">Adapt algorithm parameters to dimensionality of problem</label>
+                <select name="lvl1neldermeadadaptive" id="lvl1neldermeadadaptive">
+                  <option value="0" {% if formInfo and formInfo['lvl1optimsettings'] and formInfo['lvl1optimsettings']['algorithm'] == '2' and formInfo['lvl1optimsettings']['settings']["aptive"] == '0'%}selected{% endif %}>No</option>
+                  <option value="1" {% if formInfo and formInfo['lvl1optimsettings'] and formInfo['lvl1optimsettings']['algorithm'] == '2' and formInfo['lvl1optimsettings']['settings']["aptive"] == '1'%}selected{% endif %}>Yes</option>
+                </select><br>
+             </div>
+             <div id="lvl1shgo">
+                <label for="lvl1shgon">Number of sampling points for construction of the simplicial complex</label>
+                <input type="number" id="lvl1shgon" name="lvl1shgon" min="1" step="1"><br>
+                <label for="lvl1shgoiters">Number of iterations for construction of the simplicial complex</label>
+                <input type="number" id="lvl1shgoiters" name="lvl1shgoiters" min="1" step="1"><br>
+                <label for="lvl1shgomaxev">Maximum number of sampling evaluations</label>
+                <input type="number" id="lvl1shgomaxev" name="lvl1shgomaxev" min="1" step="1"><br>
+                <label for="lvl1shgomaxiter">Maximum number of iterations</label>
+                <input type="number" id="lvl1shgomaxiter" name="lvl1shgomaxiter" min="1" step="1"><br>
+                <label for="lvl1shgomaxfev">Maximum number of function evaluations</label>
+                <input type="number" id="lvl1shgomaxfev" name="lvl1shgomaxfev" min="1" step="1"><br>
+                <label for="lvl1shgomaxtime">Maximum processing runtime</label>
+                <input type="number" id="lvl1shgomaxtime" name="lvl1shgomaxtime" min="0" step="any"><br>
+                <label for="lvl1shgof_tol">Precision goal</label>
+                <input type="number" id="lvl1shgof_tol" name="lvl1shgof_tol" step="any"><br>
+                <label for="lvl1shgof_min">Minimum objective function value</label>
+                <input type="number" id="lvl1shgof_min" name="lvl1shgof_min" step="any"><br>
+             </div>
+             <div id="lvl1powell">
+                <label for="lvl1powellmaxiter">Maximum number of iterations</label>
+                <input type="number" id="lvl1powellmaxiter" name="lvl1powellmaxiter" min="1" step="1"><br>
+             </div>
+         </div><br><br>
+         <div id="lvl2optimsettings">
+            <label for="lvl2alg">Choose a Level 2 optimization algorithm <div class="required">*</div></label>
+            <select name="lvl2alg" id="lvl2alg" oninput="changeOptimSettings(2)">
+              <option value="2" {% if formInfo and formInfo['lvl2optimsettings'] and formInfo['lvl2optimsettings']['algorithm'] == '2'%}selected{% endif %}>Nelder-Mead</option>
+              <option value="1" {% if formInfo and formInfo['lvl2optimsettings'] and formInfo['lvl2optimsettings']['algorithm'] == '1'%}selected{% endif %}>Brute Force</option>
+              <option value="3" {% if formInfo and formInfo['lvl2optimsettings'] and formInfo['lvl2optimsettings']['algorithm'] == '3'%}selected{% endif %}>SHGO</option>
+              <option value="4" {% if formInfo and formInfo['lvl2optimsettings'] and formInfo['lvl2optimsettings']['algorithm'] == '4'%}selected{% endif %}>Powell</option>
+            </select><br><br>
+             <div id="lvl2bruteforce">
+                <label for="lvl2bruteforceNs">Number of grid points</label>
+                <input type="number" id="lvl2bruteforceNs" name="lvl2bruteforceNs" min="1" step="1"><br>
+             </div>
+             <div id="lvl2neldermead">
+                <label for="lvl2neldermeadmaxiter">Maximum number of iterations</label>
+                <input type="number" id="lvl2neldermeadmaxiter" name="lvl2neldermeadmaxiter" min="1" step="1"><br>
+                <label for="lvl2neldermeadmaxfev">Maximum number of function evaluations</label>
+                <input type="number" id="lvl2neldermeadmaxfev" name="lvl2neldermeadmaxfev" min="1" step="1"><br>
+                <label for="lvl2neldermeadxatol">Absolute error in variable acceptable for convergence</label>
+                <input type="number" id="lvl2neldermeadxatol" name="lvl2neldermeadxatol" min="0" step="any"><br>
+                <label for="lvl2neldermeadfatol">Absolute error in function acceptable for convergence</label>
+                <input type="number" id="lvl2neldermeadfatol" name="lvl2neldermeadfatol" min="0" step="any"><br>
+                <label for="lvl2neldermeadadaptive">Adapt algorithm parameters to dimensionality of problem</label>
+                <select name="lvl2neldermeadadaptive" id="lvl2neldermeadadaptive">
+                  <option value="0" {% if formInfo and formInfo['lvl2optimsettings'] and formInfo['lvl2optimsettings']['algorithm'] == '2' and formInfo['lvl2optimsettings']['settings']["aptive"] == '0'%}selected{% endif %}>No</option>
+                  <option value="1" {% if formInfo and formInfo['lvl2optimsettings'] and formInfo['lvl2optimsettings']['algorithm'] == '2' and formInfo['lvl2optimsettings']['settings']["aptive"] == '1'%}selected{% endif %}>Yes</option>
+                </select><br>
+             </div>
+             <div id="lvl2shgo">
+                <label for="lvl2shgon">Number of sampling points for construction of the simplicial complex</label>
+                <input type="number" id="lvl2shgon" name="lvl2shgon" min="1" step="1"><br>
+                <label for="lvl2shgoiters">Number of iterations for construction of the simplicial complex</label>
+                <input type="number" id="lvl2shgoiters" name="lvl2shgoiters" min="1" step="1"><br>
+                <label for="lvl2shgomaxev">Maximum number of sampling evaluations</label>
+                <input type="number" id="lvl2shgomaxev" name="lvl2shgomaxev" min="1" step="1"><br>
+                <label for="lvl2shgomaxiter">Maximum number of iterations</label>
+                <input type="number" id="lvl2shgomaxiter" name="lvl2shgomaxiter" min="1" step="1"><br>
+                <label for="lvl2shgomaxfev">Maximum number of function evaluations</label>
+                <input type="number" id="lvl2shgomaxfev" name="lvl2shgomaxfev" min="1" step="1"><br>
+                <label for="lvl2shgomaxtime">Maximum processing runtime</label>
+                <input type="number" id="lvl2shgomaxtime" name="lvl2shgomaxtime" min="0" step="any"><br>
+                <label for="lvl2shgof_tol">Precision goal</label>
+                <input type="number" id="lvl2shgof_tol" name="lvl2shgof_tol" step="any"><br>
+                <label for="lvl2shgof_min">Minimum objective function value</label>
+                <input type="number" id="lvl2shgof_min" name="lvl2shgof_min" step="any"><br>
+             </div>
+             <div id="lvl2powell">
+                <label for="lvl2powellmaxiter">Maximum number of iterations</label>
+                <input type="number" id="lvl2powellmaxiter" name="lvl2powellmaxiter" min="1" step="1"><br>
+             </div>
+         </div>
         <input class="w3-button w3-black w3-padding-large w3-large w3-margin-top" type=submit value=Start>
     </form>
   </div>
@@ -91,13 +191,22 @@
     formSolverChange()
     retTimeTresholdInput()
     {% if formInfo %}
+        {% if formInfo['porosityStart'] %}
+            document.getElementById("porosityStart").value = {{formInfo['porosityStart']}}
+        {% endif %}
+        {% if formInfo['porosityEnd'] %}
+            document.getElementById("porosityEnd").value = {{formInfo['porosityEnd']}}
+        {% endif %}
         {% if formInfo['porosity'] %}
             document.getElementById("porosityInit").value = {{formInfo['porosity']}}
         {% endif %}
-        {% for comp in compList %}
+        {% if formInfo['porosity'] %}
+            document.getElementById("porosityInit").value = {{formInfo['porosity']}}
+        {% endif %}
         {% if formInfo['retCorrThreshold'] %}
             document.getElementById("retCorrThreshold").value = {{formInfo['retCorrThreshold']}}
         {% endif %}
+        {% for comp in compList %}
                 {% if formInfo[comp + 'KStart'] %}
                     document.getElementById("{{comp}}KStart").value = {{formInfo[comp + 'KStart']}}
                 {% endif %}
@@ -120,6 +229,68 @@
                     document.getElementById("{{comp}}DInit").value = {{formInfo[comp + 'D']}}
                 {% endif %}
         {% endfor %}
+        {% if formInfo['lvl1optimsettings'] %}
+            {% if formInfo['lvl1optimsettings']['algorithm'] == '1' %}
+                {% for setting in formInfo['lvl1optimsettings']['settings']%}
+                    {% if formInfo['lvl1optimsettings']['settings'][setting] != "" %}
+                        document.getElementById("lvl1bruteforce{{setting}}").value = {{formInfo['lvl1optimsettings']['settings'][setting]}}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% if formInfo['lvl1optimsettings']['algorithm'] == '2' %}
+                {% for setting in formInfo['lvl1optimsettings']['settings']%}
+                    {% if setting != 'aptive' and formInfo['lvl1optimsettings']['settings'][setting] != "" %}
+                        document.getElementById("lvl1neldermead{{setting}}").value = {{formInfo['lvl1optimsettings']['settings'][setting]}}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% if formInfo['lvl1optimsettings']['algorithm'] == '3' %}
+                {% for setting in formInfo['lvl1optimsettings']['settings']%}
+                    {% if formInfo['lvl1optimsettings']['settings'][setting] != "" %}
+                        document.getElementById("lvl1shgo{{setting}}").value = {{formInfo['lvl1optimsettings']['settings'][setting]}}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% if formInfo['lvl1optimsettings']['algorithm'] == '4' %}
+                {% for setting in formInfo['lvl1optimsettings']['settings']%}
+                    {% if formInfo['lvl1optimsettings']['settings'][setting] != "" %}
+                        document.getElementById("lvl1powell{{setting}}").value = {{formInfo['lvl1optimsettings']['settings'][setting]}}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endif %}
+        {% if formInfo['lvl2optimsettings'] %}
+            {% if formInfo['lvl2optimsettings']['algorithm'] == '1' %}
+                {% for setting in formInfo['lvl2optimsettings']['settings']%}
+                    {% if formInfo['lvl2optimsettings']['settings'][setting] != "" %}
+                        document.getElementById("lvl2bruteforce{{setting}}").value = {{formInfo['lvl2optimsettings']['settings'][setting]}}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% if formInfo['lvl2optimsettings']['algorithm'] == '2' %}
+                {% for setting in formInfo['lvl2optimsettings']['settings']%}
+                    {% if setting != 'aptive' and formInfo['lvl2optimsettings']['settings'][setting] != "" %}
+                        document.getElementById("lvl2neldermead{{setting}}").value = {{formInfo['lvl2optimsettings']['settings'][setting]}}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% if formInfo['lvl2optimsettings']['algorithm'] == '3' %}
+                {% for setting in formInfo['lvl2optimsettings']['settings']%}
+                    {% if formInfo['lvl2optimsettings']['settings'][setting] != "" %}
+                        document.getElementById("lvl2shgo{{setting}}").value = {{formInfo['lvl2optimsettings']['settings'][setting]}}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% if formInfo['lvl2optimsettings']['algorithm'] == '4' %}
+                {% for setting in formInfo['lvl2optimsettings']['settings']%}
+                    {% if formInfo['lvl2optimsettings']['settings'][setting] != "" %}
+                        document.getElementById("lvl2powell{{setting}}").value = {{formInfo['lvl2optimsettings']['settings'][setting]}}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endif %}
     {% endif %}
+    changeOptimSettings(1)
+    changeOptimSettings(2)
 </script>
 {% endblock %}

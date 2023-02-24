@@ -47,7 +47,7 @@ function formSolverChangeForTest(){
     params = document.getElementById("paramsTest")
     if(solver == "Nonlin"){
         div.innerHTML =`
-                <label for="saturationTest">Choose a Saturation <div class="required">*</div></label>
+                <label for="saturationTest">Saturation <div class="required">*</div></label>
                 <input type="number" value="saturationTest" id="saturationTest" name="saturationTest" min="0" step="1" required><br>
            `
         params.innerHTML = params.innerHTML.replaceAll("Henry","Langmuir")
@@ -204,3 +204,18 @@ async function showGraph3(f = "mainform", aurl = "/prograph", i = "imgdiv"){
     document.getElementById(i).innerHTML = content
 }
 
+function changeOptimSettings(lvl){
+    let alg = document.getElementById("lvl" + lvl + "alg").value
+    document.getElementById("lvl" + lvl + "bruteforce").style.display = "none"
+    document.getElementById("lvl" + lvl + "neldermead").style.display = "none"
+    document.getElementById("lvl" + lvl + "shgo").style.display = "none"
+    document.getElementById("lvl" + lvl + "powell").style.display = "none"
+    if( alg == "1" )
+        document.getElementById("lvl" + lvl + "bruteforce").style.display = "block"
+    else if( alg == "2" )
+        document.getElementById("lvl" + lvl + "neldermead").style.display = "block"
+    else if( alg == "3" )
+        document.getElementById("lvl" + lvl + "shgo").style.display = "block"
+    else if( alg == "4" )
+        document.getElementById("lvl" + lvl + "powell").style.display = "block"
+}
