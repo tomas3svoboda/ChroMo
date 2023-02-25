@@ -1034,6 +1034,6 @@ def Web_Server():
         return render_template('Index.html', badLogin=True)
 
     print("localhost:6969")
-    api.run(debug=True)
-    #serve(api, listen='*:6969', threads=4)
+    #api.run(debug=True)
+    serve(api, listen='*:6969', threads=4)
 

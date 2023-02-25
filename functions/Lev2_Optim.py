@@ -32,6 +32,7 @@ def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor, solver, s
         bnds = [(gl.compRangeDict[optimId][key][0][0], gl.compRangeDict[optimId][key][0][1]), (gl.compRangeDict[optimId][key][1][0], gl.compRangeDict[optimId][key][1][1]), (gl.compRangeDict[optimId][key][2][0], gl.compRangeDict[optimId][key][2][1])]
     else:
         raise "Unknown solver choice in Lev2_Optim"
+    print("optimId: " + str(optimId) + " lvl2alg: " + str(lvl2optim["algorithm"]))
     res = handle_Optim_Settings(Lev2_Loss_Function,
                                 gl.compParamDict[optimId][key],
                                 (experimentCluster, porosity, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId),

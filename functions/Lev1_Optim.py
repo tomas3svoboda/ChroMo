@@ -8,6 +8,7 @@ def Lev1_Optim(experimentClustersComp, lossFunction, factor, solver, spacialDiff
     print("Calling Lev1_Optim with porosity " + str(round(gl.porosity[optimId], 2)) + " and range [" + str(round(gl.porosityRange[optimId][0], 2)) + ", " + str(round(gl.porosityRange[optimId][1], 2)) + "]!")
     #res = minimize(Lev1_Loss_Function, gl.porosity, args=(experimentClustersComp), bounds=Bounds(lb=0, ub=1), method='Nelder-Mead',options={'fatol': 2,'maxfev': 25})
     gl.index[optimId] = 0
+    print("optimId: " + str(optimId) + " lvl1alg: " + str(lvl1optim["algorithm"]))
     res = handle_Optim_Settings(Lev1_Loss_Function, gl.porosity[optimId],
                               (experimentClustersComp, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl2optim),
                                [(gl.porosityRange[optimId][0], gl.porosityRange[optimId][1])],
