@@ -7,13 +7,15 @@
 {% block navbar %}
 <!-- Navbar -->
 <div class="w3-top">
-  <div class="w3-bar w3-blue w3-card w3-left-align w3-large">
-    <a class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large w3-blue" href="javascript:void(0);" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
+  <div class="w3-bar siemens-blue w3-card w3-left-align w3-large">
+    <a class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large" href="javascript:void(0);" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
     <a href="{{ url_for('get_main_page') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white">Home</a>
+    <a href="{{ url_for('upload_file_page') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white">Start</a>
     {% if user %}
     <div class="w3-bar-item w3-button w3-hide-small w3-padding-large  w3-white bar-right">{{user}}</div>
     <a href="{{ url_for('logout') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white bar-right">Logout</a>
-    <a href="#" class="w3-bar-item w3-button w3-hide-small w3-padding-large  w3-white bar-right">Solver</a>
+    <a href="{{ url_for('get_projects_result_list') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white bar-right">Results</a>
+    <a href="#" class="w3-bar-item w3-button w3-hide-small w3-padding-large  w3-white bar-right">Solver Settings</a>
     {% endif %}
   </div>
 </div>
@@ -24,13 +26,13 @@
   <div class="w3-content">
      <h1>Set Solver Settings</h1>
      <form method=post enctype=multipart/form-data class="form-style-1">
-         <label for="time">Choose a time [s] (set this to match experiment data) <div class="required">*</div></label>
+         <label for="time">Time [s] (set this to match experiment data) <div class="required">*</div></label>
          <input type="number" id="time" name="time"><br>
-         <label for="spacialDiff">Choose number of spacial differences<div class="required">*</div></label>
+         <label for="spacialDiff">Number of spacial differences<div class="required">*</div></label>
          <input type="number" id="spacialDiff" name="spacialDiff"><br>
-         <label for="timeDiff">Choose number of time differences<div class="required">*</div></label>
+         <label for="timeDiff">Number of time differences<div class="required">*</div></label>
          <input type="number" id="timeDiff" name="timeDiff"><br>
-         <input type="submit" value="Submit" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">
+         <input type="submit" value="Submit" class="w3-button siemens-blue w3-padding-large w3-large w3-margin-top">
     </form>
     </div>
 </div>

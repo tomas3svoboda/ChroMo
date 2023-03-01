@@ -68,7 +68,6 @@ select{
 	height: 100px;
 }
 .form-style-1 input[type=submit], .form-style-1 input[type=button]{
-	background: #4B99AD;
 	padding: 8px 15px 8px 15px;
 	border: none;
 	color: #fff;

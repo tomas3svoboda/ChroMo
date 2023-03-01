@@ -41,8 +41,8 @@ def Model_Analysis(experimentComp, solver, params, spacialDiff = 30, timeDiff = 
             fig4 = plt.figure(4)
             ax4 = fig4.add_subplot(111)
             ax4.plot(t, model[2])  # Plot the residuals over time
-            ax4.xlabel('Time [s]')
-            ax4.ylabel('Residuals')
+            ax4.set_xlabel('Time [s]')
+            ax4.set_ylabel('Residuals')
 
         dx = length / spacialDiff
         x_plot = np.round(np.linspace(0, spacialDiff, 10)).astype(int)

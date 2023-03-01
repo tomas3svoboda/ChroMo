@@ -7,15 +7,16 @@
 {% block navbar %}
 <!-- Navbar -->
 <div class="w3-top">
-  <div class="w3-bar w3-blue w3-card w3-left-align w3-large">
-    <a class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large w3-blue" href="javascript:void(0);" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
+  <div class="w3-bar siemens-blue w3-card w3-left-align w3-large">
+    <a class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large siemens-blue" href="javascript:void(0);" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
     <a href="{{ url_for('get_main_page') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white">Home</a>
-    <a href="{{ url_for('upload_file_page') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white">Upload</a>
+    <a href="{{ url_for('upload_file_page') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white">Start</a>
     <a href="#" class="w3-bar-item w3-button w3-hide-small w3-padding-large  w3-white">Loss Function Analysis</a>
     {% if user %}
     <div class="w3-bar-item w3-button w3-hide-small w3-padding-large  w3-white bar-right">{{user}}</div>
     <a href="{{ url_for('logout') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white bar-right">Logout</a>
-    <a href="{{ url_for('get_projects_solver') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white bar-right">Solver</a>
+    <a href="{{ url_for('get_projects_result_list') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white bar-right">Results</a>
+    <a href="{{ url_for('get_projects_solver') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white bar-right">Solver Settings</a>
     {% endif %}
   </div>
 </div>
@@ -77,11 +78,11 @@
                       <label for="DStepTest">Dispersion coefficient initial guess for {{comp}} <div class="required">*</div></label>
                       <input type="number" id="DStepTest" name="DStepTest" min="0" step="any"><br>
                   </div>
-          <a type="button" onclick="showGraph()" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Graph</a>
-          <a type="button" id="newAngleButton" onclick="newAngle()" class="w3-button w3-black w3-padding-large w3-large w3-margin-top" style="display: none;">New Angle</a>
-          <a type="button" id="downloadMatrixButton" onclick="downloadMatrix()" class="w3-button w3-black w3-padding-large w3-large w3-margin-top" style="display: none;">Download Matrix</a>
-        <a href="{{ url_for('get_projects_test2') }}" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Manual Estimation</a>
-          <input type="submit" value="Optimization" formaction="{{ url_for('post_projects_test_continue') }}" class="w3-button w3-black w3-padding-large w3-large w3-margin-top">
+          <a type="button" onclick="showGraph()" class="w3-button siemens-blue w3-padding-large w3-large w3-margin-top w3-round">Graph</a>
+          <a type="button" id="newAngleButton" onclick="newAngle()" class="w3-button siemens-blue w3-padding-large w3-large w3-margin-top w3-round" style="display: none;">New Angle</a>
+          <a type="button" id="downloadMatrixButton" onclick="downloadMatrix()" class="w3-button siemens-blue w3-padding-large w3-large w3-margin-top w3-round" style="display: none;">Download Matrix</a>
+        <a href="{{ url_for('get_projects_test2') }}" class="w3-button siemens-blue w3-padding-large w3-large w3-margin-top w3-round">Manual Estimation</a>
+          <input type="submit" value="Optimization" formaction="{{ url_for('post_projects_test_continue') }}" class="w3-button siemens-blue w3-padding-large w3-large w3-margin-top w3-round">
           <iframe id="invis_iframe" style="display:none;"></iframe>
       </form>
       <div id="imgdiv">

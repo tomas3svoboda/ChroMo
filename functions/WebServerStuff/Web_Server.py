@@ -566,8 +566,6 @@ def Web_Server():
             clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
         experimentClusterComp = clusterComp[flask_login.current_user.id]
         compList[flask_login.current_user.id] = experimentClusterComp.clusters.keys()
-        print(formInfo["lvl1optimsettings"])
-        print(formInfo["lvl2optimsettings"])
         return render_template('ParamsForm.html', compList = compList[flask_login.current_user.id], formInfo = formInfo, user = flask_login.current_user.id)
 
     @api.route('/projects/params', methods=['POST'])

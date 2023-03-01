@@ -35,6 +35,11 @@ body,h1,h2,h3,h4,h5,h6 {
 .control-group.success .fileupload .fileupload-preview{color:#468847;}
 .control-group.success .fileupload .thumbnail{border-color:#468847;}
 
+.siemens-blue{
+    color: white;
+    background-color: #00A1D1;
+}
+
 input[type=checkbox]{
     box-sizing: border-box;
 
