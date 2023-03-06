@@ -15,6 +15,7 @@ def Serialize_File_To_JSON(file):
     jsonDict["columnDiameter"] = float(df.iat[1, 1])
     jsonDict["flowRate"] = float(df.iat[2, 1])
     jsonDict["feedVolume"] = float(df.iat[3, 1])
+    jsonDict["deadVolume"] = float(df.iat[4, 1])
     jsonDict["components"] = []
     columnNames = df.iloc[[7]].to_numpy()[0]
     feedConcentrations = df.iloc[[6]].replace(',', '.', regex=True).to_numpy()[0][1:]

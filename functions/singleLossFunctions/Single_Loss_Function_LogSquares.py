@@ -2,12 +2,15 @@ from functions.solvers.Solver_Choice import Solver_Choice
 from scipy.interpolate import interp1d
 import math
 import numpy as np
+from functions.Dead_Volume_Adjustment import Dead_Volume_Adjustment
 # Calculates loss value of sigle particular solution and according time series. Serves for isotherm decision.
 
 def Single_Loss_Function_LogSquares(params, experimentComp, solver, factor, spacialDiff, timeDiff, time):
     errSum = 0
     df = experimentComp.concentrationTime
     modelCurve = Solver_Choice(solver, params, experimentComp, spacialDiff, timeDiff, time)[:, -1]
+    modelCurve = Dead_Volume_Adjustment(modelCurve, experimentComp.experiment.experimentCondition.deadVolume,
+                                        experimentComp.experiment.experimentCondition.flowRate, time/timeDiff)
     minTime = df.iat[0, 0]
     maxTime = df.iat[-1, 0]
     time = np.linspace(minTime, maxTime, modelCurve.size)

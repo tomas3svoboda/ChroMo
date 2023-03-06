@@ -2,6 +2,7 @@ from functions.solvers.Solver_Choice import Solver_Choice
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from functions.Dead_Volume_Adjustment import Dead_Volume_Adjustment
 
 def Solver_Analysis(experimentSet, componentList, paramList, solver):
     time = np.linspace(0, 10800, 3000)
@@ -13,6 +14,8 @@ def Solver_Analysis(experimentSet, componentList, paramList, solver):
             for compName, params in zip(componentList, paramList):
                 if(compName == comp.name):
                     result = Solver_Choice(solver, params, comp)[:, -1]
+                    result = Dead_Volume_Adjustment(result, comp.experiment.experimentCondition.deadVolume,
+                                                        comp.experiment.experimentCondition.flowRate)
                     key = compName + "_" + str(cntr)
                     resultsDict[key] = result
                     plt.plot(time, result, label=key)

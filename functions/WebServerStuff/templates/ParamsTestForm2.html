@@ -27,7 +27,7 @@
   <div class="w3-content">
      <h1>Set Test Parameters</h1>
       <form method=post enctype=multipart/form-data id="mainform" class="form-style-1">
-                <label for="gaussTest">Replace with Gauss curve <div class="required">*</div></label>
+                <label for="gaussTest">Replace with asymmetric Gauss curve <div class="required">*</div></label>
                 <input type="checkbox" name="gaussTest" value="True" id="gaussTest" {% if formInfo and formInfo['gauss'] == True %}checked{% endif %}><br>
                 <label for="retCorrTest">Retention time correction <div class="required">*</div></label>
                 <input type="checkbox" name="retCorrTest" value="True" id="retCorrTest" oninput="retTimeTresholdInput()" {% if formInfo and formInfo['retCorr'] == True %}checked{% endif %}>
@@ -37,10 +37,10 @@
                 </div><br>
                 <label for="massBalTest">Mass balance correction <div class="required">*</div></label>
                 <input type="checkbox" name="massBalTest" value="True" id="massBalTest" {% if formInfo and formInfo['massBal'] == True %}checked{% endif %}><br>
-                <label for="solverTest">Solver <div class="required">*</div></label>
+                <label for="solverTest">Isotherm for EDM <div class="required">*</div></label>
                 <select name="solverTest" id="solverTest" oninput="formSolverChangeForTest()">
                   <option value="Lin" {% if formInfo and formInfo['solver'] == "Lin" %}selected{% endif %}>Linear</option>
-                  <option value="Nonlin" {% if formInfo and formInfo['solver'] == "Nonlin" %}selected{% endif %}>Non linear</option>
+                  <option value="Nonlin" {% if formInfo and formInfo['solver'] == "Nonlin" %}selected{% endif %}>Noncompetetive Langmuir</option>
                 </select><br><br>
                 <label for="componentTest">Component <div class="required">*</div></label>
                  <select name="componentTest" id="componentTest" onchange="formCompChangeForTest2()">

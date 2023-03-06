@@ -29,7 +29,7 @@
      <form method=post enctype=multipart/form-data class="form-style-1">
         <label for="expName">Experiment name <div class="required">*</div></label>
         <input type="text" name="expName" id="expName" {% if formInfo and formInfo['expName'] %}value="{{formInfo['expName']}}"{% endif %}><br>
-        <label for="gauss">Replace with Gauss curve <div class="required">*</div></label>
+        <label for="gauss">Replace with asymmetric Gauss curve <div class="required">*</div></label>
         <input type="checkbox" name="gauss" value="True" id="gauss" {% if formInfo and formInfo['gauss'] == True %}checked{% endif %}><br>
         <label for="retCorr">Retention time correction <div class="required">*</div></label>
         <input type="checkbox" name="retCorr" value="True" id="retCorr" oninput="retTimeTresholdInput()" {% if formInfo and formInfo['retCorr'] == True %}checked{% endif %}>
@@ -46,10 +46,10 @@
           <option value="LogSimple" {% if formInfo and formInfo['lossFunc'] == "LogSimple" %}selected{% endif %}>LogSimple</option>
           <option value="LogSquares" {% if formInfo and formInfo['lossFunc'] == "LogSquares" %}selected{% endif %}>LogSquares</option>
         </select><br>
-        <label for="solver">Solver <div class="required">*</div></label>
+        <label for="solver">Isotherm for EDM <div class="required">*</div></label>
         <select name="solver" id="solver" oninput="formSolverChange()">
           <option value="Lin" {% if formInfo and formInfo['solver'] == "Lin" %}selected{% endif %}>Linear</option>
-          <option value="Nonlin" {% if formInfo and formInfo['solver'] == "Nonlin" %}selected{% endif %}>Non linear</option>
+          <option value="Nonlin" {% if formInfo and formInfo['solver'] == "Nonlin" %}selected{% endif %}>Noncompetetive Langmuir</option>
         </select><br>
         <label for="factor">Factor <div class="required">*</div></label>
         <select name="factor" id="factor">

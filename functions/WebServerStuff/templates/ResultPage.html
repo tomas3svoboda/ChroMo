@@ -89,24 +89,25 @@
       </div>
       </div>
 
-    <div id="additionalInfoDiv2" {% if result == '-' %}style="display: none;"{% endif %}>
+      <div id="additionalInfoDiv2" {% if result == '-' %}style="display: none;"{% endif %}>
         <h2>Compare experimental data with result</h2>
         <form method=post enctype=multipart/form-data id="mainform2" class="form-style-1">
-          <label for="componentTest2">Choose a Component</label>
-          <select name="componentTest2" id="componentTest2" onchange="formCompChangeForTest2('componentTest2', 'expListDiv2')">
-            {% for comp in compList %}
-            <option value="{{comp}}">{{comp}}</option>
+          <label for="expList2">Select Experiment <div class="required">*</div></label>
+          <select name="expList2" id="expList2" onchange="formExpChangeForResult('expList2', 'compListDiv2')">
+            {% for exp, val in expDict.items() %}
+            <option value="{{loop.index0}}">{{exp}}</option>
             {% endfor %}
-          </select><br>
-          {% for comp in compList %}
-          <div id="expListDiv2{{comp}}" {% if comp != 'Sac' %}style="display:none;"{% endif %} class="expListDiv2">
-            <label for="expList2{{comp}}">Select Experiment for {{comp}} <div class="required">*</div></label>
-            <select name="expList2{{comp}}" id="expList2{{comp}}">
-              {% for exp in compExpDict[comp] %}
-              <option value="{{loop.index0}}">{{exp}}</option>
-              {% endfor %}
-            </select>
-          </div>
+          </select>
+          {% for exp, val in expDict.items() %}
+            <div id="compListDiv2{{loop.index0}}" {% if loop.index0 != 0 %}style="display:none;"{% endif %} class="compListDiv2">
+              <label for="componentTest2{{loop.index0}}">Choose a Component for {{exp}}</label>
+              <select name="componentTest2{{loop.index0}}" id="componentTest2{{loop.index0}}">
+                {% for comp in val %}
+                <option value="{{loop.index0}}">{{comp}}</option>
+                {% endfor %}
+                <option value="all">All</option>
+              </select><br>
+            </div>
           {% endfor %}
           <a type="button" onclick="showGraph2('mainform2', '/rescomp', 'imgdiv2', 'downloadMatrixButton')" class="w3-button siemens-blue w3-padding-large w3-large w3-margin-top w3-round">Graph</a>
           <a type="button" id="downloadMatrixButton" onclick="downloadMatrix('graphImg2')" class="w3-button siemens-blue w3-padding-large w3-large w3-margin-top w3-round" style="display: none;">Download Result</a>

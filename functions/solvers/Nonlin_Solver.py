@@ -21,9 +21,7 @@ non-linear second order convection-diffusion PDE used to describe concentration
 wave propagation trough the chromatographic column. Numerical scheme utilizes
 averaged centred difference scheme in spatial direction and forward difference
 scheme in time direction. Danckwert's boudaries are implemented with usage of
-fictious point for left boundary. The solution of non-lienar algebraic system for
-each time step is done by scipy.lialg.solve_banded which significatly boosts
-speed.
+fictious point for left boundary.
 '''
 def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
                   length = 235,         # Lenght of the packed section in the column [mm]

@@ -219,3 +219,12 @@ function changeOptimSettings(lvl){
     else if( alg == "4" )
         document.getElementById("lvl" + lvl + "powell").style.display = "block"
 }
+
+function formExpChangeForResult(e, d){
+    exp = document.getElementById(e).value
+    divs = document.getElementsByClassName(d)
+    for(i=0; i<divs.length; i++){
+        divs[i].style.display = "none"
+    }
+    document.getElementById(d + exp).style.display = "block"
+}

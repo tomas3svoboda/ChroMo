@@ -14,6 +14,7 @@ def Deep_Copy_ExperimentSet(experimentSet):
         newExperiment.metadata.path = experiment.metadata.path
         newExperiment.experimentCondition.flowRate = experiment.experimentCondition.flowRate
         newExperiment.experimentCondition.feedVolume = experiment.experimentCondition.feedVolume
+        newExperiment.experimentCondition.deadVolume = experiment.experimentCondition.deadVolume
         newExperiment.experimentCondition.columnLength = experiment.experimentCondition.columnLength
         newExperiment.experimentCondition.columnDiameter = experiment.experimentCondition.columnDiameter
         for experimentComponent in experiment.experimentComponents:

@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from functions.solvers.Solver_Choice import Solver_Choice
+from functions.Dead_Volume_Adjustment import Dead_Volume_Adjustment
 
 def Model_Analysis(experimentComp, solver, params, spacialDiff = 30, timeDiff = 3000, time = 10800, webMode = False, title = False, full = False):
     df = experimentComp.concentrationTime
@@ -9,6 +10,8 @@ def Model_Analysis(experimentComp, solver, params, spacialDiff = 30, timeDiff = 
         modelCurve = model[0][:, -1]
     else:
         modelCurve = model[:, -1]
+    modelCurve = Dead_Volume_Adjustment(modelCurve, experimentComp.experiment.experimentCondition.deadVolume,
+                                        experimentComp.experiment.experimentCondition.flowRate, time/timeDiff)
     minTime = df.iat[0, 0]
     maxTime = df.iat[-1, 0]
     timeSpace = np.linspace(minTime, maxTime, modelCurve.size)

@@ -26,6 +26,8 @@ from functions.Compare_ExperimentSets import Compare_ExperimentSets
 from functions.Bilevel_Optim import Bilevel_Optim
 from functions.solvers.Solver_Choice import Solver_Choice
 from functions.Handle_File_Creation import Handle_File_Creation
+from functions.Dead_Volume_Adjustment import Dead_Volume_Adjustment
+
 
 """
 Time measuring decorator
@@ -174,6 +176,8 @@ class Operator:
                                                 str(compObj.experiment.experimentCondition.feedTime) + \
                                                 ", Feed Volume: " + \
                                                 str(compObj.experiment.experimentCondition.feedVolume) + \
+                                                ", Dead Volume: " + \
+                                                str(compObj.experiment.experimentCondition.deadVolume) + \
                                                 ", Flow rate: " + \
                                                 str(compObj.experiment.experimentCondition.flowRate) + \
                                                 "\n"
@@ -181,9 +185,12 @@ class Operator:
                 saturVal = 0
                 if solverSelection == "Nonlin":
                     saturVal = result["compparams"][comp][2]
+                selectedComp = experimentClusterComp.clusters[comp][conditionSelection]
                 solverOutput = Solver_Choice(solverSelection,
                                              [result["porosity"], result["compparams"][comp][0], result["compparams"][comp][1], saturVal],
-                                             experimentClusterComp.clusters[comp][conditionSelection])[:, -1]
+                                             selectedComp)[:, -1]
+                solverOutput = Dead_Volume_Adjustment(solverOutput, selectedComp.experiment.experimentCondition.deadVolume,
+                                                      selectedComp.experiment.experimentCondition.flowRate)
                 df = experimentClusterComp.clusters[comp][conditionSelection].concentrationTime
                 minTime = df.iat[0, 0]
                 maxTime = df.iat[-1, 0]
@@ -300,13 +307,13 @@ class Operator:
         directory = "Gauss_graphs"
         path = os.path.join(parentDir, directory)
         Handle_File_Creation(path, True)
-        figNum = 1;
+        figNum = 1
         for exp1, expG in zip(experimentSet.experiments, experimentSetGauss.experiments):
             head, tail = os.path.split(exp1.metadata.path)
             filename, extesion = os.path.splitext(tail)
             for comp1, compG in zip(exp1.experimentComponents, expG.experimentComponents):
                 plt.figure(figNum)
-                figNum += 1;
+                figNum += 1
                 time1 = comp1.concentrationTime.iloc[:, 0].to_numpy()
                 conc1 = comp1.concentrationTime.iloc[:, 1].to_numpy()
                 timeG = compG.concentrationTime.iloc[:, 0].to_numpy()
@@ -325,12 +332,14 @@ class Operator:
         columnLength = float(jsonDict["columnLength"])
         columnDiameter = float(jsonDict["columnDiameter"])
         flowRate = float(jsonDict["flowRate"])
+        deadVolume = float(jsonDict["deadVolume"])
         feedVolume = float(jsonDict["feedVolume"])
         experiment = Experiment()
         experiment.metadata.date = experimentDate
         experiment.metadata.description = description
         experiment.metadata.path = jsonDict["name"]
         experiment.experimentCondition.flowRate = float(flowRate)
+        experiment.experimentCondition.deadVolume = float(deadVolume)
         experiment.experimentCondition.feedVolume = float(feedVolume)
         experiment.experimentCondition.columnLength = float(columnLength)
         experiment.experimentCondition.columnDiameter = float(columnDiameter)
@@ -359,6 +368,7 @@ class Operator:
             columnDiameter = float(df.iat[1, 1])
             flowRate = float(df.iat[2, 1])
             feedVolume = float(df.iat[3, 1])
+            deadVolume = float(df.iat[4, 1])
             columnNames = df.iloc[[7]].to_numpy()[0]
             feedConcentrations = df.iloc[[6]].replace(',','.', regex=True).to_numpy()[0][1:]
             df.drop([0, 1, 2, 3, 4, 5, 6, 7], axis=0, inplace=True)
@@ -370,6 +380,7 @@ class Operator:
             experiment.metadata.path = path + "\\" + file
             experiment.experimentCondition.flowRate = float(flowRate)
             experiment.experimentCondition.feedVolume = float(feedVolume)
+            experiment.experimentCondition.deadVolume = float(deadVolume)
             experiment.experimentCondition.columnLength = float(columnLength)
             experiment.experimentCondition.columnDiameter = float(columnDiameter)
             for index in range(columnNames[1:].size):
