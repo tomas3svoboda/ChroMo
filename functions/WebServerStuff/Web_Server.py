@@ -7,10 +7,6 @@ from operator import add
 import flask_login
 import pandas as pd
 import numpy as np
-from flask_security import Security, MongoEngineUserDatastore, \
-    UserMixin, RoleMixin, login_required
-from flask_security.utils import hash_password
-from flask_mongoengine import MongoEngine
 from flask import Flask, flash, request, redirect, url_for, send_file, render_template, json
 import mongoengine as me
 from werkzeug.utils import secure_filename
