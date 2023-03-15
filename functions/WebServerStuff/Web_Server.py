@@ -35,11 +35,8 @@ def Web_Server():
     operator = Operator()
 
 
-    UPLOAD_FOLDER = 'C:\\Users\\Adam\\ChroMo\\docu\\TestUploadFolder'
-    BASE_FOLDER = 'C:\\Users\\Adam\\ChroMo'
-
-    #UPLOAD_FOLDER = 'C:\\Users\\Z004PTSU\\PycharmProjects\\ChroMo\\docu\\TestUploadFolder'
-    #BASE_FOLDER = 'C:\\Users\\Z004PTSU\\PycharmProjects\\ChroMo'
+    BASE_FOLDER = os.getcwd()
+    UPLOAD_FOLDER = BASE_FOLDER + '\\docu\\TestUploadFolder'
 
     ALLOWED_EXTENSIONS = {'xlsx', 'xls', 'csv'}
 
