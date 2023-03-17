@@ -12,9 +12,7 @@ def Model_Analysis(experimentComp, solver, params, spacialDiff = 30, timeDiff = 
         modelCurve = model[:, -1]
     modelCurve = Dead_Volume_Adjustment(modelCurve, experimentComp.experiment.experimentCondition.deadVolume,
                                         experimentComp.experiment.experimentCondition.flowRate, time/timeDiff)
-    minTime = df.iat[0, 0]
-    maxTime = df.iat[-1, 0]
-    timeSpace = np.linspace(minTime, maxTime, modelCurve.size)
+    timeSpace = np.linspace(0, time, modelCurve.size)
     fig = plt.figure(1)
     ax = fig.add_subplot(111)
     if title:

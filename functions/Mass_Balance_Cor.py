@@ -14,8 +14,7 @@ def Mass_Balance_Cor(experimentSetCor2, writeToFile = False):
         initialFeedTime = exp2.experimentCondition.feedTime
         #print(initialFeedTime - (initialFeedTime/2), initialFeedTime + (initialFeedTime/2))
         def Loss_Func(feedTime):
-            outputMassSum = 0.0
-            feedMassSum = 0.0
+            outputSum = 0.0
             for comp2, comp3 in zip(exp2.experimentComponents, exp3.experimentComponents):
                 df2 = comp2.concentrationTime
                 peakVal = float(df2[comp2.name].loc[df2[comp2.name].idxmax()])
@@ -23,13 +22,10 @@ def Mass_Balance_Cor(experimentSetCor2, writeToFile = False):
                     #print("Skipping " + comp2.name)
                     continue
                 trapzRes = np.trapz(x=df2.iloc[:, 0].to_numpy(), y=df2.iloc[:, 1].to_numpy())
-                comp_output_mass = trapzRes * exp2.experimentCondition.flowRate / 3600
-                comp_feed_mass = feedTime * comp2.feedConcentration * exp2.experimentCondition.flowRate
-                outputMassSum += comp_output_mass
-                feedMassSum += comp_feed_mass
-                result = abs(outputMassSum - feedMassSum)
-                exp3.feedMassSum = feedMassSum
-            return result
+                comp_output_mass = trapzRes * exp2.experimentCondition.flowRate / 3600 # [mg]
+                comp_feed_mass = feedTime * comp2.feedConcentration * exp2.experimentCondition.flowRate # feedTime in [h], result in [mg]
+                outputSum += abs(comp_output_mass - comp_feed_mass)
+            return outputSum
         newFeedTime = scipy.optimize.minimize_scalar(Loss_Func, bounds=(initialFeedTime - (initialFeedTime/2), initialFeedTime + (initialFeedTime/2)), method='bounded')
         if writeToFile:
             head, tail = os.path.split(exp3.metadata.path)

@@ -22,6 +22,8 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
                debugGraph=False,
                full=False):
 
+    print(feedVol)
+
     def diagonal_form(a, lower=1, upper=1):
         # Transforms banded matrix into diagonal ordered form
         # allows to use scipy.linalg.solve_banded

@@ -10,9 +10,7 @@ def Single_Loss_Function_Squares(params, experimentComp, solver, factor, spacial
     modelCurve = Solver_Choice(solver, params, experimentComp, spacialDiff, timeDiff, time)[:, -1]
     modelCurve = Dead_Volume_Adjustment(modelCurve, experimentComp.experiment.experimentCondition.deadVolume,
                                         experimentComp.experiment.experimentCondition.flowRate, time/timeDiff)
-    minTime = df.iat[0, 0]
-    maxTime = df.iat[-1, 0]
-    time = np.linspace(minTime, maxTime, modelCurve.size)
+    time = np.linspace(0, time, modelCurve.size)
     f = interp1d(time, modelCurve)
     modelCurveInterpolated = f(df.iloc[:, 0].to_numpy())
     tmpErrSum = 0

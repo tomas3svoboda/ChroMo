@@ -373,6 +373,8 @@ class Operator:
             feedConcentrations = df.iloc[[6]].replace(',','.', regex=True).to_numpy()[0][1:]
             df.drop([0, 1, 2, 3, 4, 5, 6, 7], axis=0, inplace=True)
             df.columns = columnNames
+            while(not isinstance(df.columns[-1], str) ):
+                df.drop(columns=df.columns[-1],  axis=1,  inplace=True)
             df = df.replace(',','.', regex=True).astype(float)
             experiment = Experiment()
             experiment.metadata.date = date
@@ -383,7 +385,7 @@ class Operator:
             experiment.experimentCondition.deadVolume = float(deadVolume)
             experiment.experimentCondition.columnLength = float(columnLength)
             experiment.experimentCondition.columnDiameter = float(columnDiameter)
-            for index in range(columnNames[1:].size):
+            for index in range(df.columns[1:].size):
                 experimentComponent = ExperimentComponent()
                 experimentComponent.concentrationTime = df.iloc[:, [0, 1 + index]].astype(float)
                 experimentComponent.concentrationTime['Time'] = experimentComponent.concentrationTime['Time'].apply(lambda x: x*60)

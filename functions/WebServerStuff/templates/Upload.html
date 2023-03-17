@@ -22,8 +22,9 @@
   <div class="w3-content">
      <h1>Upload experiment file</h1>
      <form method=post enctype=multipart/form-data class="fileupload">
-        <input type=file name=file id="fileInput" multiple>
+        <input type=file name=file id="fileInput">
         <input type=submit value=Upload>
+         {% if error %}<p>{{error}}</p>{% endif %}
          {% if uploadedFilesLen > 0 %}
             <ul>
                 {% for i in range(0, uploadedFilesLen) %}

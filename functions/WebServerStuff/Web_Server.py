@@ -68,8 +68,8 @@ def Web_Server():
     class DBUser(me.Document):
         username = me.StringField(required=True, unique=True)
         password_hash = me.StringField()
-        results = me.ListField()
-        experiments = me.ListField()
+        results = me.ListField(me.ReferenceField(DBResult))
+        experiments = me.ListField(me.ReferenceField(DBExperiment))
 
     class User(flask_login.UserMixin):
         pass
@@ -165,7 +165,7 @@ def Web_Server():
             experimentClusterComp2 = clusterComp[self.user_id]
             params = [formInfo["porosity"], formInfo[formInfo["comp2"] + "K"], formInfo[formInfo["comp2"] + "D"],
                       formInfo["saturation"]]
-            Model_Analysis(experimentClusterComp2.clusters[formInfo["comp2"]][formInfo["exp" + formInfo["comp2"]] - 1],
+            Model_Analysis(experimentClusterComp2.clusters[formInfo["comp2"]][formInfo["exp" + formInfo["comp2"]]],
                            formInfo["solver"], params, webMode=True, title="Experimental data")
             filename = "plot" + str(plotFileCounter) + ".png"
             plotFileCounter += 1
@@ -190,7 +190,7 @@ def Web_Server():
                 formInfo["originalFeedTimes"] = None
                 formInfo["newFeedTimes"] = None
             experimentClusterComp = operator.Cluster_By_Component(currExperimentSet)
-            Model_Analysis(experimentClusterComp.clusters[formInfo["comp2"]][formInfo["exp" + formInfo["comp2"]] - 1],
+            Model_Analysis(experimentClusterComp.clusters[formInfo["comp2"]][formInfo["exp" + formInfo["comp2"]]],
                            formInfo["solver"], params, formInfo["spacialDiff"], formInfo["timeDiff"], formInfo["time"],
                            webMode=True, title="Preprocessed data", full=True)
             filenames = []
@@ -789,7 +789,6 @@ def Web_Server():
             results = exporting_threads[thread_id].result
             fig = plt.figure()
             ax = fig.add_subplot(111)
-            print(len(results))
             for idx, result in enumerate(results):
                 compName = exporting_threads[thread_id].exp.experimentComponents[idx].name
                 df = exporting_threads[thread_id].exp.experimentComponents[idx].concentrationTime
@@ -988,14 +987,19 @@ def Web_Server():
             filename = secure_filename(file.filename)
             file.save(os.path.join(api.config['UPLOAD_FOLDER']  + '\\' + flask_login.current_user.id, filename))
             newExperiment = DBExperiment(uniquename=flask_login.current_user.id + "/" + filename, name=filename, experiment=Serialize_File_To_JSON(BASE_FOLDER + "\\docu\\TestUploadFolder\\" + flask_login.current_user.id + "\\" + filename))
-            newExperiment.save()
-            flask_login.current_user.db.experiments.append(newExperiment)
-            flask_login.current_user.db.save()
-            uploadedFiles[flask_login.current_user.id] = next(walk(UPLOAD_FOLDER + "\\" + flask_login.current_user.id), (None, None, []))[2]
-            experimentSet[flask_login.current_user.id] = operator.Load_Experiment_Set(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)
-            clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
-            compList[flask_login.current_user.id] = clusterComp[flask_login.current_user.id].clusters.keys()
-            return redirect(url_for('upload_file_page'))
+            try:
+                newExperiment.save()
+                flask_login.current_user.db.experiments.append(newExperiment)
+                flask_login.current_user.db.save()
+                uploadedFiles[flask_login.current_user.id] = next(walk(UPLOAD_FOLDER + "\\" + flask_login.current_user.id), (None, None, []))[2]
+                experimentSet[flask_login.current_user.id] = operator.Load_Experiment_Set(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)
+                clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
+                compList[flask_login.current_user.id] = clusterComp[flask_login.current_user.id].clusters.keys()
+                return redirect(url_for('upload_file_page'))
+            except me.errors.NotUniqueError:
+                return render_template('Upload.html', uploadedFilesLen = len(uploadedFiles[flask_login.current_user.id]), uploadedFiles = uploadedFiles[flask_login.current_user.id], user = flask_login.current_user.id, error="File with that name already exists.")
+            except:
+                return render_template('Upload.html', uploadedFilesLen = len(uploadedFiles[flask_login.current_user.id]), uploadedFiles = uploadedFiles[flask_login.current_user.id], user = flask_login.current_user.id, error="Something went wrong uploading a file.")
 
     @api.route('/projects/<file>', methods=['DELETE'])
     @flask_login.login_required
@@ -1072,7 +1076,7 @@ def Web_Server():
 
         return render_template('Index.html', badLogin=True)
 
-    print("localhost:6969")
     #api.run(debug=True)
+    print("localhost:6969")
     serve(api, listen='*:6969', threads=4)
 

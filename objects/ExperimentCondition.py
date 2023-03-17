@@ -12,9 +12,9 @@ class ExperimentCondition:
         self.columnDiameter = -1.0
         self.columnLength = -1.0
         self.deadVolume = -1.0
-        self._feedVolume = -1.0
-        self._feedTime = -1.0
-        self._flowRate = -1.0
+        self._feedVolume = -1.0 # [mL]
+        self._feedTime = -1.0 # [h]
+        self._flowRate = -1.0 # [mL/h]
         self.originalFeedTime = -1.0
 
     @property
@@ -37,7 +37,7 @@ class ExperimentCondition:
     @feedVolume.setter
     def feedVolume(self, new_val):
         self._feedVolume = new_val
-        self._feedTime = new_val/self.flowRate\
+        self._feedTime = new_val/self.flowRate
 
     @flowRate.setter
     def flowRate(self, new_val):
