@@ -12,7 +12,7 @@ def Single_Loss_Function_LogSquares(params, experimentComp, solver, factor, spac
     modelCurve = Dead_Volume_Adjustment(modelCurve, experimentComp.experiment.experimentCondition.deadVolume,
                                         experimentComp.experiment.experimentCondition.flowRate, time/timeDiff)
     time = np.linspace(0, time, modelCurve.size)
-    f = interp1d(time, modelCurve)
+    f = interp1d(time, modelCurve, fill_value="extrapolate")
     modelCurveInterpolated = f(df.iloc[:, 0].to_numpy())
     tmpErrSum = 0
     max = 0

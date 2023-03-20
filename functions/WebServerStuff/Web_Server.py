@@ -63,7 +63,9 @@ def Web_Server():
     class DBResult(me.Document):
         thr_id = me.IntField(required=True, unique=True)
         name = me.StringField(required=True)
+        experiments = me.ListField(me.ReferenceField(DBExperiment))
         results = me.DictField(required=True)
+
 
     class DBUser(me.Document):
         username = me.StringField(required=True, unique=True)
@@ -842,7 +844,7 @@ def Web_Server():
         else:
             thread = exporting_threads[id]
             timers.pop(id)
-            newResult = DBResult(results = thread.result, thr_id=id, name=thread.name)
+            newResult = DBResult(results = thread.result, thr_id=id, name=thread.name, experiments=flask_login.current_user.db.experiments)
             newResult.save()
             dbuser = flask_login.current_user.db
             dbuser.results.append(newResult)
