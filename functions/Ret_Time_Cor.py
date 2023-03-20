@@ -4,6 +4,7 @@ from scipy.optimize import minimize
 import os
 
 def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold = 0, writeToFile = False):
+
     if writeToFile:
         filePath = experimentSet.metadata.path + "\\Time_Shifts.txt"
         print(filePath)
@@ -36,13 +37,14 @@ def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold = 0, writeToFil
     for key, value in experimentClustersExp.clusters.items():
         avgPeakTimes = dict()
         for key2, value2 in value[1].items():
-            peakTimeAvg = 0
+            peakTimeSum = 0
             for comp in value2:
+                pd.set_option('display.max_colwidth', None)
                 column = pd.to_numeric(comp.concentrationTime[comp.name])
                 peakIndex = column.idxmax()
                 peakTime = comp.concentrationTime.iloc[peakIndex, 0]
-                peakTimeAvg += peakTime
-            peakTimeAvg = peakTimeAvg/len(value2)
+                peakTimeSum += peakTime
+            peakTimeAvg = peakTimeSum/len(value2)
             avgPeakTimes[key2] = peakTimeAvg
         initalGuess = list()
         bounds = list()
@@ -61,7 +63,6 @@ def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold = 0, writeToFil
                 head2, tail2 = os.path.split(exp.metadata.path)
                 experimentName, extesion = os.path.splitext(tail2)
                 file.write("Experiment: " + experimentName + ", Shift: " + str(res.x[idx]) + "\n")
-
     if writeToFile:
         file.close()
     return experimentSet

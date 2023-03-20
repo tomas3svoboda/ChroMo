@@ -9,6 +9,7 @@ def Deep_Copy_ExperimentSet(experimentSet):
     newExperimentSet.metadata.description = experimentSet.metadata.description
     for experiment in experimentSet.experiments:
         newExperiment = Experiment()
+        newExperiment.shift = experiment.shift
         newExperiment.metadata.date = experiment.metadata.date
         newExperiment.metadata.description = experiment.metadata.description
         newExperiment.metadata.path = experiment.metadata.path

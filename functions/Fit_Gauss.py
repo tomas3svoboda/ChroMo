@@ -117,7 +117,7 @@ def Fit_Gauss(experimentSetGauss):
             #result.loc[len(result.index)] = [max_Time,data_set[-1, 1]]
             #result = result.dropna()
 
-            comp.concentrationTime = result
+            comp.concentrationTime = result.reset_index(drop=True)
 
     return experimentSetGauss
 
