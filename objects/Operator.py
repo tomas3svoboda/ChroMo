@@ -201,7 +201,7 @@ class Operator:
                 resultDF.to_csv(filePath, index=False, compression=None)
                 chromatogramSelection = input("More Chromatograms?[Y - yes, N - no]")
 
-    def Web_Start(self, experimentSet, path, gauss, retCorr, massBal, lossFunc, solver, factor, porosityStart, porosityEnd, porosityInit, KDQDict, spacialDiff, timeDiff, time, optimId, retThreshold, lvl1optim, lvl2optim) :
+    def Web_Start(self, experimentSet, gauss, retCorr, massBal, lossFunc, solver, factor, porosityStart, porosityEnd, porosityInit, KDQDict, spacialDiff, timeDiff, time, optimId, retThreshold, lvl1optim, lvl2optim) :
         currentExperimentSet = self.Preprocess(experimentSet, gauss, retCorr, massBal, retThreshold)
         experimentClusterComp = self.Cluster_By_Component(currentExperimentSet)
         lossFunctionSelection = lossFunc

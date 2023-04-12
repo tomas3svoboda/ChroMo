@@ -33,6 +33,7 @@
               <th></th>
               <th></th>
               <th></th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -42,6 +43,7 @@
               <td>{{res.thr_id}}</td>
               <td><a href="{{ url_for('get_projects_result_list_show', id=res.thr_id) }}">Show</a></td>
               <td><a href="javascript:void(0)" onclick="deleteResult('{{ url_for('get_projects_result_list_delete', id=res.thr_id) }}')">Delete</a></td>
+              <td><a href="javascript:void(0)" onclick="copyResult('{{ url_for('get_projects_result_list_copy', id=res.thr_id) }}')">Get JSON</a></td>
               <td><a href="{{ url_for('get_projects_result_params', id=res.thr_id) }}">Copy Settings</a></td>
             </tr>
             {% endfor %}
@@ -56,6 +58,13 @@
             method: 'DELETE'
         })
       location.reload()
+  }
+
+  async function copyResult(url){
+    let data = await fetch(url)
+    let content = await data.text()
+    navigator.clipboard.writeText(content);
+    alert("Copied export to clipboard");
   }
 </script>
 {% endblock %}

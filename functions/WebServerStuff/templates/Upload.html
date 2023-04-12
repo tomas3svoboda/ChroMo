@@ -28,7 +28,10 @@
          {% if uploadedFilesLen > 0 %}
             <ul>
                 {% for i in range(0, uploadedFilesLen) %}
-                <li>{{ uploadedFiles[i] }} &emsp; <a href="javascript:void(0)" onclick="deleteExperiment('{{ url_for('delete_file', file=uploadedFiles[i]) }}')">remove</a></li>
+                <li>{{ uploadedFiles[i] }} &emsp;
+                    <a href="javascript:void(0)" onclick="deleteExperiment('{{ url_for('delete_file', file=uploadedFiles[i]) }}')">remove</a>&emsp;
+                    <a href="javascript:void(0)" onclick="copyExperiment('{{ url_for('get_experiment_string', file=uploadedFiles[i]) }}')">get JSON</a>
+                </li>
                 {% endfor %}
             </ul>
          {% endif %}
@@ -44,6 +47,13 @@
             method: 'DELETE'
         })
       location.reload()
+  }
+
+  async function copyExperiment(url){
+    let data = await fetch(url)
+    let content = await data.text()
+    navigator.clipboard.writeText(content);
+    alert("Copied export to clipboard");
   }
 </script>
 {% endblock %}
