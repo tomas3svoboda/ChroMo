@@ -36,7 +36,7 @@ def Web_Server():
 
 
     BASE_FOLDER = os.getcwd()
-    UPLOAD_FOLDER = BASE_FOLDER + '\\docu\\TestUploadFolder'
+    UPLOAD_FOLDER = BASE_FOLDER + '/docu/TestUploadFolder'
 
     ALLOWED_EXTENSIONS = {'xlsx', 'xls', 'csv'}
 
@@ -63,8 +63,9 @@ def Web_Server():
     class DBResult(me.Document):
         thr_id = me.IntField(required=True, unique=True)
         name = me.StringField(required=True)
-        experiments = me.ListField(me.ReferenceField(DBExperiment))
+        experiments = me.ListField(me.StringField())
         results = me.DictField(required=True)
+        time = me.StringField()
 
 
     class DBUser(me.Document):
@@ -108,16 +109,18 @@ def Web_Server():
         return 'Unauthorized', 401
 
     class MainWorkThread(threading.Thread):
-        nonlocal experimentSet, formInfos
+        nonlocal experimentSet, formInfos, timers
 
-        def __init__(self, user_id, thr_id):
+        def __init__(self, user_id, thr_id, dbuser):
             self.user_id = user_id
             self.thr_id = thr_id
+            self.dbuser = dbuser
             self.result = "-"
             super().__init__()
 
         def run(self):
             formInfo = formInfos[self.user_id]
+            usedExpSet = experimentSet[self.user_id]
             KDQDict = {}
             for comp in compList[self.user_id]:
                 tmpDict = {}
@@ -132,7 +135,7 @@ def Web_Server():
                     tmpDict["qinit"] = 0
                     tmpDict["qrange"] = [0, 0]
                 KDQDict[comp] = tmpDict
-            tmp = operator.Web_Start(experimentSet[self.user_id],
+            tmp = operator.Web_Start(usedExpSet,
                     formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["lossFunc"],
                     formInfo["solver"], formInfo["factor"], formInfo["porosityStart"], formInfo["porosityEnd"],
                     formInfo["porosity"], KDQDict, formInfo["spacialDiff"],
@@ -147,6 +150,11 @@ def Web_Server():
                 formInfo["newFeedTimes"] = tmp["newFeedTimes"]
             else:
                 formInfo["originalFeedTimes"] = None
+            timer = time.time() - timers[self.thr_id]
+            newResult = DBResult(results = tmp, thr_id=self.thr_id, name=self.name, experiments=[os.path.split(exp.metadata.path)[1] for exp in usedExpSet.experiments], time=str(datetime.timedelta(seconds=timer)))
+            newResult.save()
+            self.dbuser.results.append(newResult)
+            self.dbuser.save()
             self.result = tmp
 
     class ApiWorkThread(threading.Thread):
@@ -362,6 +370,7 @@ def Web_Server():
             expList = []
             for comp2 in experimentClusterComp.clusters[comp]:
                 head, tail = os.path.split(comp2.experiment.metadata.path)
+                print(tail)
                 expList.append(tail)
             compExperimentDict[comp] = expList
         return render_template('ParamsTestForm2.html', compList = compList[flask_login.current_user.id], compExpDict = compExperimentDict, formInfo=formInfo, user = flask_login.current_user.id)
@@ -721,7 +730,7 @@ def Web_Server():
         threadCounter += 1
         if not thread_id in exporting_threads:
             print("ID: " + str(thread_id))
-            exporting_threads[thread_id] = MainWorkThread(flask_login.current_user.id, thread_id)
+            exporting_threads[thread_id] = MainWorkThread(flask_login.current_user.id, thread_id, flask_login.current_user.db)
             exporting_threads[thread_id].name = formInfo["expName"]
             exporting_threads[thread_id].start()
             timers[thread_id] = time.time()
@@ -735,29 +744,26 @@ def Web_Server():
             fetchExperimentData()
         if not flask_login.current_user.id in clusterComp:
             clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
-        expCompDict = {}
-        for experiment in experimentSet[flask_login.current_user.id].experiments:
-            head, tail = os.path.split(experiment.metadata.path)
-            tmpCompList = []
-            for comp in experiment.experimentComponents:
-                tmpCompList.append(comp.name)
-            expCompDict[tail] = tmpCompList
-        experimentClusterComp = clusterComp[flask_login.current_user.id]
         id = int(id)
-        compExperimentDict = {}
-        for comp in compList[flask_login.current_user.id]:
-            expList = []
-            for comp2 in experimentClusterComp.clusters[comp]:
-                head, tail = os.path.split(comp2.experiment.metadata.path)
-                expList.append(tail)
-            compExperimentDict[comp] = expList
         if id in exporting_threads:
-            return render_template('ResultPage.html', compList = compList[flask_login.current_user.id], compExpDict = compExperimentDict, expDict=expCompDict, result = exporting_threads[id].result, user = flask_login.current_user.id, name = exporting_threads[id].name, id = id)
+            return render_template('ResultPage.html', result = exporting_threads[id].result, user = flask_login.current_user.id, name = exporting_threads[id].name, id = id)
         else:
             dbuser = flask_login.current_user.db
             for result in dbuser.results:
                 if result.thr_id == id:
-                    return render_template('ResultPage.html', compList = compList[flask_login.current_user.id], compExpDict = compExperimentDict, expDict=expCompDict, result = result.results, user = flask_login.current_user.id, name = result.name, id = id)
+                    expCompDict = {}
+                    for exp in result.experiments:
+                        expCompDict[exp] = []
+                    for key, val in result.results["lossfunctionprogress"].items():
+                        for exp in val.keys():
+                            expCompDict[exp].append(key)
+                    id = int(id)
+                    compExperimentDict = {}
+                    for key, val in result.results["lossfunctionprogress"].items():
+                        compExperimentDict[key] = val.keys()
+                    return render_template('ResultPage.html', compList=result.results["compparams"].keys(),
+                                           compExpDict=compExperimentDict, expDict=expCompDict, result=result.results,
+                                           timer=result.time, user=flask_login.current_user.id, name=result.name, id=id)
         return "Result not found"
 
     @api.route('/projects/params/result/<id>/prograph', methods=['POST'])
@@ -904,13 +910,8 @@ def Web_Server():
         if exporting_threads[id].result == "-":
             return "Time elapsed: " + str(datetime.timedelta(seconds=timer))
         else:
-            thread = exporting_threads[id]
+            exporting_threads.pop(id)
             timers.pop(id)
-            newResult = DBResult(results = thread.result, thr_id=id, name=thread.name, experiments=flask_login.current_user.db.experiments)
-            newResult.save()
-            dbuser = flask_login.current_user.db
-            dbuser.results.append(newResult)
-            dbuser.save()
             return "DONE"
 
     @api.route('/projects/result', methods=['GET'])
@@ -974,27 +975,22 @@ def Web_Server():
             fetchExperimentData()
         if not flask_login.current_user.id in clusterComp:
             clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
-        experimentClusterComp = clusterComp[flask_login.current_user.id]
-        compList[flask_login.current_user.id] = experimentClusterComp.clusters.keys()
-        id = int(id)
         dbuser = flask_login.current_user.db
-        expCompDict = {}
-        for experiment in experimentSet[flask_login.current_user.id].experiments:
-            head, tail = os.path.split(experiment.metadata.path)
-            tmpCompList = []
-            for comp in experiment.experimentComponents:
-                tmpCompList.append(comp.name)
-            expCompDict[tail] = tmpCompList
-        compExperimentDict = {}
-        for comp in compList[flask_login.current_user.id]:
-            expList = []
-            for comp2 in experimentClusterComp.clusters[comp]:
-                head, tail = os.path.split(comp2.experiment.metadata.path)
-                expList.append(tail)
-            compExperimentDict[comp] = expList
-        for res in dbuser.results:
-            if res.thr_id == id:
-                return render_template('ResultPage.html', compList = compList[flask_login.current_user.id], compExpDict = compExperimentDict, expDict=expCompDict, result = res.results, user = flask_login.current_user.id, name = res.name)
+        id = int(id)
+        for result in dbuser.results:
+            if result.thr_id == id:
+                expCompDict = {}
+                for exp in result.experiments:
+                    expCompDict[exp] = []
+                for key, val in result.results["lossfunctionprogress"].items():
+                    for exp in val.keys():
+                        expCompDict[exp].append(key)
+                compExperimentDict = {}
+                for key, val in result.results["lossfunctionprogress"].items():
+                    compExperimentDict[key] = val.keys()
+                return render_template('ResultPage.html', compList=result.results["compparams"].keys(),
+                                           compExpDict=compExperimentDict, expDict=expCompDict, result=result.results,
+                                           timer=result.time, user=flask_login.current_user.id, name=result.name, id=id)
         return "Unknown result"
 
     @api.route('/projects/result/<id>', methods=['DELETE'])
@@ -1060,8 +1056,8 @@ def Web_Server():
             return redirect(url_for('upload_file_page'))
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(api.config['UPLOAD_FOLDER']  + '\\' + flask_login.current_user.id, filename))
-            jsonString = Serialize_File_To_JSON(BASE_FOLDER + "\\docu\\TestUploadFolder\\" + flask_login.current_user.id + "\\" + filename)
+            file.save(os.path.join(api.config['UPLOAD_FOLDER']  + '/' + flask_login.current_user.id, filename))
+            jsonString = Serialize_File_To_JSON(BASE_FOLDER + "/docu/TestUploadFolder/" + flask_login.current_user.id + "/" + filename)
             newExperiment = DBExperiment(uniquename=flask_login.current_user.id + "/" + filename, name=filename, experiment=jsonString)
             try:
                 newExperiment.save()
@@ -1069,8 +1065,8 @@ def Web_Server():
                 flask_login.current_user.db.save()
                 uploadedFiles[flask_login.current_user.id] = [exp.name for exp in flask_login.current_user.db.experiments]
                 #uploadedFiles[flask_login.current_user.id] = next(walk(UPLOAD_FOLDER + "\\" + flask_login.current_user.id), (None, None, []))[2]
-                clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
                 fetchExperimentData()
+                clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
                 compList[flask_login.current_user.id] = clusterComp[flask_login.current_user.id].clusters.keys()
                 return redirect(url_for('upload_file_page'))
             except me.errors.NotUniqueError:
@@ -1086,7 +1082,7 @@ def Web_Server():
                 dbuser.experiments.remove(exp)
                 exp.delete()
                 dbuser.save()
-                os.remove(UPLOAD_FOLDER + "\\" + flask_login.current_user.id + "\\" + file)
+                os.remove(UPLOAD_FOLDER + "/" + flask_login.current_user.id + "/" + file)
                 uploadedFiles[flask_login.current_user.id] = [exp.name for exp in dbuser.experiments]
                 #uploadedFiles[flask_login.current_user.id] = next(walk(UPLOAD_FOLDER + "\\" + flask_login.current_user.id), (None, None, []))[2]
                 fetchExperimentData()
@@ -1111,8 +1107,8 @@ def Web_Server():
     @flask_login.login_required
     def upload_file_page():
         nonlocal uploadedFiles
-        if not os.path.exists(UPLOAD_FOLDER + "\\" + flask_login.current_user.id):
-            os.mkdir(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)
+        if not os.path.exists(UPLOAD_FOLDER + "/" + flask_login.current_user.id):
+            os.mkdir(UPLOAD_FOLDER + "/" + flask_login.current_user.id)
         uploadedFiles[flask_login.current_user.id] = [exp.name for exp in flask_login.current_user.db.experiments]
         #uploadedFiles[flask_login.current_user.id] = next(walk(UPLOAD_FOLDER + '\\' + flask_login.current_user.id), (None, None, []))[2]
         return render_template('Upload.html', uploadedFilesLen = len(uploadedFiles[flask_login.current_user.id]), uploadedFiles = uploadedFiles[flask_login.current_user.id], user = flask_login.current_user.id)
@@ -1158,8 +1154,8 @@ def Web_Server():
                 flask_login.login_user(user)
                 if not user.id in formInfos:
                     formInfos[user.id] = {}
-                if not os.path.exists(UPLOAD_FOLDER + "\\" + user.id):
-                    os.mkdir(UPLOAD_FOLDER + "\\" + user.id)
+                if not os.path.exists(UPLOAD_FOLDER + "/" + user.id):
+                    os.mkdir(UPLOAD_FOLDER + "/" + user.id)
                 return redirect(url_for('upload_file_page'))
 
         return render_template('Index.html', badLogin=True)
@@ -1195,7 +1191,7 @@ def Web_Server():
             newResult.save()
             return newResult.to_json()
 
-    #api.run(debug=True)
-    print("localhost:6969")
-    serve(api, listen='*:6969', threads=4)
+    api.run(debug=True)
+    #print("localhost:6969")
+    #serve(api, listen='*:6969', threads=4)
 

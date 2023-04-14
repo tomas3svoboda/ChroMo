@@ -29,7 +29,8 @@
      <h1>Results{% if name %} of {{name}}{% endif %}</h1>
     <div id="resultDiv">
     {% if result != "-" %}
-      <p id="finalPorosity">Final porosity: <div class="boldText">{{result["porosity"]}}</div></p>
+      <p id="timer">Run time: <div class="boldText">{{timer}}</div></p>
+      <p id="finalPorosity">Final porosity: <div class="boldText">{{result["porosity"]}}</div>({{result["optimparams"]["porosityIntervals"]["init"]}}&nbsp;:&nbsp;{{result["optimparams"]["porosityIntervals"]["range"][0]}}-{{result["optimparams"]["porosityIntervals"]["range"][1]}})</p>
       <p id="finalLossFuncVal">Final loss function value: <div class="boldText">{{result["lv1lossfunctionval"]}}</div></p><br>
         <table>
           <thead>
@@ -47,21 +48,40 @@
             {% for comp in compList %}
             <tr>
               <td>{{comp}}</td>
-              <td>{{result["compparams"][comp][0]|round(2)}}</td>
-              <td>{{result["compparams"][comp][1]|round(2)}}</td>
+              <td><div class="boldText">{{result["compparams"][comp][0]|round(2)}}</div>({{result["optimparams"]["KDIntervals"][comp]["kinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["KDIntervals"][comp]["krange"][0]}}-{{result["optimparams"]["KDIntervals"][comp]["krange"][1]}})</td>
+              <td><div class="boldText">{{result["compparams"][comp][1]|round(2)}}</div>({{result["optimparams"]["KDIntervals"][comp]["dinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["KDIntervals"][comp]["drange"][0]}}-{{result["optimparams"]["KDIntervals"][comp]["drange"][1]}})</td>
               {% if result["solver"] == "Nonlin" %}
-              <td>{{result["compparams"][comp][2]|round(2)}}</td>
+              <td><div class="boldText">{{result["compparams"][comp][2]|round(2)}}</div>({{result["optimparams"]["KDIntervals"][comp]["qinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["KDIntervals"][comp]["qrange"][0]}}-{{result["optimparams"]["KDIntervals"][comp]["qrange"][1]}})</td>
               {% endif %}
-              <td>{{result["lv2lossfunctionvals"][comp]|round(2)}}</td>
+              <td><div class="boldText">{{result["lv2lossfunctionvals"][comp]|round(2)}}</div></td>
             </tr>
             {% endfor %}
           </tbody>
-        </table>
-    {% else %}
-    Working<div id="dotsDiv" class="inline">...</div>
-    {% endif %}
-      <br><br>
-
+        </table><br>
+      <div id="optimsettingsInfo">
+        <p id="lv1optim">Level 1 optimization algorithm: <div class="boldText">
+        {% if result["optimparams"]["lvl1optim"]["algorithm"] == "1"%}
+          Brute Force
+        {% elif result["optimparams"]["lvl1optim"]["algorithm"] == "2"%}
+          Nelder-Mead
+        {% elif result["optimparams"]["lvl1optim"]["algorithm"] == "3"%}
+          SHGO
+        {% elif result["optimparams"]["lvl1optim"]["algorithm"] == "4"%}
+          Powell
+        {% endif %}
+        </div></p>
+        <p id="lv2optim">Level 2 optimization algorithm: <div class="boldText">
+        {% if result["optimparams"]["lvl2optim"]["algorithm"] == "1"%}
+          Brute Force
+        {% elif result["optimparams"]["lvl2optim"]["algorithm"] == "2"%}
+          Nelder-Mead
+        {% elif result["optimparams"]["lvl2optim"]["algorithm"] == "3"%}
+          SHGO
+        {% elif result["optimparams"]["lvl2optim"]["algorithm"] == "4"%}
+          Powell
+        {% endif %}
+        </div></p>
+      </div>
       <div id="additionalInfoDiv" {% if result == '-' %}style="display: none;"{% endif %}>
         <h2>Show loss function value progress</h2>
         <form method=post enctype=multipart/form-data id="mainform" class="form-style-1">
@@ -117,6 +137,10 @@
       </div>
       </div>
 
+    {% else %}
+    Working<div id="dotsDiv" class="inline">...</div>
+    {% endif %}
+      <br><br>
     </div>
   </div>
 </div>
