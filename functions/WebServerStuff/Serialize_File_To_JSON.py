@@ -21,8 +21,10 @@ def Serialize_File_To_JSON(file):
     feedConcentrations = df.iloc[[6]].replace(',', '.', regex=True).to_numpy()[0][1:]
     df.drop([0, 1, 2, 3, 4, 5, 6, 7], axis=0, inplace=True)
     df.columns = columnNames
+    while(not isinstance(df.columns[-1], str) ):
+                df.drop(columns=df.columns[-1],  axis=1,  inplace=True)
     df = df.replace(',', '.', regex=True).astype(float)
-    for index in range(columnNames[1:].size):
+    for index in range(df.columns[1:].size):
         compDict = {}
         concentrationTime = df.iloc[:, [0, 1 + index]].astype(float)
         concentrationTime['Time'] = concentrationTime['Time'].apply(lambda x: x * 60)
