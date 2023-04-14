@@ -370,11 +370,13 @@ class Operator:
             feedVolume = float(df.iat[3, 1])
             deadVolume = float(df.iat[4, 1])
             columnNames = df.iloc[[7]].to_numpy()[0]
+            print(columnNames)
             feedConcentrations = df.iloc[[6]].replace(',','.', regex=True).to_numpy()[0][1:]
             df.drop([0, 1, 2, 3, 4, 5, 6, 7], axis=0, inplace=True)
             df.columns = columnNames
             while(not isinstance(df.columns[-1], str) ):
                 df.drop(columns=df.columns[-1],  axis=1,  inplace=True)
+            print(df.columns)
             df = df.replace(',','.', regex=True).astype(float)
             experiment = Experiment()
             experiment.metadata.date = date
