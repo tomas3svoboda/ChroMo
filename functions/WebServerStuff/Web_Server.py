@@ -56,6 +56,8 @@ def Web_Server():
     uploadedFiles = {}
     exporting_threads = {}
 
+    db_mutex = threading.Lock()
+
     class DBExperiment(me.Document):
         uniquename = me.StringField(required=True, unique=True)
         name = me.StringField(required=True)
@@ -120,7 +122,7 @@ def Web_Server():
             super().__init__()
 
         def run(self):
-            nonlocal numberOfRunningOptims
+            nonlocal numberOfRunningOptims, db_mutex
             numberOfRunningOptims += 1
             try:
                 formInfo = formInfos[self.user_id]
@@ -156,9 +158,11 @@ def Web_Server():
                     formInfo["originalFeedTimes"] = None
                 timer = time.time() - timers[self.thr_id]
                 newResult = DBResult(results = tmp, thr_id=self.thr_id, name=self.name, experiments=[os.path.split(exp.metadata.path)[1] for exp in usedExpSet.experiments], time=str(datetime.timedelta(seconds=timer)))
-                newResult.save()
-                self.dbuser.results.append(newResult)
-                self.dbuser.save()
+                with db_mutex:
+                    newResult.save()
+                    self.dbuser.reload()
+                    self.dbuser.results.append(newResult)
+                    self.dbuser.save()
                 self.result = tmp
             except Exception as e:
                 print(e)
@@ -1018,14 +1022,15 @@ def Web_Server():
     @api.route('/projects/result/<id>', methods=['DELETE'])
     @flask_login.login_required
     def get_projects_result_list_delete(id):
-        nonlocal compList
+        nonlocal compList, db_mutex
         id = int(id)
         dbuser = flask_login.current_user.db
         for res in dbuser.results:
             if res.thr_id == id:
-                dbuser.results.remove(res)
+                with db_mutex:
+                    dbuser.results.remove(res)
+                    dbuser.save()
                 res.delete()
-                dbuser.save()
                 return redirect(url_for('get_projects_result_list'))
         return "Unknown result"
 
@@ -1068,7 +1073,7 @@ def Web_Server():
     @api.route('/projects', methods=['POST'])
     @flask_login.login_required
     def upload_file():
-        nonlocal uploadedFiles
+        nonlocal uploadedFiles, db_mutex
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
@@ -1082,9 +1087,10 @@ def Web_Server():
             jsonString = Serialize_File_To_JSON(BASE_FOLDER + "/docu/TestUploadFolder/" + flask_login.current_user.id + "/" + filename)
             newExperiment = DBExperiment(uniquename=flask_login.current_user.id + "/" + filename, name=filename, experiment=jsonString)
             try:
-                newExperiment.save()
-                flask_login.current_user.db.experiments.append(newExperiment)
-                flask_login.current_user.db.save()
+                with db_mutex:
+                    newExperiment.save()
+                    flask_login.current_user.db.experiments.append(newExperiment)
+                    flask_login.current_user.db.save()
                 uploadedFiles[flask_login.current_user.id] = [exp.name for exp in flask_login.current_user.db.experiments]
                 #uploadedFiles[flask_login.current_user.id] = next(walk(UPLOAD_FOLDER + "\\" + flask_login.current_user.id), (None, None, []))[2]
                 fetchExperimentData()
@@ -1097,13 +1103,14 @@ def Web_Server():
     @api.route('/projects/<file>', methods=['DELETE'])
     @flask_login.login_required
     def delete_file(file):
-        nonlocal uploadedFiles
+        nonlocal uploadedFiles, db_mutex
         dbuser = flask_login.current_user.db
         for exp in dbuser.experiments:
             if exp.uniquename == flask_login.current_user.id + "/" + file:
-                dbuser.experiments.remove(exp)
+                with db_mutex:
+                    dbuser.experiments.remove(exp)
+                    dbuser.save()
                 exp.delete()
-                dbuser.save()
                 os.remove(UPLOAD_FOLDER + "/" + flask_login.current_user.id + "/" + file)
                 uploadedFiles[flask_login.current_user.id] = [exp.name for exp in dbuser.experiments]
                 #uploadedFiles[flask_login.current_user.id] = next(walk(UPLOAD_FOLDER + "\\" + flask_login.current_user.id), (None, None, []))[2]
@@ -1142,6 +1149,7 @@ def Web_Server():
 
     @api.route('/register', methods=['GET', 'POST'])
     def get_registration():
+        nonlocal db_mutex
         if request.method == 'GET':
             return render_template('Registration.html')
         username = request.form['username']
@@ -1150,7 +1158,8 @@ def Web_Server():
             if username == user.username:
                 return render_template('Registration.html', badRegistration="User already exists.")
         newUser = DBUser(username=username, password_hash=password)
-        newUser.save()
+        with db_mutex:
+            newUser.save()
         return redirect(url_for('get_main_page'))
 
     @api.route('/', methods=['GET', 'POST'])
@@ -1201,7 +1210,7 @@ def Web_Server():
 
     @api.route('/api/result/<id>', methods=['GET'])
     def api_get_result(id):
-        nonlocal threadCounter
+        nonlocal threadCounter, db_mutex
         id = int(id)
         timer = time.time() - timers[id]
         if exporting_threads[id].result == "-":
@@ -1210,7 +1219,8 @@ def Web_Server():
             thread = exporting_threads[id]
             timers.pop(id)
             newResult = DBResult(results = thread.result, thr_id=id, name=thread.data['settings']['expName'])
-            newResult.save()
+            with db_mutex:
+                newResult.save()
             return newResult.to_json()
 
     api.run(debug=True)
