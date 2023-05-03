@@ -27,6 +27,7 @@ def Web_Server():
     matplotlib.use('Agg')
 
     plotFileCounter = 1
+    numberOfRunningOptims = 0
     experimentSet = {}
     clusterComp = {}
     compList = {}
@@ -36,7 +37,7 @@ def Web_Server():
 
 
     BASE_FOLDER = os.getcwd()
-    UPLOAD_FOLDER = BASE_FOLDER + '\\docu\\TestUploadFolder'
+    UPLOAD_FOLDER = BASE_FOLDER + '/docu/TestUploadFolder'
 
     ALLOWED_EXTENSIONS = {'xlsx', 'xls', 'csv'}
 
@@ -55,6 +56,8 @@ def Web_Server():
     uploadedFiles = {}
     exporting_threads = {}
 
+    db_mutex = threading.Lock()
+
     class DBExperiment(me.Document):
         uniquename = me.StringField(required=True, unique=True)
         name = me.StringField(required=True)
@@ -63,8 +66,9 @@ def Web_Server():
     class DBResult(me.Document):
         thr_id = me.IntField(required=True, unique=True)
         name = me.StringField(required=True)
-        experiments = me.ListField(me.ReferenceField(DBExperiment))
+        experiments = me.ListField(me.StringField())
         results = me.DictField(required=True)
+        time = me.StringField()
 
 
     class DBUser(me.Document):
@@ -108,46 +112,62 @@ def Web_Server():
         return 'Unauthorized', 401
 
     class MainWorkThread(threading.Thread):
-        nonlocal experimentSet, formInfos
+        nonlocal experimentSet, formInfos, timers
 
-        def __init__(self, user_id, thr_id):
+        def __init__(self, user_id, thr_id, dbuser):
             self.user_id = user_id
             self.thr_id = thr_id
+            self.dbuser = dbuser
             self.result = "-"
             super().__init__()
 
         def run(self):
-            formInfo = formInfos[self.user_id]
-            KDQDict = {}
-            for comp in compList[self.user_id]:
-                tmpDict = {}
-                tmpDict["kinit"] = formInfo[comp + "K"]
-                tmpDict["krange"] = [formInfo[comp + "KStart"], formInfo[comp + "KEnd"]]
-                tmpDict["dinit"] = formInfo[comp + "D"]
-                tmpDict["drange"] = [formInfo[comp + "DStart"], formInfo[comp + "DEnd"]]
-                if formInfo["solver"] == "Nonlin":
-                    tmpDict["qinit"] = formInfo[comp + "Q"]
-                    tmpDict["qrange"] = [formInfo[comp + "QStart"], formInfo[comp + "QEnd"]]
+            nonlocal numberOfRunningOptims, db_mutex
+            numberOfRunningOptims += 1
+            try:
+                formInfo = formInfos[self.user_id]
+                usedExpSet = experimentSet[self.user_id]
+                KDQDict = {}
+                for comp in compList[self.user_id]:
+                    tmpDict = {}
+                    tmpDict["kinit"] = formInfo[comp + "K"]
+                    tmpDict["krange"] = [formInfo[comp + "KStart"], formInfo[comp + "KEnd"]]
+                    tmpDict["dinit"] = formInfo[comp + "D"]
+                    tmpDict["drange"] = [formInfo[comp + "DStart"], formInfo[comp + "DEnd"]]
+                    if formInfo["solver"] == "Nonlin":
+                        tmpDict["qinit"] = formInfo[comp + "Q"]
+                        tmpDict["qrange"] = [formInfo[comp + "QStart"], formInfo[comp + "QEnd"]]
+                    else:
+                        tmpDict["qinit"] = 0
+                        tmpDict["qrange"] = [0, 0]
+                    KDQDict[comp] = tmpDict
+                tmp = operator.Web_Start(usedExpSet,
+                        formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["lossFunc"],
+                        formInfo["solver"], formInfo["factor"], formInfo["porosityStart"], formInfo["porosityEnd"],
+                        formInfo["porosity"], KDQDict, formInfo["spacialDiff"],
+                        formInfo["timeDiff"], formInfo["time"], self.thr_id, formInfo["retCorrThreshold"],
+                        formInfo["lvl1optimsettings"], formInfo["lvl2optimsettings"])
+                if formInfo["retCorr"]:
+                    formInfo["shifts"] = tmp["shifts"]
                 else:
-                    tmpDict["qinit"] = 0
-                    tmpDict["qrange"] = [0, 0]
-                KDQDict[comp] = tmpDict
-            tmp = operator.Web_Start(experimentSet[self.user_id],
-                    formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["lossFunc"],
-                    formInfo["solver"], formInfo["factor"], formInfo["porosityStart"], formInfo["porosityEnd"],
-                    formInfo["porosity"], KDQDict, formInfo["spacialDiff"],
-                    formInfo["timeDiff"], formInfo["time"], self.thr_id, formInfo["retCorrThreshold"],
-                    formInfo["lvl1optimsettings"], formInfo["lvl2optimsettings"])
-            if formInfo["retCorr"]:
-                formInfo["shifts"] = tmp["shifts"]
-            else:
-                formInfo["shifts"] = None
-            if formInfo["massBal"]:
-                formInfo["originalFeedTimes"] = tmp["originalFeedTimes"]
-                formInfo["newFeedTimes"] = tmp["newFeedTimes"]
-            else:
-                formInfo["originalFeedTimes"] = None
-            self.result = tmp
+                    formInfo["shifts"] = None
+                if formInfo["massBal"]:
+                    formInfo["originalFeedTimes"] = tmp["originalFeedTimes"]
+                    formInfo["newFeedTimes"] = tmp["newFeedTimes"]
+                else:
+                    formInfo["originalFeedTimes"] = None
+                timer = time.time() - timers[self.thr_id]
+                newResult = DBResult(results = tmp, thr_id=self.thr_id, name=self.name, experiments=[os.path.split(exp.metadata.path)[1] for exp in usedExpSet.experiments], time=str(datetime.timedelta(seconds=timer)))
+                with db_mutex:
+                    newResult.save()
+                    self.dbuser.reload()
+                    self.dbuser.results.append(newResult)
+                    self.dbuser.save()
+                self.result = tmp
+            except Exception as e:
+                print(e)
+                self.result = "FAIL"
+            numberOfRunningOptims -= 1
 
     class ApiWorkThread(threading.Thread):
 
@@ -158,46 +178,50 @@ def Web_Server():
             super().__init__()
 
         def run(self):
-            expSet = ExperimentSet()
-            expSet.metadata.path = "database"
-            expSet.metadata.date = datetime.date.today().strftime("%m/%d/%Y")
-            for exp in self.data['experiments']:
-                operator.Load_Experimet_JSON(expSet, json.dumps(exp))
-            gauss = bool(self.data['settings']['gauss'])
-            retCorr = bool(self.data['settings']['retCorr'])
-            retCorrThreshold = float(self.data['settings']['retCorrThreshold'])
-            massBal = bool(self.data['settings']['massBal'])
-            lossFunc = str(self.data['settings']['lossFunc'])
-            solver = str(self.data['settings']['solver'])
-            factor = int(self.data['settings']['factor'])
-            porosityStart = float(self.data['settings']['porosityStart'])
-            porosityEnd = float(self.data['settings']['porosityEnd'])
-            porosity = float(self.data['settings']['porosityInit'])
-            KDQDict = {}
-            for key, val in self.data['settings']['components'].items():
-                tmpDict = {}
-                tmpDict["kinit"] = val["K"]
-                tmpDict["krange"] = [val["KStart"], val["KEnd"]]
-                tmpDict["dinit"] = val["D"]
-                tmpDict["drange"] = [val["DStart"], val["DEnd"]]
-                if solver == "Nonlin":
-                    tmpDict["qinit"] = val["Q"]
-                    tmpDict["Qrange"] = [val["QStart"], val["QEnd"]]
-                else:
-                    tmpDict["qinit"] = 0
-                    tmpDict["qrange"] = [0, 0]
-                KDQDict[key] = tmpDict
-            lvl1optimsettings = self.data['settings']['lvl1optimsettings']
-            lvl2optimsettings = self.data['settings']['lvl2optimsettings']
-            spacialDiff = int(self.data['settings']['spacialDiff'])
-            timeDiff = int(self.data['settings']['timeDiff'])
-            time = float(self.data['settings']['time'])
-            tmp = operator.Web_Start(expSet, gauss, retCorr, massBal, lossFunc,
-                    solver, factor, porosityStart, porosityEnd,
-                    porosity, KDQDict, spacialDiff,
-                    timeDiff, time, self.thr_id, retCorrThreshold,
-                    lvl1optimsettings, lvl2optimsettings)
-            self.result = tmp
+            try:
+                expSet = ExperimentSet()
+                expSet.metadata.path = "database"
+                expSet.metadata.date = datetime.date.today().strftime("%m/%d/%Y")
+                for exp in self.data['experiments']:
+                    operator.Load_Experimet_JSON(expSet, json.dumps(exp))
+                gauss = bool(self.data['settings']['gauss'])
+                retCorr = bool(self.data['settings']['retCorr'])
+                retCorrThreshold = float(self.data['settings']['retCorrThreshold'])
+                massBal = bool(self.data['settings']['massBal'])
+                lossFunc = str(self.data['settings']['lossFunc'])
+                solver = str(self.data['settings']['solver'])
+                factor = int(self.data['settings']['factor'])
+                porosityStart = float(self.data['settings']['porosityStart'])
+                porosityEnd = float(self.data['settings']['porosityEnd'])
+                porosity = float(self.data['settings']['porosityInit'])
+                KDQDict = {}
+                for key, val in self.data['settings']['components'].items():
+                    tmpDict = {}
+                    tmpDict["kinit"] = val["K"]
+                    tmpDict["krange"] = [val["KStart"], val["KEnd"]]
+                    tmpDict["dinit"] = val["D"]
+                    tmpDict["drange"] = [val["DStart"], val["DEnd"]]
+                    if solver == "Nonlin":
+                        tmpDict["qinit"] = val["Q"]
+                        tmpDict["Qrange"] = [val["QStart"], val["QEnd"]]
+                    else:
+                        tmpDict["qinit"] = 0
+                        tmpDict["qrange"] = [0, 0]
+                    KDQDict[key] = tmpDict
+                lvl1optimsettings = self.data['settings']['lvl1optimsettings']
+                lvl2optimsettings = self.data['settings']['lvl2optimsettings']
+                spacialDiff = int(self.data['settings']['spacialDiff'])
+                timeDiff = int(self.data['settings']['timeDiff'])
+                time = float(self.data['settings']['time'])
+                tmp = operator.Web_Start(expSet, gauss, retCorr, massBal, lossFunc,
+                        solver, factor, porosityStart, porosityEnd,
+                        porosity, KDQDict, spacialDiff,
+                        timeDiff, time, self.thr_id, retCorrThreshold,
+                        lvl1optimsettings, lvl2optimsettings)
+                self.result = tmp
+            except Exception as e:
+                print(e)
+                self.result = "FAIL"
 
     class SimpleThread(threading.Thread):
         nonlocal experimentSet, formInfos, clusterComp
@@ -209,51 +233,55 @@ def Web_Server():
 
         def run(self):
             nonlocal plotFileCounter
-            plt.clf()
-            formInfo = formInfos[self.user_id]
-            if not self.user_id in clusterComp:
-                clusterComp[self.user_id] = operator.Cluster_By_Component(experimentSet[self.user_id])
-            experimentClusterComp2 = clusterComp[self.user_id]
-            params = [formInfo["porosity"], formInfo[formInfo["comp2"] + "K"], formInfo[formInfo["comp2"] + "D"],
-                      formInfo["saturation"]]
-            Model_Analysis(experimentClusterComp2.clusters[formInfo["comp2"]][formInfo["exp" + formInfo["comp2"]]],
-                           formInfo["solver"], params, webMode=True, title="Experimental data")
-            filename = "plot" + str(plotFileCounter) + ".png"
-            plotFileCounter += 1
-            plt.savefig('functions/WebServerStuff/static/images/' + filename)
-            plt.clf()
-            currExperimentSet = operator.Preprocess(experimentSet[self.user_id], formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["retCorrThreshold"])
-            if formInfo["retCorr"]:
-                formInfo["shifts"] = {}
-                for exp in currExperimentSet.experiments:
-                    head, tail = os.path.split(exp.metadata.path)
-                    formInfo["shifts"][tail] = exp.shift
-            else:
-                formInfo["shifts"] = None
-            if formInfo["massBal"]:
-                formInfo["originalFeedTimes"] = {}
-                formInfo["newFeedTimes"] = {}
-                for exp in currExperimentSet.experiments:
-                    head, tail = os.path.split(exp.metadata.path)
-                    formInfo["originalFeedTimes"][tail] = exp.experimentCondition.originalFeedTime
-                    formInfo["newFeedTimes"][tail] = exp.experimentCondition.feedTime
-            else:
-                formInfo["originalFeedTimes"] = None
-                formInfo["newFeedTimes"] = None
-            experimentClusterComp = operator.Cluster_By_Component(currExperimentSet)
-            Model_Analysis(experimentClusterComp.clusters[formInfo["comp2"]][formInfo["exp" + formInfo["comp2"]]],
-                           formInfo["solver"], params, formInfo["spacialDiff"], formInfo["timeDiff"], formInfo["time"],
-                           webMode=True, title="Preprocessed data", full=True)
-            filenames = []
-            fig_nums = plt.get_fignums()
-            figs = [plt.figure(n) for n in fig_nums]
-            for fig in figs:
-                filename2 = "plot" + str(plotFileCounter) + ".png"
-                filenames.append(filename2)
+            try:
+                plt.clf()
+                formInfo = formInfos[self.user_id]
+                if not self.user_id in clusterComp:
+                    clusterComp[self.user_id] = operator.Cluster_By_Component(experimentSet[self.user_id])
+                experimentClusterComp2 = clusterComp[self.user_id]
+                params = [formInfo["porosity"], formInfo[formInfo["comp2"] + "K"], formInfo[formInfo["comp2"] + "D"],
+                          formInfo["saturation"]]
+                Model_Analysis(experimentClusterComp2.clusters[formInfo["comp2"]][formInfo["exp" + formInfo["comp2"]]],
+                               formInfo["solver"], params, webMode=True, title="Experimental data")
+                filename = "plot" + str(plotFileCounter) + ".png"
                 plotFileCounter += 1
-                fig.savefig('functions/WebServerStuff/static/images/' + filename2)
-                fig.clf()
-            self.progress = [filename] + filenames
+                plt.savefig('functions/WebServerStuff/static/images/' + filename)
+                plt.clf()
+                currExperimentSet = operator.Preprocess(experimentSet[self.user_id], formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["retCorrThreshold"])
+                if formInfo["retCorr"]:
+                    formInfo["shifts"] = {}
+                    for exp in currExperimentSet.experiments:
+                        head, tail = os.path.split(exp.metadata.path)
+                        formInfo["shifts"][tail] = exp.shift
+                else:
+                    formInfo["shifts"] = None
+                if formInfo["massBal"]:
+                    formInfo["originalFeedTimes"] = {}
+                    formInfo["newFeedTimes"] = {}
+                    for exp in currExperimentSet.experiments:
+                        head, tail = os.path.split(exp.metadata.path)
+                        formInfo["originalFeedTimes"][tail] = exp.experimentCondition.originalFeedTime
+                        formInfo["newFeedTimes"][tail] = exp.experimentCondition.feedTime
+                else:
+                    formInfo["originalFeedTimes"] = None
+                    formInfo["newFeedTimes"] = None
+                experimentClusterComp = operator.Cluster_By_Component(currExperimentSet)
+                Model_Analysis(experimentClusterComp.clusters[formInfo["comp2"]][formInfo["exp" + formInfo["comp2"]]],
+                               formInfo["solver"], params, formInfo["spacialDiff"], formInfo["timeDiff"], formInfo["time"],
+                               webMode=True, title="Preprocessed data", full=True)
+                filenames = []
+                fig_nums = plt.get_fignums()
+                figs = [plt.figure(n) for n in fig_nums]
+                for fig in figs:
+                    filename2 = "plot" + str(plotFileCounter) + ".png"
+                    filenames.append(filename2)
+                    plotFileCounter += 1
+                    fig.savefig('functions/WebServerStuff/static/images/' + filename2)
+                    fig.clf()
+                self.progress = [filename] + filenames
+            except Exception as e:
+                print(e)
+                self.progress = "FAILED"
 
     class ExportingThread(threading.Thread):
         nonlocal experimentSet, formInfos
@@ -265,32 +293,37 @@ def Web_Server():
             super().__init__()
 
         def run(self):
-            formInfo = formInfos[self.user_id]
-            currExperimentSet = operator.Preprocess(experimentSet[self.user_id], formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["retCorrThreshold"])
-            if formInfo["retCorr"]:
-                formInfo["shifts"] = {}
-                for exp in currExperimentSet.experiments:
-                    head, tail = os.path.split(exp.metadata.path)
-                    formInfo["shifts"][tail] = exp.shift
-            else:
-                formInfo["shifts"] = None
-            if formInfo["massBal"]:
-                formInfo["originalFeedTimes"] = {}
-                formInfo["newFeedTimes"] = {}
-                for exp in currExperimentSet.experiments:
-                    head, tail = os.path.split(exp.metadata.path)
-                    formInfo["originalFeedTimes"][tail] = exp.experimentCondition.originalFeedTime
-                    formInfo["newFeedTimes"][tail] = exp.experimentCondition.feedTime
-            else:
-                formInfo["originalFeedTimes"] = None
-                formInfo["newFeedTimes"] = None
-            experimentClusterComp = operator.Cluster_By_Component(currExperimentSet)
-            self.generator = Loss_Function_Analysis_Simple(experimentClusterComp, formInfo["comp"], "", formInfo[formInfo["comp"] + "KStart"]
-                                      , formInfo[formInfo["comp"] + "DStart"], formInfo[formInfo["comp"] + "KEnd"]
-                                      , formInfo[formInfo["comp"] + "DEnd"], formInfo[formInfo["comp"] + "KStep"]
-                                      , formInfo[formInfo["comp"] + "DStep"], formInfo["porosity"], formInfo["saturation"]
-                                      , formInfo["lossFunc"], formInfo["factor"], formInfo["solver"], formInfo["spacialDiff"]
-                                      ,formInfo["timeDiff"], formInfo["time"], True, self.thr_id)
+            try:
+                formInfo = formInfos[self.user_id]
+                currExperimentSet = operator.Preprocess(experimentSet[self.user_id], formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["retCorrThreshold"])
+                if formInfo["retCorr"]:
+                    formInfo["shifts"] = {}
+                    for exp in currExperimentSet.experiments:
+                        head, tail = os.path.split(exp.metadata.path)
+                        formInfo["shifts"][tail] = exp.shift
+                else:
+                    formInfo["shifts"] = None
+                if formInfo["massBal"]:
+                    formInfo["originalFeedTimes"] = {}
+                    formInfo["newFeedTimes"] = {}
+                    for exp in currExperimentSet.experiments:
+                        head, tail = os.path.split(exp.metadata.path)
+                        formInfo["originalFeedTimes"][tail] = exp.experimentCondition.originalFeedTime
+                        formInfo["newFeedTimes"][tail] = exp.experimentCondition.feedTime
+                else:
+                    formInfo["originalFeedTimes"] = None
+                    formInfo["newFeedTimes"] = None
+                experimentClusterComp = operator.Cluster_By_Component(currExperimentSet)
+                self.generator = Loss_Function_Analysis_Simple(experimentClusterComp, formInfo["comp"], "", formInfo[formInfo["comp"] + "KStart"]
+                                          , formInfo[formInfo["comp"] + "DStart"], formInfo[formInfo["comp"] + "KEnd"]
+                                          , formInfo[formInfo["comp"] + "DEnd"], formInfo[formInfo["comp"] + "KStep"]
+                                          , formInfo[formInfo["comp"] + "DStep"], formInfo["porosity"], formInfo["saturation"]
+                                          , formInfo["lossFunc"], formInfo["factor"], formInfo["solver"], formInfo["spacialDiff"]
+                                          ,formInfo["timeDiff"], formInfo["time"], True, self.thr_id)
+            except Exception as e:
+                print(e)
+                self.progress = "FAIL"
+                return
             for res in self.generator:
                 self.progress = res
                 if not type(res) is str:
@@ -362,6 +395,7 @@ def Web_Server():
             expList = []
             for comp2 in experimentClusterComp.clusters[comp]:
                 head, tail = os.path.split(comp2.experiment.metadata.path)
+                print(tail)
                 expList.append(tail)
             compExperimentDict[comp] = expList
         return render_template('ParamsTestForm2.html', compList = compList[flask_login.current_user.id], compExpDict = compExperimentDict, formInfo=formInfo, user = flask_login.current_user.id)
@@ -721,7 +755,7 @@ def Web_Server():
         threadCounter += 1
         if not thread_id in exporting_threads:
             print("ID: " + str(thread_id))
-            exporting_threads[thread_id] = MainWorkThread(flask_login.current_user.id, thread_id)
+            exporting_threads[thread_id] = MainWorkThread(flask_login.current_user.id, thread_id, flask_login.current_user.db)
             exporting_threads[thread_id].name = formInfo["expName"]
             exporting_threads[thread_id].start()
             timers[thread_id] = time.time()
@@ -735,29 +769,26 @@ def Web_Server():
             fetchExperimentData()
         if not flask_login.current_user.id in clusterComp:
             clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
-        expCompDict = {}
-        for experiment in experimentSet[flask_login.current_user.id].experiments:
-            head, tail = os.path.split(experiment.metadata.path)
-            tmpCompList = []
-            for comp in experiment.experimentComponents:
-                tmpCompList.append(comp.name)
-            expCompDict[tail] = tmpCompList
-        experimentClusterComp = clusterComp[flask_login.current_user.id]
         id = int(id)
-        compExperimentDict = {}
-        for comp in compList[flask_login.current_user.id]:
-            expList = []
-            for comp2 in experimentClusterComp.clusters[comp]:
-                head, tail = os.path.split(comp2.experiment.metadata.path)
-                expList.append(tail)
-            compExperimentDict[comp] = expList
         if id in exporting_threads:
-            return render_template('ResultPage.html', compList = compList[flask_login.current_user.id], compExpDict = compExperimentDict, expDict=expCompDict, result = exporting_threads[id].result, user = flask_login.current_user.id, name = exporting_threads[id].name, id = id)
+            return render_template('ResultPage.html', result = exporting_threads[id].result, user = flask_login.current_user.id, name = exporting_threads[id].name, id = id)
         else:
             dbuser = flask_login.current_user.db
             for result in dbuser.results:
                 if result.thr_id == id:
-                    return render_template('ResultPage.html', compList = compList[flask_login.current_user.id], compExpDict = compExperimentDict, expDict=expCompDict, result = result.results, user = flask_login.current_user.id, name = result.name, id = id)
+                    expCompDict = {}
+                    for exp in result.experiments:
+                        expCompDict[exp] = []
+                    for key, val in result.results["lossfunctionprogress"].items():
+                        for exp in val.keys():
+                            expCompDict[exp].append(key)
+                    id = int(id)
+                    compExperimentDict = {}
+                    for key, val in result.results["lossfunctionprogress"].items():
+                        compExperimentDict[key] = val.keys()
+                    return render_template('ResultPage.html', compList=result.results["compparams"].keys(),
+                                           compExpDict=compExperimentDict, expDict=expCompDict, result=result.results,
+                                           timer=result.time, user=flask_login.current_user.id, name=result.name, id=id)
         return "Result not found"
 
     @api.route('/projects/params/result/<id>/prograph', methods=['POST'])
@@ -904,23 +935,19 @@ def Web_Server():
         if exporting_threads[id].result == "-":
             return "Time elapsed: " + str(datetime.timedelta(seconds=timer))
         else:
-            thread = exporting_threads[id]
+            exporting_threads.pop(id)
             timers.pop(id)
-            newResult = DBResult(results = thread.result, thr_id=id, name=thread.name, experiments=flask_login.current_user.db.experiments)
-            newResult.save()
-            dbuser = flask_login.current_user.db
-            dbuser.results.append(newResult)
-            dbuser.save()
             return "DONE"
 
     @api.route('/projects/result', methods=['GET'])
     @flask_login.login_required
     def get_projects_result_list():
+        nonlocal numberOfRunningOptims
         dbuser = flask_login.current_user.db
         resList = []
         for res in dbuser.results:
             resList.append(res)
-        return render_template('ResultList.html', resList=resList, user=flask_login.current_user.id)
+        return render_template('ResultList.html', resList=resList, user=flask_login.current_user.id, numOfTasks=numberOfRunningOptims)
 
 
     @api.route('/projects/result/<id>/params', methods=['GET'])
@@ -974,40 +1001,36 @@ def Web_Server():
             fetchExperimentData()
         if not flask_login.current_user.id in clusterComp:
             clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
-        experimentClusterComp = clusterComp[flask_login.current_user.id]
-        compList[flask_login.current_user.id] = experimentClusterComp.clusters.keys()
-        id = int(id)
         dbuser = flask_login.current_user.db
-        expCompDict = {}
-        for experiment in experimentSet[flask_login.current_user.id].experiments:
-            head, tail = os.path.split(experiment.metadata.path)
-            tmpCompList = []
-            for comp in experiment.experimentComponents:
-                tmpCompList.append(comp.name)
-            expCompDict[tail] = tmpCompList
-        compExperimentDict = {}
-        for comp in compList[flask_login.current_user.id]:
-            expList = []
-            for comp2 in experimentClusterComp.clusters[comp]:
-                head, tail = os.path.split(comp2.experiment.metadata.path)
-                expList.append(tail)
-            compExperimentDict[comp] = expList
-        for res in dbuser.results:
-            if res.thr_id == id:
-                return render_template('ResultPage.html', compList = compList[flask_login.current_user.id], compExpDict = compExperimentDict, expDict=expCompDict, result = res.results, user = flask_login.current_user.id, name = res.name)
+        id = int(id)
+        for result in dbuser.results:
+            if result.thr_id == id:
+                expCompDict = {}
+                for exp in result.experiments:
+                    expCompDict[exp] = []
+                for key, val in result.results["lossfunctionprogress"].items():
+                    for exp in val.keys():
+                        expCompDict[exp].append(key)
+                compExperimentDict = {}
+                for key, val in result.results["lossfunctionprogress"].items():
+                    compExperimentDict[key] = val.keys()
+                return render_template('ResultPage.html', compList=result.results["compparams"].keys(),
+                                           compExpDict=compExperimentDict, expDict=expCompDict, result=result.results,
+                                           timer=result.time, user=flask_login.current_user.id, name=result.name, id=id)
         return "Unknown result"
 
     @api.route('/projects/result/<id>', methods=['DELETE'])
     @flask_login.login_required
     def get_projects_result_list_delete(id):
-        nonlocal compList
+        nonlocal compList, db_mutex
         id = int(id)
         dbuser = flask_login.current_user.db
         for res in dbuser.results:
             if res.thr_id == id:
-                dbuser.results.remove(res)
+                with db_mutex:
+                    dbuser.results.remove(res)
+                    dbuser.save()
                 res.delete()
-                dbuser.save()
                 return redirect(url_for('get_projects_result_list'))
         return "Unknown result"
 
@@ -1050,7 +1073,7 @@ def Web_Server():
     @api.route('/projects', methods=['POST'])
     @flask_login.login_required
     def upload_file():
-        nonlocal uploadedFiles
+        nonlocal uploadedFiles, db_mutex
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
@@ -1060,17 +1083,18 @@ def Web_Server():
             return redirect(url_for('upload_file_page'))
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(api.config['UPLOAD_FOLDER']  + '\\' + flask_login.current_user.id, filename))
-            jsonString = Serialize_File_To_JSON(BASE_FOLDER + "\\docu\\TestUploadFolder\\" + flask_login.current_user.id + "\\" + filename)
+            file.save(os.path.join(api.config['UPLOAD_FOLDER']  + '/' + flask_login.current_user.id, filename))
+            jsonString = Serialize_File_To_JSON(BASE_FOLDER + "/docu/TestUploadFolder/" + flask_login.current_user.id + "/" + filename)
             newExperiment = DBExperiment(uniquename=flask_login.current_user.id + "/" + filename, name=filename, experiment=jsonString)
             try:
-                newExperiment.save()
-                flask_login.current_user.db.experiments.append(newExperiment)
-                flask_login.current_user.db.save()
+                with db_mutex:
+                    newExperiment.save()
+                    flask_login.current_user.db.experiments.append(newExperiment)
+                    flask_login.current_user.db.save()
                 uploadedFiles[flask_login.current_user.id] = [exp.name for exp in flask_login.current_user.db.experiments]
                 #uploadedFiles[flask_login.current_user.id] = next(walk(UPLOAD_FOLDER + "\\" + flask_login.current_user.id), (None, None, []))[2]
-                clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
                 fetchExperimentData()
+                clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
                 compList[flask_login.current_user.id] = clusterComp[flask_login.current_user.id].clusters.keys()
                 return redirect(url_for('upload_file_page'))
             except me.errors.NotUniqueError:
@@ -1079,14 +1103,15 @@ def Web_Server():
     @api.route('/projects/<file>', methods=['DELETE'])
     @flask_login.login_required
     def delete_file(file):
-        nonlocal uploadedFiles
+        nonlocal uploadedFiles, db_mutex
         dbuser = flask_login.current_user.db
         for exp in dbuser.experiments:
             if exp.uniquename == flask_login.current_user.id + "/" + file:
-                dbuser.experiments.remove(exp)
+                with db_mutex:
+                    dbuser.experiments.remove(exp)
+                    dbuser.save()
                 exp.delete()
-                dbuser.save()
-                os.remove(UPLOAD_FOLDER + "\\" + flask_login.current_user.id + "\\" + file)
+                os.remove(UPLOAD_FOLDER + "/" + flask_login.current_user.id + "/" + file)
                 uploadedFiles[flask_login.current_user.id] = [exp.name for exp in dbuser.experiments]
                 #uploadedFiles[flask_login.current_user.id] = next(walk(UPLOAD_FOLDER + "\\" + flask_login.current_user.id), (None, None, []))[2]
                 fetchExperimentData()
@@ -1111,8 +1136,8 @@ def Web_Server():
     @flask_login.login_required
     def upload_file_page():
         nonlocal uploadedFiles
-        if not os.path.exists(UPLOAD_FOLDER + "\\" + flask_login.current_user.id):
-            os.mkdir(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)
+        if not os.path.exists(UPLOAD_FOLDER + "/" + flask_login.current_user.id):
+            os.mkdir(UPLOAD_FOLDER + "/" + flask_login.current_user.id)
         uploadedFiles[flask_login.current_user.id] = [exp.name for exp in flask_login.current_user.db.experiments]
         #uploadedFiles[flask_login.current_user.id] = next(walk(UPLOAD_FOLDER + '\\' + flask_login.current_user.id), (None, None, []))[2]
         return render_template('Upload.html', uploadedFilesLen = len(uploadedFiles[flask_login.current_user.id]), uploadedFiles = uploadedFiles[flask_login.current_user.id], user = flask_login.current_user.id)
@@ -1124,6 +1149,7 @@ def Web_Server():
 
     @api.route('/register', methods=['GET', 'POST'])
     def get_registration():
+        nonlocal db_mutex
         if request.method == 'GET':
             return render_template('Registration.html')
         username = request.form['username']
@@ -1132,7 +1158,8 @@ def Web_Server():
             if username == user.username:
                 return render_template('Registration.html', badRegistration="User already exists.")
         newUser = DBUser(username=username, password_hash=password)
-        newUser.save()
+        with db_mutex:
+            newUser.save()
         return redirect(url_for('get_main_page'))
 
     @api.route('/', methods=['GET', 'POST'])
@@ -1158,8 +1185,8 @@ def Web_Server():
                 flask_login.login_user(user)
                 if not user.id in formInfos:
                     formInfos[user.id] = {}
-                if not os.path.exists(UPLOAD_FOLDER + "\\" + user.id):
-                    os.mkdir(UPLOAD_FOLDER + "\\" + user.id)
+                if not os.path.exists(UPLOAD_FOLDER + "/" + user.id):
+                    os.mkdir(UPLOAD_FOLDER + "/" + user.id)
                 return redirect(url_for('upload_file_page'))
 
         return render_template('Index.html', badLogin=True)
@@ -1183,7 +1210,7 @@ def Web_Server():
 
     @api.route('/api/result/<id>', methods=['GET'])
     def api_get_result(id):
-        nonlocal threadCounter
+        nonlocal threadCounter, db_mutex
         id = int(id)
         timer = time.time() - timers[id]
         if exporting_threads[id].result == "-":
@@ -1192,7 +1219,8 @@ def Web_Server():
             thread = exporting_threads[id]
             timers.pop(id)
             newResult = DBResult(results = thread.result, thr_id=id, name=thread.data['settings']['expName'])
-            newResult.save()
+            with db_mutex:
+                newResult.save()
             return newResult.to_json()
 
     #api.run(debug=True)
