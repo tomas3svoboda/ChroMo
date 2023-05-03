@@ -501,7 +501,7 @@ class Operator:
     """
     Calculates if comp2 is close to comp1 with tolerance(default 0.05)
     """
-    def Cluster_Match(self, comp1, comp2, tolerance = 0.01):
+    def Cluster_Match(self, comp1, comp2, tolerance = 0.05):
         print("Calling Cluster_Match")
         cond1 = comp1.experiment.experimentCondition
         cond2 = comp2.experiment.experimentCondition
