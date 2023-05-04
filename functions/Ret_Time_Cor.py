@@ -3,6 +3,7 @@ from functions.Handle_File_Creation import Handle_File_Creation
 import pandas as pd
 from scipy.optimize import minimize
 import os
+import math
 
 
 # Define function to adjust retention times for experiments
@@ -17,12 +18,17 @@ def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold=0, writeToFile=
     # This is stored as a temporary property on the experiment object
     for key1, cluster in experimentClustersExp.clusters.items():
         for exp in cluster[0]:
-            maxShift = -1
+            maxShift = math.inf
             for comp in exp.experimentComponents:
                 column = pd.to_numeric(comp.concentrationTime[comp.name])
-                firstNonZeroIndex = column.gt(threshold).idxmax()
+                gtRes = column.gt(threshold)
+                firstNonZeroIndex = gtRes.idxmax()
+                if firstNonZeroIndex == 0 and gtRes[0] == False:
+                    if comp.concentrationTime.iloc[-1, 0] < maxShift:
+                        maxShift = comp.concentrationTime.iloc[-1, 0]
+                    continue
                 firstNonZeroTime = comp.concentrationTime.iloc[firstNonZeroIndex, 0]
-                if maxShift < 0 or firstNonZeroTime < maxShift:
+                if firstNonZeroTime < maxShift:
                     maxShift = firstNonZeroTime
             exp.maxShift = -maxShift
 
@@ -56,7 +62,7 @@ def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold=0, writeToFile=
             initalGuess.append(0)
             bounds.append((exp.maxShift, None))
         res = minimize(Shift_Loss_Function, initalGuess, args=(avgPeakTimes, value[0]),
-                       bounds=bounds, method='Nelder-Mead')
+                        bounds=bounds,  method='Nelder-Mead')
         for idx, exp in enumerate(value[0]):
             for comp in exp.experimentComponents:
                 df = comp.concentrationTime
