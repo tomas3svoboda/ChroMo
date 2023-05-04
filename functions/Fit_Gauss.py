@@ -85,13 +85,13 @@ def Fit_Gauss(experimentSetGauss):
 
             #---------------------------- End of External code--------------------------
 
-            time = (np.linspace(0, max_time, 80))
+            time = (np.linspace(0, max_time, 60))
 
             # This chunk of code assures more dense concentration/time data during the peak is being eluted and
             # less dense during concentration around 0 coming out of column
 
             gauss_data = GaussSum(time, const, n_value)/mutiplier
-            time_red = (np.linspace(0, max_time, 60))
+            time_red = (np.linspace(0, max_time, 30))
             n = 0
             for i in gauss_data:
                 if i > (max_conc/60):
