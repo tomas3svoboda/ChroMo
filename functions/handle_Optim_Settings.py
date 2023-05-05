@@ -77,6 +77,9 @@ def handle_Optim_Settings(func, x, args, bounds, optimInfo, default=0):
         options = {}
         if optimInfo["settings"]["maxiter"]:
             options["maxiter"] = int(optimInfo["settings"]["maxiter"])
+        print("x", x)
+        print("args", args)
+        print("bounds", bounds)
         return minimize(func,
                    x,
                    args=args,
