@@ -22,7 +22,7 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
                debugGraph=False,
                full=False):
 
-    #print("feedVol", feedVol)
+    print(feedVol)
 
     def diagonal_form(a, lower=1, upper=1):
         # Transforms banded matrix into diagonal ordered form
@@ -49,7 +49,6 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
     flowSpeed = (flowRate * 1000/3600) / ((math.pi * (diameter**2) / 4) * porosity)
     # 1 h = 3600 s
     # 1 mL = 1000 mm^3
-
 
     '''print("flowRate: " + str(flowRate))
     print("length: " + str(length))

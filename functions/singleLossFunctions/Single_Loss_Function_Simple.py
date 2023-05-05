@@ -6,16 +6,16 @@ from functions.Dead_Volume_Adjustment import Dead_Volume_Adjustment
 
 def Single_Loss_Function_Simple(params, experimentComp, solver, factor, spacialDiff, timeDiff, time):
     errSum = 0
-    df = experimentComp.concentrationTime
+    realCurve = experimentComp.concentrationTime
     modelCurve = Solver_Choice(solver, params, experimentComp, spacialDiff, timeDiff, time)[:, -1]
     modelCurve = Dead_Volume_Adjustment(modelCurve, experimentComp.experiment.experimentCondition.deadVolume,
                                         experimentComp.experiment.experimentCondition.flowRate, time/timeDiff)
-    time = np.linspace(0, time, modelCurve.size)
-    f = interp1d(time, modelCurve, fill_value="extrapolate")
-    modelCurveInterpolated = f(df.iloc[:, 0].to_numpy())
+    timeVec = np.linspace(0, time, modelCurve.size)
+    f = interp1d(timeVec, modelCurve, fill_value="extrapolate")
+    modelCurveInterpolated = f(realCurve.iloc[:, 0].to_numpy())
     tmpErrSum = 0
     max = 0
-    for a, b in zip(df.iloc[:, 1].to_numpy(), modelCurveInterpolated):
+    for a, b in zip(realCurve.iloc[:, 1].to_numpy(), modelCurveInterpolated):
         err = abs(a-b)
         tmpErrSum += err
         if (factor == 2 or factor == 3) and a > max:

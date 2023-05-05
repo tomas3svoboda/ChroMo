@@ -1,28 +1,38 @@
+# Import necessary modules
 from functions.Handle_File_Creation import Handle_File_Creation
 import pandas as pd
 from scipy.optimize import minimize
 import os
+import math
 
-def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold = 0, writeToFile = False):
 
+# Define function to adjust retention times for experiments
+def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold=0, writeToFile=False):
+    # If writeToFile flag is set, create a file to write output to
     if writeToFile:
         filePath = experimentSet.metadata.path + "\\Time_Shifts.txt"
         print(filePath)
         file = Handle_File_Creation(filePath)
 
-    # calculate maximum negative shifts for each experiment to not lose non-zero values, again as temporary property
+    # Calculate maximum negative shifts for each experiment to not lose non-zero values
+    # This is stored as a temporary property on the experiment object
     for key1, cluster in experimentClustersExp.clusters.items():
         for exp in cluster[0]:
-            maxShift = -1
+            maxShift = math.inf
             for comp in exp.experimentComponents:
                 column = pd.to_numeric(comp.concentrationTime[comp.name])
-                firstNonZeroIndex = column.gt(threshold).idxmax()
+                gtRes = column.gt(threshold)
+                firstNonZeroIndex = gtRes.idxmax()
+                if firstNonZeroIndex == 0 and gtRes[0] == False:
+                    if comp.concentrationTime.iloc[-1, 0] < maxShift:
+                        maxShift = comp.concentrationTime.iloc[-1, 0]
+                    continue
                 firstNonZeroTime = comp.concentrationTime.iloc[firstNonZeroIndex, 0]
-                if maxShift < 0 or firstNonZeroTime < maxShift:
+                if firstNonZeroTime < maxShift:
                     maxShift = firstNonZeroTime
             exp.maxShift = -maxShift
 
-    # defines loss function for minimization task
+    # Define loss function for minimization task
     def Shift_Loss_Function(shifts, avgPeakTimes, cluster):
         sum = 0
         for idx, exp in enumerate(cluster):
@@ -30,10 +40,10 @@ def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold = 0, writeToFil
                 column = pd.to_numeric(comp.concentrationTime[comp.name])
                 peakIndex = column.idxmax()
                 peakTime = comp.concentrationTime.iloc[peakIndex, 0]
-                sum += abs(peakTime+shifts[idx]-avgPeakTimes[comp.name])
+                sum += abs(peakTime + shifts[idx] - avgPeakTimes[comp.name])
         return sum
 
-    # calculates avg peak time and shift for each cluster
+    # Calculate average peak time and shift for each cluster
     for key, value in experimentClustersExp.clusters.items():
         avgPeakTimes = dict()
         for key2, value2 in value[1].items():
@@ -44,7 +54,7 @@ def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold = 0, writeToFil
                 peakIndex = column.idxmax()
                 peakTime = comp.concentrationTime.iloc[peakIndex, 0]
                 peakTimeSum += peakTime
-            peakTimeAvg = peakTimeSum/len(value2)
+            peakTimeAvg = peakTimeSum / len(value2)
             avgPeakTimes[key2] = peakTimeAvg
         initalGuess = list()
         bounds = list()
@@ -52,7 +62,7 @@ def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold = 0, writeToFil
             initalGuess.append(0)
             bounds.append((exp.maxShift, None))
         res = minimize(Shift_Loss_Function, initalGuess, args=(avgPeakTimes, value[0]),
-                       bounds=bounds, method='Nelder-Mead')
+                        bounds=bounds,  method='Nelder-Mead')
         for idx, exp in enumerate(value[0]):
             for comp in exp.experimentComponents:
                 df = comp.concentrationTime
@@ -63,6 +73,10 @@ def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold = 0, writeToFil
                 head2, tail2 = os.path.split(exp.metadata.path)
                 experimentName, extesion = os.path.splitext(tail2)
                 file.write("Experiment: " + experimentName + ", Shift: " + str(res.x[idx]) + "\n")
+
+    # If writeToFile flag is set, close the file
     if writeToFile:
         file.close()
+
+    # Return the updated experiment set
     return experimentSet

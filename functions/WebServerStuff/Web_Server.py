@@ -1223,7 +1223,7 @@ def Web_Server():
                 newResult.save()
             return newResult.to_json()
 
-    api.run(debug=True)
-    #print("localhost:6969")
-    #serve(api, listen='*:6969', threads=4)
+    #api.run(debug=True)
+    print("localhost:6969")
+    serve(api, listen='*:6969', threads=4)
 
