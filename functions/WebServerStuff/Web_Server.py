@@ -863,8 +863,14 @@ def Web_Server():
             for comp in result["lossfunctionprogress"].keys():
                 params.append([result["porosity"], result["compparams"][comp][0], result["compparams"][comp][1]])
             comp = compIdx
+        gauss = bool(request.form.get("gauss"))
+        retCorr = bool(request.form.get("retCorr"))
+        retCorrThreshold = 0
+        if retCorr:
+            retCorrThreshold = float(request.form.get("retCorrThreshold"))
+        massBal = bool(request.form.get("massBal"))
+        currExpSet = operator.Preprocess(experimentSet[flask_login.current_user.id], gauss, retCorr, massBal, retCorrThreshold)
         exp = expList[expIdx]
-        currExpSet = operator.Preprocess(experimentSet[flask_login.current_user.id], result["optimparams"]["gauss"], result["optimparams"]["retCorr"], result["optimparams"]["massBal"], result["optimparams"]["retThreshold"])
         expObj = currExpSet.get_exp_by_name(exp)
         if expObj:
             thread_id = threadCounter

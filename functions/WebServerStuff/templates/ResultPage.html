@@ -139,7 +139,18 @@
               </select><br>
             </div>
           {% endfor %}
-          <a type="button" onclick="showGraph2('mainform2', '/rescomp', 'imgdiv2', 'downloadMatrixButton')" class="w3-button siemens-blue w3-padding-large w3-large w3-margin-top w3-round">Graph</a>
+          <h4>Preprocess options</h4>
+          <label for="gauss">Replace with asymmetric Gauss curve <div class="required">*</div></label>
+          <input type="checkbox" name="gauss" value="True" id="gauss"><br>
+          <label for="retCorr">Retention time correction <div class="required">*</div></label>
+          <input type="checkbox" name="retCorr" value="True" id="retCorr" oninput="retTimeTresholdInput()">
+           <div id="retCorrTresholdDiv" style="display: none;">
+              <label for="retCorrThreshold">Retention time zero threshold<div class="required">*</div></label>
+              <input type="number" id="retCorrThreshold" name="retCorrThreshold" step="any">
+           </div><br>
+          <label for="massBal">Mass balance correction <div class="required">*</div></label>
+          <input type="checkbox" name="massBal" value="True" id="massBal"><br>
+            <a type="button" onclick="showGraph2('mainform2', '/rescomp', 'imgdiv2', 'downloadMatrixButton')" class="w3-button siemens-blue w3-padding-large w3-large w3-margin-top w3-round">Graph</a>
           <a type="button" id="downloadMatrixButton" onclick="downloadMatrix('graphImg2')" class="w3-button siemens-blue w3-padding-large w3-large w3-margin-top w3-round" style="display: none;">Download Result</a>
           <iframe id="invis_iframe" style="display:none;"></iframe>
         </form>
@@ -155,6 +166,7 @@
   </div>
 </div>
 <script type="text/javascript">
+    retTimeTresholdInput()
     {% if result == "-" %}
       getResult()
     {% endif %}
