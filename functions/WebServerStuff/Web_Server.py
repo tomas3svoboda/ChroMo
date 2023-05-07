@@ -224,7 +224,7 @@ def Web_Server():
                 self.result = "FAIL"
 
     class SimpleThread(threading.Thread):
-        nonlocal experimentSet, formInfos, clusterComp
+        nonlocal experimentSet, formInfos, clusterComp, BASE_FOLDER
 
         def __init__(self, user_id):
             self.user_id = user_id
@@ -245,7 +245,7 @@ def Web_Server():
                                formInfo["solver"], params, webMode=True, title="Experimental data")
                 filename = "plot" + str(plotFileCounter) + ".png"
                 plotFileCounter += 1
-                plt.savefig('functions/WebServerStuff/static/images/' + filename)
+                plt.savefig(BASE_FOLDER + '/functions/WebServerStuff/static/images/' + filename)
                 plt.clf()
                 currExperimentSet = operator.Preprocess(experimentSet[self.user_id], formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["retCorrThreshold"])
                 if formInfo["retCorr"]:
@@ -276,7 +276,7 @@ def Web_Server():
                     filename2 = "plot" + str(plotFileCounter) + ".png"
                     filenames.append(filename2)
                     plotFileCounter += 1
-                    fig.savefig('functions/WebServerStuff/static/images/' + filename2)
+                    fig.savefig(BASE_FOLDER + '/functions/WebServerStuff/static/images/' + filename2)
                     fig.clf()
                 self.progress = [filename] + filenames
             except Exception as e:
@@ -335,12 +335,13 @@ def Web_Server():
     class SolverThread(threading.Thread):
         nonlocal experimentSet, formInfos
 
-        def __init__(self, user_id, solver, params, experiment, compIdx):
+        def __init__(self, user_id, solver, params, experiment, compIdx, comp):
             self.user_id = user_id
             self.solver = solver
             self.params = params
             self.exp = experiment
             self.compIdx = compIdx
+            self.comp = comp
             self.result = "-"
             super().__init__()
 
@@ -521,7 +522,7 @@ def Web_Server():
         progress = exporting_threads[thread_id].progress
         filename = "plot" + str(plotFileCounter) + ".png"
         plotFileCounter += 1
-        plt.savefig('functions/WebServerStuff/static/images/' + filename)
+        plt.savefig(BASE_FOLDER + '/functions/WebServerStuff/static/images/' + filename)
         returnString = render_template('Picture.html', pictureURL = url_for('static', filename='images/'+filename), alt="chart", width="640", height="480", newAngleUrl=url_for('post_projects_test_new_angle', id=id)) + \
                        render_template('GraphInfo.html', henryConst=progress[0], disperCoef=progress[1], shifts=formInfo["shifts"], originalFeedTimes=formInfo["originalFeedTimes"], newFeedTimes=formInfo["newFeedTimes"] )
         return  returnString
@@ -529,7 +530,7 @@ def Web_Server():
     @api.route('/projects/test/<id>/progress', methods=['GET'])
     @flask_login.login_required
     def post_projects_test_progress(id):
-        nonlocal exporting_threads, plotFileCounter, formInfos
+        nonlocal exporting_threads, plotFileCounter, formInfos, BASE_FOLDER
         formInfo = formInfos[flask_login.current_user.id]
         thread_id = int(id)
         if type(exporting_threads[thread_id].progress) is str:
@@ -538,7 +539,7 @@ def Web_Server():
             progress = exporting_threads[thread_id].progress
             filename = "plot" + str(plotFileCounter) + ".png"
             plotFileCounter += 1
-            plt.savefig('functions/WebServerStuff/static/images/' + filename)
+            plt.savefig(BASE_FOLDER + '/functions/WebServerStuff/static/images/' + filename)
             returnString = render_template('Picture.html', pictureURL = url_for('static', filename='images/'+filename),
                                            alt="chart", width="640", height="480", newAngleUrl=url_for('post_projects_test_new_angle', id=id),
                                            downloadUrl = url_for('get_projects_test_matrix', id=id)) + \
@@ -796,7 +797,7 @@ def Web_Server():
     @flask_login.login_required
     def post_projects_result_prograph(id):
         # TODO maybe thread this
-        nonlocal exporting_threads, plotFileCounter
+        nonlocal exporting_threads, plotFileCounter, BASE_FOLDER
         id = int(id)
         if id in exporting_threads:
             result = exporting_threads[id].result
@@ -831,7 +832,7 @@ def Web_Server():
         ax.plot(relevantList)
         filename = "plot" + str(plotFileCounter) + ".png"
         plotFileCounter += 1
-        plt.savefig('functions/WebServerStuff/static/images/' + filename)
+        plt.savefig(BASE_FOLDER + '/functions/WebServerStuff/static/images/' + filename)
         plt.clf()
         return render_template('Picture.html', pictureURL = url_for('static', filename='images/'+filename), alt="chart", width="640", height="480")
 
@@ -843,39 +844,43 @@ def Web_Server():
         if not flask_login.current_user.id in experimentSet:
             fetchExperimentData()
         id = int(id)
-        if id in exporting_threads:
-            result = exporting_threads[id].result
-        else:
-            dbuser = flask_login.current_user.db
-            for res in dbuser.results:
-                if res.thr_id == id:
-                    result = res.results
-        exp = int(request.form.get("expList2"))
-        compForm = request.form.get("componentTest2" + str(exp))
+        dbuser = flask_login.current_user.db
+        for res in dbuser.results:
+            if res.thr_id == id:
+                result = res.results
+                expList = res.experiments
+        expIdx = int(request.form.get("expList2"))
+        compForm = request.form.get("componentTest2" + str(expIdx))
         if compForm != "all":
             compIdx = int(compForm)
-            comp = experimentSet[flask_login.current_user.id].experiments[exp].experimentComponents[compIdx].name
+            comp = list(result["lossfunctionprogress"].keys())[compIdx]
             params = [result["porosity"], result["compparams"][comp][0], result["compparams"][comp][1]]
             if result["optimparams"]["solver"] == "Nonlin":
                 params.append(result["compparams"][comp][2])
         else:
             compIdx = compForm
             params = []
-            for comp in experimentSet[flask_login.current_user.id].experiments[exp].experimentComponents:
-                params.append([result["porosity"], result["compparams"][comp.name][0], result["compparams"][comp.name][1]])
-        thread_id = threadCounter
-        threadCounter += 1
-        if not thread_id in exporting_threads:
-            print("ID: " + str(thread_id))
-            exporting_threads[thread_id] = SolverThread(flask_login.current_user.id, result["optimparams"]["solver"], params, experimentSet[flask_login.current_user.id].experiments[exp], compIdx)
-            exporting_threads[thread_id].start()
-        return url_for('post_projects_result_rescomp_progress', id=thread_id)
+            for comp in result["lossfunctionprogress"].keys():
+                params.append([result["porosity"], result["compparams"][comp][0], result["compparams"][comp][1]])
+            comp = compIdx
+        exp = expList[expIdx]
+        currExpSet = operator.Preprocess(experimentSet[flask_login.current_user.id], result["optimparams"]["gauss"], result["optimparams"]["retCorr"], result["optimparams"]["massBal"], result["optimparams"]["retThreshold"])
+        expObj = currExpSet.get_exp_by_name(exp)
+        if expObj:
+            thread_id = threadCounter
+            threadCounter += 1
+            if not thread_id in exporting_threads:
+                print("ID: " + str(thread_id))
+                exporting_threads[thread_id] = SolverThread(flask_login.current_user.id, result["optimparams"]["solver"], params, expObj, compIdx, comp)
+                exporting_threads[thread_id].start()
+            return url_for('post_projects_result_rescomp_progress', id=thread_id)
+        return "Error: requested experiment was removed"
 
     @api.route('/projects/params/result/<id>/rescomp/progress', methods=['GET'])
     @api.route('/projects/result/<id>/rescomp/progress', methods=['GET'])
     @flask_login.login_required
     def post_projects_result_rescomp_progress(id):
-        nonlocal exporting_threads, plotFileCounter, formInfos
+        nonlocal exporting_threads, plotFileCounter, formInfos, BASE_FOLDER
         formInfo = formInfos[flask_login.current_user.id]
         thread_id = int(id)
         if type(exporting_threads[thread_id].result) is str and exporting_threads[thread_id].result == "-":
@@ -884,24 +889,41 @@ def Web_Server():
             results = exporting_threads[thread_id].result
             fig = plt.figure()
             ax = fig.add_subplot(111)
-            for idx, result in enumerate(results):
-                compName = exporting_threads[thread_id].exp.experimentComponents[idx].name
-                df = exporting_threads[thread_id].exp.experimentComponents[idx].concentrationTime
-                modelCurve = result[:, -1]
-                modelCurve = Dead_Volume_Adjustment(modelCurve, exporting_threads[thread_id].exp.experimentCondition.deadVolume,
-                                                     exporting_threads[thread_id].exp.experimentCondition.flowRate, formInfo["time"]/formInfo["timeDiff"])
+            if exporting_threads[thread_id].comp == "all":
+                for idx, result in enumerate(results):
+                    compName = exporting_threads[thread_id].exp.experimentComponents[idx].name
+                    df = exporting_threads[thread_id].exp.experimentComponents[idx].concentrationTime
+                    modelCurve = result[:, -1]
+                    modelCurve = Dead_Volume_Adjustment(modelCurve, exporting_threads[thread_id].exp.experimentCondition.deadVolume,
+                                                         exporting_threads[thread_id].exp.experimentCondition.flowRate, formInfo["time"]/formInfo["timeDiff"])
+                    minTime = df.iat[0, 0]
+                    maxTime = df.iat[-1, 0]
+                    time = np.linspace(minTime, maxTime, modelCurve.size)
+                    ax.set_title("Result comparison")
+                    ax.set_xlabel("Time [s]")
+                    ax.set_ylabel("Concentration [mg/mL]")
+                    ax.plot(time, modelCurve, label=compName+" model")
+                    ax.scatter(df.iloc[:, 0], df.iloc[:, 1], marker=',', s=10, label=compName+" experiment")
+            else:
+                compName = exporting_threads[thread_id].comp
+                df = exporting_threads[thread_id].exp.experimentComponents[int(exporting_threads[thread_id].compIdx)].concentrationTime
+                modelCurve = results[0][:, -1]
+                modelCurve = Dead_Volume_Adjustment(modelCurve,
+                                                    exporting_threads[thread_id].exp.experimentCondition.deadVolume,
+                                                    exporting_threads[thread_id].exp.experimentCondition.flowRate,
+                                                    formInfo["time"] / formInfo["timeDiff"])
                 minTime = df.iat[0, 0]
                 maxTime = df.iat[-1, 0]
                 time = np.linspace(minTime, maxTime, modelCurve.size)
                 ax.set_title("Result comparison")
                 ax.set_xlabel("Time [s]")
                 ax.set_ylabel("Concentration [mg/mL]")
-                ax.plot(time, modelCurve, label=compName+" model")
-                ax.scatter(df.iloc[:, 0], df.iloc[:, 1], marker=',', s=10, label=compName+" experiment")
+                ax.plot(time, modelCurve, label=compName + " model")
+                ax.scatter(df.iloc[:, 0], df.iloc[:, 1], marker=',', s=10, label=compName + " experiment")
             plt.legend()
             filename = "plot" + str(plotFileCounter) + ".png"
             plotFileCounter += 1
-            plt.savefig('functions/WebServerStuff/static/images/' + filename)
+            plt.savefig(BASE_FOLDER + '/functions/WebServerStuff/static/images/' + filename)
             plt.clf()
             return render_template('Picture.html', pictureURL=url_for('static', filename="images/" + filename), picId="graphImg2", alt="chart", width="640", height="480", downloadUrl=url_for("post_projects_result_rescomp_matrix", id=thread_id))
 

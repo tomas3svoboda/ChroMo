@@ -131,6 +131,10 @@ async function showGraph2(f = "mainform", aurl = "", i = "imgdiv", showEl = ""){
         "body": data,
     })
     let path = await resp.text()
+    if(path.startsWith("Error")){
+        document.getElementById(i).innerHTML = path
+        return
+    }
     while(1){
         await sleep(500)
         let resp2 = await fetch(path)

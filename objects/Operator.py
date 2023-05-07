@@ -517,7 +517,7 @@ class Operator:
     """
     Calculates if exp2 is close to exp1 with tolerance(default 0.05)
     """
-    def Cluster_Match_Exp(self, exp1, exp2, tolerance = 0.01):
+    def Cluster_Match_Exp(self, exp1, exp2, tolerance = 0.1):
         cond1 = exp1.experimentCondition
         cond2 = exp2.experimentCondition
         if(abs(cond1.flowRate - cond2.flowRate) < tolerance * cond1.flowRate and
