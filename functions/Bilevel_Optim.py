@@ -31,10 +31,10 @@ def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, 
     result["optimparams"]["solver"] = solver
     result["optimparams"]["lvl1optim"] = lvl1optim
     result["optimparams"]["lvl2optim"] = lvl2optim
-    result["porosity"] = gl.porosity[optimId]
-    result["lv1lossfunctionval"] = gl.lv1LossFunctionVal[optimId]
-    result["compparams"] = gl.compParamDict[optimId]
-    result["lv2lossfunctionvals"] = gl.lv2LossFunctionVals[optimId]
+    result["porosity"] = gl.bestPorosity[optimId]
+    result["lv1lossfunctionval"] = gl.bestLvl1LossFunctionVal[optimId]
+    result["compparams"] = gl.bestCompParamDict[optimId]
+    result["lv2lossfunctionvals"] = gl.bestLvl2LossFunctionVals[optimId]
     result["lossfunctionprogress"] = gl.lossFunctionProgress[optimId]
 
     '''cond = experimentSetCor3.experiments[0].experimentCondition
@@ -44,4 +44,4 @@ def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, 
     plt.plot(t, res[:, -1])
     comp.concentrationTime.plot.line(x=0)
     plt.show()'''
-    return result # TODO return Solution object
+    return result
