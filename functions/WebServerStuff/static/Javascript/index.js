@@ -182,6 +182,8 @@ function retTimeTresholdInput(){
     let check = document.getElementById("retCorrTest")
     if(check == null)
         check = document.getElementById("retCorr")
+    if(check == null)
+        return
     let val = check.checked
     if(val){
         div.style.display = "block"

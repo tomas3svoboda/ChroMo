@@ -103,7 +103,7 @@
             <option value="all">All</option>
           </select><br>
           {% for comp in compList %}
-          <div id="expListDiv{{comp}}" {% if comp != 'Sac' %}style="display:none;"{% endif %} class="expListDiv">
+          <div id="expListDiv{{comp}}" {% if loop.index0 != 0 %}style="display:none;"{% endif %} class="expListDiv">
             <label for="expList{{comp}}">Select Experiment for {{comp}} <div class="required">*</div></label>
             <select name="expList{{comp}}" id="expList{{comp}}">
               {% for exp in compExpDict[comp] %}
@@ -166,9 +166,9 @@
   </div>
 </div>
 <script type="text/javascript">
-    retTimeTresholdInput()
     {% if result == "-" %}
       getResult()
     {% endif %}
+    retTimeTresholdInput()
 </script>
 {% endblock %}
