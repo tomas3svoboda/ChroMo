@@ -5,7 +5,7 @@ from functions.Dead_Volume_Adjustment import Dead_Volume_Adjustment
 
 def Model_Analysis(experimentComp, solver, params, spacialDiff = 30, timeDiff = 3000, time = 10800, webMode = False, title = False, full = False):
     df = experimentComp.concentrationTime
-    model = Solver_Choice(solver, params, experimentComp, spacialDiff, timeDiff, time, full=full)
+    model = Solver_Choice(solver, params, experimentComp, spacialDiff, timeDiff, time, full=full, debugPrint=True)
     if full:
         modelCurve = model[0][:, -1]
     else:

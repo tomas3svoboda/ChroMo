@@ -38,7 +38,7 @@ def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor, solver, s
                                 (experimentCluster, porosity, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId),
                                 bnds,
                                 lvl2optim)
-    print('__________________________________________')
+    # print('__________________________________________')
 
     '''for i in [0,1]:
         #if res.x[i] == 0 or res.x[i] == 1000:
