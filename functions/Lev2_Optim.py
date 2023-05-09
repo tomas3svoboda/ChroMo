@@ -9,7 +9,7 @@ from functions.handle_Optim_Settings import handle_Optim_Settings
 def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, lvl2optim=None):
     #print("Calling Lev2_Optim with params " + str(gl.compParamDict[key]) + "!")
     #res = minimize(Lev2_Loss_Function, gl.compParamDict[key], args=(experimentCluster, porosity), bounds=((0, None), (0, None)), method='Nelder-Mead', options={'fatol': 0.5,'maxfev': 25})
-    print("Calling Lev2_Optim with:\nK " +
+    '''print("Calling Lev2_Optim with:\nK " +
           str(round(gl.compParamDict[optimId][key][0], 2)) +
           " and range [" +
           str(round(gl.compRangeDict[optimId][key][0][0], 2)) +
@@ -21,7 +21,7 @@ def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor, solver, s
           str(round(gl.compRangeDict[optimId][key][1][0], 2)) +
           ", " +
           str(round(gl.compRangeDict[optimId][key][1][1], 2)) +
-          "]!")
+          "]!")'''
     if not optimId in gl.lossFunctionProgress:
         gl.lossFunctionProgress[optimId] = {}
     if not key in gl.lossFunctionProgress[optimId]:
@@ -32,7 +32,7 @@ def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor, solver, s
         bnds = [(gl.compRangeDict[optimId][key][0][0], gl.compRangeDict[optimId][key][0][1]), (gl.compRangeDict[optimId][key][1][0], gl.compRangeDict[optimId][key][1][1]), (gl.compRangeDict[optimId][key][2][0], gl.compRangeDict[optimId][key][2][1])]
     else:
         raise "Unknown solver choice in Lev2_Optim"
-    print("optimId: " + str(optimId) + " lvl2alg: " + str(lvl2optim["algorithm"]))
+    # print("optimId: " + str(optimId) + " lvl2alg: " + str(lvl2optim["algorithm"]))
     res = handle_Optim_Settings(Lev2_Loss_Function,
                                 gl.compParamDict[optimId][key],
                                 (experimentCluster, porosity, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId),
