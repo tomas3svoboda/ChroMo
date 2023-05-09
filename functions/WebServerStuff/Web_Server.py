@@ -241,8 +241,10 @@ def Web_Server():
                 experimentClusterComp2 = clusterComp[self.user_id]
                 params = [formInfo["porosity"], formInfo[formInfo["comp2"] + "K"], formInfo[formInfo["comp2"] + "D"],
                           formInfo["saturation"]]
+                print("---------Not Preprocessed Output Start---------")
                 Model_Analysis(experimentClusterComp2.clusters[formInfo["comp2"]][formInfo["exp" + formInfo["comp2"]]],
                                formInfo["solver"], params, webMode=True, title="Experimental data")
+                print("---------Not Preprocessed Output End---------")
                 filename = "plot" + str(plotFileCounter) + ".png"
                 plotFileCounter += 1
                 plt.savefig(BASE_FOLDER + '/functions/WebServerStuff/static/images/' + filename)
@@ -266,9 +268,11 @@ def Web_Server():
                     formInfo["originalFeedTimes"] = None
                     formInfo["newFeedTimes"] = None
                 experimentClusterComp = operator.Cluster_By_Component(currExperimentSet)
+                print("---------Preprocessed Output Start---------")
                 Model_Analysis(experimentClusterComp.clusters[formInfo["comp2"]][formInfo["exp" + formInfo["comp2"]]],
                                formInfo["solver"], params, formInfo["spacialDiff"], formInfo["timeDiff"], formInfo["time"],
                                webMode=True, title="Preprocessed data", full=True)
+                print("---------Preprocessed Output End---------")
                 filenames = []
                 fig_nums = plt.get_fignums()
                 figs = [plt.figure(n) for n in fig_nums]
@@ -396,7 +400,6 @@ def Web_Server():
             expList = []
             for comp2 in experimentClusterComp.clusters[comp]:
                 head, tail = os.path.split(comp2.experiment.metadata.path)
-                print(tail)
                 expList.append(tail)
             compExperimentDict[comp] = expList
         return render_template('ParamsTestForm2.html', compList = compList[flask_login.current_user.id], compExpDict = compExperimentDict, formInfo=formInfo, user = flask_login.current_user.id)
@@ -666,7 +669,6 @@ def Web_Server():
             clusterComp[flask_login.current_user.id] = operator.Cluster_By_Component(experimentSet[flask_login.current_user.id])
         experimentClusterComp = clusterComp[flask_login.current_user.id]
         compList[flask_login.current_user.id] = experimentClusterComp.clusters.keys()
-        print(compList[flask_login.current_user.id])
         return render_template('ParamsForm.html', compList = compList[flask_login.current_user.id], formInfo = formInfo, user = flask_login.current_user.id)
 
     @api.route('/projects/params', methods=['POST'])
@@ -750,8 +752,6 @@ def Web_Server():
             formInfo["lvl2optimsettings"]["settings"]["f_min"] = request.form.get("lvl2shgof_min")
         elif formInfo["lvl2optimsettings"]["algorithm"] == "4":
             formInfo["lvl2optimsettings"]["settings"]["maxiter"] = request.form.get("lvl2powellmaxiter")
-        print(formInfo["lvl1optimsettings"])
-        print(formInfo["lvl2optimsettings"])
         thread_id = threadCounter
         threadCounter += 1
         if not thread_id in exporting_threads:
