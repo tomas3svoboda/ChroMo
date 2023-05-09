@@ -243,7 +243,8 @@ def Web_Server():
                           formInfo["saturation"]]
                 print("---------Not Preprocessed Output Start---------")
                 Model_Analysis(experimentClusterComp2.clusters[formInfo["comp2"]][formInfo["exp" + formInfo["comp2"]]],
-                               formInfo["solver"], params, webMode=True, title="Experimental data")
+                               formInfo["solver"], params, formInfo["spacialDiff"], formInfo["timeDiff"],
+                               formInfo["time"], webMode=True, title="Experimental data")
                 print("---------Not Preprocessed Output End---------")
                 filename = "plot" + str(plotFileCounter) + ".png"
                 plotFileCounter += 1
