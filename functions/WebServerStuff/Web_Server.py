@@ -1142,6 +1142,7 @@ def Web_Server():
                 exp.delete()
                 os.remove(UPLOAD_FOLDER + "/" + flask_login.current_user.id + "/" + file)
                 uploadedFiles[flask_login.current_user.id] = [exp.name for exp in dbuser.experiments]
+                print(uploadedFiles[flask_login.current_user.id])
                 #uploadedFiles[flask_login.current_user.id] = next(walk(UPLOAD_FOLDER + "\\" + flask_login.current_user.id), (None, None, []))[2]
                 fetchExperimentData()
                 #experimentSet[flask_login.current_user.id] = operator.Load_Experiment_Set(UPLOAD_FOLDER + "\\" + flask_login.current_user.id)

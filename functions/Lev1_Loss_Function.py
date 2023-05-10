@@ -23,7 +23,7 @@ def Lev1_Loss_Function(porosity, experimentClustersComp, lossFunction, factor, s
     print(sum)
     print('porosity:')
     print(porosity[0])
-    for key, val in gl.bestCompParamDict[optimId].items():
+    for key, val in gl.compParamDict[optimId].items():
         print('K, D for', key, ':')
         print(val[0])
         print(val[1])
