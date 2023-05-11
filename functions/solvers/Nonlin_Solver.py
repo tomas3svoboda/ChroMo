@@ -121,7 +121,7 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
 
         sol = optimize.root(fun=function,
                             x0=c[i - 1, :],
-                            method='hybr',
+                            method='krylov',
                             args=(c[i - 1, :], feed[i], porosity, langmuirConst, saturCoef, disperCoef, flowSpeed))
         c[i, :] = sol.x
         residuals[i] = np.linalg.norm(sol.fun)  # Save the L2-norm of the residuals at each time step
