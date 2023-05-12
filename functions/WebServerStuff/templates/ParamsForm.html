@@ -217,17 +217,26 @@
                 {% if formInfo[comp + 'DStart'] %}
                     document.getElementById("{{comp}}DStart").value = {{formInfo[comp + 'DStart']}}
                 {% endif %}
+                {% if formInfo[comp + 'QStart'] %}
+                    document.getElementById("{{comp}}QStart").value = {{formInfo[comp + 'QStart']}}
+                {% endif %}
                 {% if formInfo[comp + 'DEnd'] %}
                     document.getElementById("{{comp}}DEnd").value = {{formInfo[comp + 'DEnd']}}
                 {% endif %}
                 {% if formInfo['saturation'] %}
                     document.getElementById("{{comp}}QInit").value = {{formInfo['saturation']}}
                 {% endif %}
+                {% if formInfo[comp + 'QEnd'] %}
+                    document.getElementById("{{comp}}QEnd").value = {{formInfo[comp + 'QEnd']}}
+                {% endif %}
                 {% if formInfo[comp + 'K'] %}
                     document.getElementById("{{comp}}KInit").value = {{formInfo[comp + 'K']}}
                 {% endif %}
                 {% if formInfo[comp + 'D'] %}
                     document.getElementById("{{comp}}DInit").value = {{formInfo[comp + 'D']}}
+                {% endif %}
+                {% if formInfo[comp + 'Q'] %}
+                    document.getElementById("{{comp}}QInit").value = {{formInfo[comp + 'Q']}}
                 {% endif %}
         {% endfor %}
         {% if formInfo['lvl1optimsettings'] %}
