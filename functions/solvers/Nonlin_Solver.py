@@ -44,7 +44,7 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
     feedTime = (feedVol / flowRate) * 3600
 
     # Calculation of the flow speed [mm/s]
-    flowSpeed = (flowRate * 1000 / 3600) / (math.pi * ((diameter / 2) ** 2) * porosity)
+    flowSpeed = (flowRate * 1000/3600) / ((math.pi * (diameter**2) / 4) * porosity)
     if debugPrint:
         print('Flow speed:   ' + str(round(flowSpeed, 2)) + ' [mm/s]')
 
@@ -84,14 +84,14 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
     # c0 is previous calculated time step. For time 0 c0 in zeros (initial condition)
     def function(c1, c0, feedCur, porosity, langmuirConst, saturCoef, disperCoef, flowSpeed):
         f = np.zeros(len(c0))  # Preparation of solution vector - will be optimized to 0
-        for i in range(0, len(c0)):  # Main loop trough all the vector's elements
+        for i in range(0, len(c0)):  # Main loop through all the vector's elements
             if i == 0:  # Left boundary
                 f[0] = ((((c0[1] - c0[0]) / dx) + ((c1[1] - c1[0]) / dx)) / 2) - (flowSpeed * (c1[0] - feedCur))
             elif i > 0 and i < Nx - 1:
                 denominator0 = ((1 - porosity) * saturCoef * langmuirConst) / (
-                            (((-langmuirConst * c0[i] + 1) ** 2) * porosity) + 1)
+                            (((langmuirConst * c0[i] + 1) ** 2) * porosity) + 1)
                 denominator1 = ((1 - porosity) * saturCoef * langmuirConst) / (
-                            (((-langmuirConst * c1[i] + 1) ** 2) * porosity) + 1)
+                            (((langmuirConst * c1[i] + 1) ** 2) * porosity) + 1)
                 secondDer0 = (c0[i - 1] - 2 * c0[i] + c0[i + 1]) / (dx ** 2)
                 secondDer1 = (c1[i - 1] - 2 * c1[i] + c1[i + 1]) / (dx ** 2)
                 firstDer0 = (c0[i + 1] - c0[i - 1]) / (dx * 2)
@@ -121,7 +121,7 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
 
         sol = optimize.root(fun=function,
                             x0=c[i - 1, :],
-                            method='hybr',
+                            method='krylov',
                             args=(c[i - 1, :], feed[i], porosity, langmuirConst, saturCoef, disperCoef, flowSpeed))
         c[i, :] = sol.x
         residuals[i] = np.linalg.norm(sol.fun)  # Save the L2-norm of the residuals at each time step

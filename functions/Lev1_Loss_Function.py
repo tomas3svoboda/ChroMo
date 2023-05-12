@@ -24,9 +24,9 @@ def Lev1_Loss_Function(porosity, experimentClustersComp, lossFunction, factor, s
     print('porosity:')
     print(porosity[0])
     for key, val in gl.compParamDict[optimId].items():
-        print('K, D for', key, ':')
-        print(val[0])
-        print(val[1])
+        print('K, D, (Q) for', key, ':')
+        for par in val:
+            print(par)
     print('time:')
     print(str(datetime.timedelta(seconds=t.time() - timeStart)))
     print('__________________________________________')

@@ -48,7 +48,7 @@ function formSolverChangeForTest(){
     if(solver == "Nonlin"){
         div.innerHTML =`
                 <label for="saturationTest">Saturation <div class="required">*</div></label>
-                <input type="number" value="saturationTest" id="saturationTest" name="saturationTest" min="0" step="1" required><br>
+                <input type="number" value="saturationTest" id="saturationTest" name="saturationTest" min="0" step="any" required><br>
            `
         params.innerHTML = params.innerHTML.replaceAll("Henry","Langmuir")
     }
