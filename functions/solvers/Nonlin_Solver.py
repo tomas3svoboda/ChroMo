@@ -7,6 +7,7 @@ from scipy import optimize
 from IPython.display import display
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+from numba import jit
 
 # ***Numerical solution of Equilibrium Dispersive Model of Chromatography***
 #                       ***Langmuir isotherm***
@@ -39,14 +40,16 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
                   debugGraph=False,
                   full=False
                   ):
-
     # Calculation of the feed time [s]
     feedTime = (feedVol / flowRate) * 3600
 
     # Calculation of the flow speed [mm/s]
-    flowSpeed = (flowRate * 1000/3600) / ((math.pi * (diameter**2) / 4) * porosity)
+    flowSpeed = (flowRate * 1000 / 3600) / ((math.pi * (diameter ** 2) / 4) * porosity)
     if debugPrint:
         print('Flow speed:   ' + str(round(flowSpeed, 2)) + ' [mm/s]')
+        print('Saturation Coefficient:   ' + str(round(saturCoef, 2)) + ' g/L')
+        print('Langmuir Constant:   ' + str(round(langmuirConst, 2)))
+        print('Dispersion Coefficient:   ' + str(round(disperCoef, 2)) + ' mm2/s')
 
     # ________________________________________________________________________
     # DATA STRUCTURES PREPARATION
@@ -60,7 +63,7 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
     feedSteps = int(feedTime // dt)  # Whole number of feed iterations
     feedTimeAprox = feedTime % dt  # aproximation of division
     # Rounding iteration step based on defined feed parameters
-    if feedTimeAprox >= dt/2:
+    if feedTimeAprox >= dt / 2:
         feedSteps += 1
     # Constructing pulse injection feed vector
     feed = np.linspace(0, time, Nt)
@@ -71,7 +74,7 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
             feed[i] = 0
 
     # Preparation of the solution matrix
-    c = np.zeros((len(t), len(x)))
+    c = np.zeros((Nt, Nx))
     # Initial conditions
     c0 = np.zeros(len(x))
 
@@ -82,16 +85,24 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
     # of nonlinear algebraic equations. The solution of this system is that c1
     # which corresponds to vector f filled with zeros. c1 is unknown next time step.
     # c0 is previous calculated time step. For time 0 c0 in zeros (initial condition)
-    def function(c1, c0, feedCur, porosity, langmuirConst, saturCoef, disperCoef, flowSpeed):
+    @jit(nopython=True)
+    def function(c1,
+                 c0,
+                 feedCur,
+                 porosity,
+                 langmuirConst,
+                 saturCoef,
+                 disperCoef,
+                 flowSpeed):
         f = np.zeros(len(c0))  # Preparation of solution vector - will be optimized to 0
         for i in range(0, len(c0)):  # Main loop through all the vector's elements
             if i == 0:  # Left boundary
                 f[0] = ((((c0[1] - c0[0]) / dx) + ((c1[1] - c1[0]) / dx)) / 2) - (flowSpeed * (c1[0] - feedCur))
             elif i > 0 and i < Nx - 1:
                 denominator0 = ((1 - porosity) * saturCoef * langmuirConst) / (
-                            (((langmuirConst * c0[i] + 1) ** 2) * porosity) + 1)
+                        (((langmuirConst * c0[i] + 1) ** 2) * porosity) + 1)
                 denominator1 = ((1 - porosity) * saturCoef * langmuirConst) / (
-                            (((langmuirConst * c1[i] + 1) ** 2) * porosity) + 1)
+                        (((langmuirConst * c1[i] + 1) ** 2) * porosity) + 1)
                 secondDer0 = (c0[i - 1] - 2 * c0[i] + c0[i + 1]) / (dx ** 2)
                 secondDer1 = (c1[i - 1] - 2 * c1[i] + c1[i + 1]) / (dx ** 2)
                 firstDer0 = (c0[i + 1] - c0[i - 1]) / (dx * 2)
@@ -101,9 +112,7 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
                 convElem = ((flowSpeed / denominator0 * firstDer0) + (flowSpeed / denominator1 * firstDer1)) / 2
                 f[i] = disperElem - convElem - timeDer
             elif i == Nx - 1:  # Right boundary
-                # f[Nx-1] = c0[Nx-1] - c0[Nx-2] - (c1[Nx-1] - c1[Nx-2])
                 f[Nx - 1] = (((c0[Nx - 1] - c0[Nx - 2]) / dx) + ((c1[Nx - 1] - c1[Nx - 2]) / dx)) / 2
-                # f[i] = (((c0[i]-c0[i-1])/dx)+((c1[i]-c1[i-2])/dx))/2
         return f
 
     # ________________________________________________________________________
@@ -114,15 +123,25 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
     for i in range(1, Nt):
         if debugPrint:
             if i == 1:
-                print('Solution algorithm has been started:')
+                print('\nSolution algorithm has been started:')
             if i % (Nt // 20) == 0:
                 print(str(i) + ' steps has been finished ... ' +
                       str(Nt - i) + ' steps remain.')
+        # -0.25 %, 9s
+        # options = {'maxiter':1000, 'jac_options':{'method':'bicgstab'}}
+
+        # -0.25 %, 8s ------------------------------------------------------------------------------------------------------------------------------
+        options = {'fatol': 6e-4, 'jac_options': {'method': 'gmres'}}
+
+        # -0.25 %, 10s
+        # options = {'maxiter':1000, 'jac_options':{'method':'lgmres'}}
 
         sol = optimize.root(fun=function,
                             x0=c[i - 1, :],
                             method='krylov',
-                            args=(c[i - 1, :], feed[i], porosity, langmuirConst, saturCoef, disperCoef, flowSpeed))
+                            args=(c[i - 1, :], feed[i], porosity, langmuirConst, saturCoef, disperCoef, flowSpeed),
+                            options=options
+                            )
         c[i, :] = sol.x
         residuals[i] = np.linalg.norm(sol.fun)  # Save the L2-norm of the residuals at each time step
     # ________________________________________________________________________
@@ -139,6 +158,7 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
     # Calculation of differece between mass in feed and in the outlet
     massDifferenceOut = feedMass - massCumulOut
     massDifferenceIn = feedMass - massCumulIn
+    massDifferencePerc = massDifferenceOut * 100 / feedMass
     # Display mass balance check
     if debugPrint:
         print('\nFeed Mass:   ' + str(round(feedMass, 2)) + ' mg')
@@ -173,7 +193,7 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
         x_plot = np.round(np.linspace(0, Nx, 10)).astype(int)
         fig2 = plt.figure(2)
         plt.plot(t, c[:, -1])
-        plt.title('Outlet ooncentration-time')
+        plt.title('Outlet concentration-time')
         # plt.savefig('plot_' + str(Nt)+ 'x' +str(Nx) + '_' + str(int(round(Nt/Nx,0)))\
         #            + '.png')
         plt.show()
@@ -211,5 +231,5 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
         plt.ylabel('Residuals')
         plt.show()
     if full:
-        return [c, feed, residuals]
+        return [c, feed, residuals, massDifferencePerc]
     return c
