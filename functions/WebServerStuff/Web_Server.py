@@ -434,6 +434,9 @@ def Web_Server():
         formInfo["exp" + formInfo["comp2"]] = int(request.form.get("expList" + formInfo["comp2"]))
         formInfo[formInfo["comp2"] + "K"] = float(request.form.get("KTest"))
         formInfo[formInfo["comp2"] + "D"] = float(request.form.get("DTest"))
+        formInfo[formInfo["comp2"] + "Q"] = 0
+        if formInfo["solver"] == "Nonlin":
+            formInfo[formInfo["comp2"] + "Q"] = float(request.form.get("saturationTest"))
         thread_id = threadCounter
         threadCounter += 1
         if not thread_id in exporting_threads:

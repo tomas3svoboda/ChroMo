@@ -93,6 +93,9 @@
         if(component == "{{comp}}"){
             document.getElementById("KTest").value = {% if formInfo[comp + "K"] %}{{ formInfo[comp + "K"] }}{% else %}0{% endif %}
             document.getElementById("DTest").value = {% if formInfo[comp + "D"] %}{{ formInfo[comp + "D"] }}{% else %}0{% endif %}
+            if(document.getElementById("solverTest").value == "Nonlin"){
+                document.getElementById("saturationTest").value = {% if formInfo[comp + "Q"] %}{{ formInfo[comp + "Q"] }}{% else %}0{% endif %}
+            }
         }
         {% endfor %}
     }

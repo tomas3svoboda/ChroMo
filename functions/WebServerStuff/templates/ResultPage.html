@@ -38,7 +38,7 @@
               <th>Component</th>
               <th>K</th>
               <th>D</th>
-              {% if result["solver"] == "Nonlin" %}
+              {% if result["optimparams"]["solver"] == "Nonlin" %}
               <th>Q</th>
               {% endif %}
               <th>Loss Function Value</th>
@@ -50,7 +50,7 @@
               <td>{{comp}}</td>
               <td><div class="boldText">{{result["compparams"][comp][0]|round(2)}}</div>({{result["optimparams"]["KDIntervals"][comp]["kinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["KDIntervals"][comp]["krange"][0]}}-{{result["optimparams"]["KDIntervals"][comp]["krange"][1]}})</td>
               <td><div class="boldText">{{result["compparams"][comp][1]|round(2)}}</div>({{result["optimparams"]["KDIntervals"][comp]["dinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["KDIntervals"][comp]["drange"][0]}}-{{result["optimparams"]["KDIntervals"][comp]["drange"][1]}})</td>
-              {% if result["solver"] == "Nonlin" %}
+              {% if result["optimparams"]["solver"] == "Nonlin" %}
               <td><div class="boldText">{{result["compparams"][comp][2]|round(2)}}</div>({{result["optimparams"]["KDIntervals"][comp]["qinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["KDIntervals"][comp]["qrange"][0]}}-{{result["optimparams"]["KDIntervals"][comp]["qrange"][1]}})</td>
               {% endif %}
               <td><div class="boldText">{{result["lv2lossfunctionvals"][comp]|round(2)}}</div></td>
