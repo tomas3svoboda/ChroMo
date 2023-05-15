@@ -21,7 +21,6 @@ from objects.Operator import Operator
 from objects.ExperimentSet import ExperimentSet
 from os import walk
 from waitress import serve
-from functions.Dead_Volume_Adjustment import Dead_Volume_Adjustment
 
 def Web_Server():
     matplotlib.use('Agg')
@@ -238,7 +237,8 @@ def Web_Server():
                 formInfo = formInfos[self.user_id]
                 if not self.user_id in clusterComp:
                     clusterComp[self.user_id] = operator.Cluster_By_Component(experimentSet[self.user_id])
-                experimentClusterComp2 = clusterComp[self.user_id]
+                currExperimentSet2 = operator.Preprocess(experimentSet[self.user_id], False, False, False, 0)
+                experimentClusterComp2 = operator.Cluster_By_Component(currExperimentSet2)
                 params = [formInfo["porosity"], formInfo[formInfo["comp2"] + "K"], formInfo[formInfo["comp2"] + "D"],
                           formInfo["saturation"]]
                 print("---------Not Preprocessed Output Start---------")
@@ -903,12 +903,8 @@ def Web_Server():
                 for idx, result in enumerate(results):
                     compName = exporting_threads[thread_id].exp.experimentComponents[idx].name
                     df = exporting_threads[thread_id].exp.experimentComponents[idx].concentrationTime
-                    modelCurve = result[:, -1]
-                    modelCurve = Dead_Volume_Adjustment(modelCurve, exporting_threads[thread_id].exp.experimentCondition.deadVolume,
-                                                         exporting_threads[thread_id].exp.experimentCondition.flowRate, formInfo["time"]/formInfo["timeDiff"])
-                    minTime = df.iat[0, 0]
-                    maxTime = df.iat[-1, 0]
-                    time = np.linspace(minTime, maxTime, modelCurve.size)
+                    modelCurve = result[0][:, -1]
+                    time = result[1]
                     ax.set_title("Result comparison")
                     ax.set_xlabel("Time [s]")
                     ax.set_ylabel("Concentration [mg/mL]")
@@ -917,14 +913,8 @@ def Web_Server():
             else:
                 compName = exporting_threads[thread_id].comp
                 df = exporting_threads[thread_id].exp.experimentComponents[int(exporting_threads[thread_id].compIdx)].concentrationTime
-                modelCurve = results[0][:, -1]
-                modelCurve = Dead_Volume_Adjustment(modelCurve,
-                                                    exporting_threads[thread_id].exp.experimentCondition.deadVolume,
-                                                    exporting_threads[thread_id].exp.experimentCondition.flowRate,
-                                                    formInfo["time"] / formInfo["timeDiff"])
-                minTime = df.iat[0, 0]
-                maxTime = df.iat[-1, 0]
-                time = np.linspace(minTime, maxTime, modelCurve.size)
+                modelCurve = results[0][0][:, -1]
+                time = results[0][1]
                 ax.set_title("Result comparison")
                 ax.set_xlabel("Time [s]")
                 ax.set_ylabel("Concentration [mg/mL]")

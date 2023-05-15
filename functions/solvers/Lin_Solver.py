@@ -175,5 +175,5 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
         plt.plot(t,c[:,-1])
         plt.show()
     if full:
-        return [c, feed]
-    return c
+        return [c, t, feed]
+    return [c, t]

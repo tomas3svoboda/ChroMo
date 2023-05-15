@@ -3,7 +3,6 @@
 # Generates FinalResults data object.
 from functions.Lev1_Optim import Lev1_Optim
 import functions.global_ as gl
-from functions.solvers.Lin_Solver import Lin_Solver
 
 
 def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, KDIntervals, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, lvl1optim = None, lvl2optim = None):

@@ -36,6 +36,8 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
                   Nx = 30,              # Number of spatial differences - Nx
                   Nt = 3000,            # Number of time differences - Nt
                   time = 3000,          # Finite time of the experiment [s]
+                  denserFeed = True,
+                  denseSparseRatio = 0.4, # define ratio between dense and sparse steps
                   debugPrint=False,
                   debugGraph=False,
                   full=False
@@ -44,7 +46,7 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
     feedTime = (feedVol / flowRate) * 3600
 
     # Calculation of the flow speed [mm/s]
-    flowSpeed = (flowRate * 1000 / 3600) / ((math.pi * (diameter ** 2) / 4) * porosity)
+    flowSpeed = (flowRate * 1000/3600) / ((math.pi * (diameter**2) / 4) * porosity)
     if debugPrint:
         print('Flow speed:   ' + str(round(flowSpeed, 2)) + ' [mm/s]')
         print('Saturation Coefficient:   ' + str(round(saturCoef, 2)) + ' g/L')
@@ -56,22 +58,44 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
 
     x = np.linspace(0, length, Nx)  # Preparation of space vector
     dx = length / Nx  # Calculating space step [mm]
-    t = np.linspace(0, time, Nt)  # Preparation of time vector
-    dt = time / Nt  # Calculating time step [mm]
 
-    # Feed preparation
-    feedSteps = int(feedTime // dt)  # Whole number of feed iterations
-    feedTimeAprox = feedTime % dt  # aproximation of division
-    # Rounding iteration step based on defined feed parameters
-    if feedTimeAprox >= dt / 2:
-        feedSteps += 1
-    # Constructing pulse injection feed vector
-    feed = np.linspace(0, time, Nt)
-    for i in range(0, Nt):
-        if i <= feedSteps:
-            feed[i] = feedConc
-        else:
-            feed[i] = 0
+    if denserFeed:
+        dense_steps = int(Nt * denseSparseRatio)  # Determine number of dense steps
+        sparse_steps = Nt - dense_steps  # Determine number of sparse steps
+        # Define time step sizes
+        dt_dense = (feedTime + feedTime / 5) / dense_steps  # Time step size for dense grid
+        # dense grit will be used during the feed and 1/5 of feed time after feed
+        dt_sparse = (time - (feedTime + feedTime / 5)) / sparse_steps  # Time step size for sparse grid
+        # Create time vector with varying step sizes
+        t_dense = np.arange(0, dt_dense * dense_steps, dt_dense)  # Dense grid
+        t_sparse = np.arange(dt_dense * dense_steps, time, dt_sparse)  # Sparse grid
+        t = np.concatenate((t_dense, t_sparse))  # Combined time vector
+        # Constructing pulse injection feed vector
+        feedSteps = int(feedTime // dt_dense)  # Whole number of feed iterations
+        feed = np.zeros(Nt)  # Initialize feed vector
+        # Set feed concentration values
+        for i in range(dense_steps):
+            if i <= feedSteps:
+                feed[i] = feedConc
+            else:
+                feed[i] = 0
+    else:
+        t = np.linspace(0, time, Nt)  # Preparation of time vector
+        dt = time / Nt  # Calculating time step [mm]
+
+        # Feed preparation
+        feedSteps = int(feedTime // dt)  # Whole number of feed iterations
+        feedTimeAprox = feedTime % dt  # aproximation of division
+        # Rounding iteration step based on defined feed parameters
+        if feedTimeAprox >= dt / 2:
+            feedSteps += 1
+        # Constructing pulse injection feed vector
+        feed = np.linspace(0, time, Nt)
+        for i in range(0, Nt):
+            if i <= feedSteps:
+                feed[i] = feedConc
+            else:
+                feed[i] = 0
 
     # Preparation of the solution matrix
     c = np.zeros((Nt, Nx))
@@ -93,16 +117,17 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
                  langmuirConst,
                  saturCoef,
                  disperCoef,
-                 flowSpeed):
+                 flowSpeed,
+                 dt):
         f = np.zeros(len(c0))  # Preparation of solution vector - will be optimized to 0
         for i in range(0, len(c0)):  # Main loop through all the vector's elements
             if i == 0:  # Left boundary
                 f[0] = ((((c0[1] - c0[0]) / dx) + ((c1[1] - c1[0]) / dx)) / 2) - (flowSpeed * (c1[0] - feedCur))
             elif i > 0 and i < Nx - 1:
                 denominator0 = ((1 - porosity) * saturCoef * langmuirConst) / (
-                        (((langmuirConst * c0[i] + 1) ** 2) * porosity) + 1)
+                            (((langmuirConst * c0[i] + 1) ** 2) * porosity) + 1)
                 denominator1 = ((1 - porosity) * saturCoef * langmuirConst) / (
-                        (((langmuirConst * c1[i] + 1) ** 2) * porosity) + 1)
+                            (((langmuirConst * c1[i] + 1) ** 2) * porosity) + 1)
                 secondDer0 = (c0[i - 1] - 2 * c0[i] + c0[i + 1]) / (dx ** 2)
                 secondDer1 = (c1[i - 1] - 2 * c1[i] + c1[i + 1]) / (dx ** 2)
                 firstDer0 = (c0[i + 1] - c0[i - 1]) / (dx * 2)
@@ -127,19 +152,19 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
             if i % (Nt // 20) == 0:
                 print(str(i) + ' steps has been finished ... ' +
                       str(Nt - i) + ' steps remain.')
-        # -0.25 %, 9s
-        # options = {'maxiter':1000, 'jac_options':{'method':'bicgstab'}}
 
-        # -0.25 %, 8s ------------------------------------------------------------------------------------------------------------------------------
+        if denserFeed:
+            if i <= dense_steps:
+                dt = dt_dense
+            else:
+                dt = dt_sparse
+
         options = {'fatol': 6e-4, 'jac_options': {'method': 'gmres'}}
-
-        # -0.25 %, 10s
-        # options = {'maxiter':1000, 'jac_options':{'method':'lgmres'}}
 
         sol = optimize.root(fun=function,
                             x0=c[i - 1, :],
                             method='krylov',
-                            args=(c[i - 1, :], feed[i], porosity, langmuirConst, saturCoef, disperCoef, flowSpeed),
+                            args=(c[i - 1, :], feed[i], porosity, langmuirConst, saturCoef, disperCoef, flowSpeed, dt),
                             options=options
                             )
         c[i, :] = sol.x
@@ -231,5 +256,5 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
         plt.ylabel('Residuals')
         plt.show()
     if full:
-        return [c, feed, residuals, massDifferencePerc]
-    return c
+        return [c, t, feed, residuals, massDifferencePerc]
+    return [c, t]

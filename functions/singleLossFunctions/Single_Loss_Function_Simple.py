@@ -1,17 +1,15 @@
 from functions.solvers.Solver_Choice import Solver_Choice
 from scipy.interpolate import interp1d
 import numpy as np
-from functions.Dead_Volume_Adjustment import Dead_Volume_Adjustment
 # Calculates loss value of sigle particular solution and according time series. Serves for isotherm decision.
 
 def Single_Loss_Function_Simple(params, experimentComp, solver, factor, spacialDiff, timeDiff, time):
     errSum = 0
     realCurve = experimentComp.concentrationTime
-    modelCurve = Solver_Choice(solver, params, experimentComp, spacialDiff, timeDiff, time)[:, -1]
-    modelCurve = Dead_Volume_Adjustment(modelCurve, experimentComp.experiment.experimentCondition.deadVolume,
-                                        experimentComp.experiment.experimentCondition.flowRate, time/timeDiff)
-    timeVec = np.linspace(0, time, modelCurve.size)
-    f = interp1d(timeVec, modelCurve, fill_value="extrapolate")
+    model = Solver_Choice(solver, params, experimentComp, spacialDiff, timeDiff, time)
+    modelCurve = model[0][:, -1]
+    time = model[1]
+    f = interp1d(time, modelCurve, fill_value="extrapolate")
     modelCurveInterpolated = f(realCurve.iloc[:, 0].to_numpy())
     tmpErrSum = 0
     max = 0

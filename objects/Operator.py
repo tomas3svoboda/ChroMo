@@ -20,13 +20,13 @@ from functions.Loss_Function_Analysis import Loss_Function_Analysis
 from functions.Loss_Function_Analysis_Simple import Loss_Function_Analysis_Simple
 from functions.Model_Analysis import Model_Analysis
 from functions.Solver_Analysis import Solver_Analysis
-from functions.Loss_Function_Porosity_Analysis import Loss_Function_Porosity_Analysis
 from functions.Iso_Decision import Iso_Decision
 from functions.Compare_ExperimentSets import Compare_ExperimentSets
 from functions.Bilevel_Optim import Bilevel_Optim
 from functions.solvers.Solver_Choice import Solver_Choice
 from functions.Handle_File_Creation import Handle_File_Creation
 from functions.Dead_Volume_Adjustment import Dead_Volume_Adjustment
+from functions.Dead_Volume_Preprocess import Dead_Volume_Preprocess
 
 
 """
@@ -54,7 +54,7 @@ class Operator:
         path = input('Enter path to Experiment set: ')
         experimentSet = self.Load_Experiment_Set(path)
         gaussSelection = input("Replace experiment data with gauss curve?[Y - yes, N - no]")
-        currentExperimentSet = Deep_Copy_ExperimentSet(experimentSet)
+        currentExperimentSet = Dead_Volume_Preprocess(experimentSet)
         if gaussSelection == "Y":
             currentExperimentSet = Fit_Gauss(currentExperimentSet)
             self.Save_Graphs_To_Directory(experimentSet, currentExperimentSet, path)
@@ -188,9 +188,7 @@ class Operator:
                 selectedComp = experimentClusterComp.clusters[comp][conditionSelection]
                 solverOutput = Solver_Choice(solverSelection,
                                              [result["porosity"], result["compparams"][comp][0], result["compparams"][comp][1], saturVal],
-                                             selectedComp)[:, -1]
-                solverOutput = Dead_Volume_Adjustment(solverOutput, selectedComp.experiment.experimentCondition.deadVolume,
-                                                      selectedComp.experiment.experimentCondition.flowRate)
+                                             selectedComp)[0][:, -1]
                 df = experimentClusterComp.clusters[comp][conditionSelection].concentrationTime
                 minTime = df.iat[0, 0]
                 maxTime = df.iat[-1, 0]
@@ -400,7 +398,7 @@ class Operator:
         return experimentSet
 
     def Preprocess(self, experimentSet, gauss, retCorr, massBal, retThreshold = 0):
-        currExperimentSet = Deep_Copy_ExperimentSet(experimentSet)
+        currExperimentSet = Dead_Volume_Preprocess(experimentSet)
         if gauss:
             currExperimentSet = Fit_Gauss(currExperimentSet)
         if retCorr:
