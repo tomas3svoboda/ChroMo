@@ -60,19 +60,25 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
     dx = length / Nx  # Calculating space step [mm]
 
     if denserFeed:
+        denseSparseRatio = 0.4  # define ratio between dense and sparse steps
+
         dense_steps = int(Nt * denseSparseRatio)  # Determine number of dense steps
         sparse_steps = Nt - dense_steps  # Determine number of sparse steps
-        # Define time step sizes
-        dt_dense = (feedTime + feedTime / 5) / dense_steps  # Time step size for dense grid
-        # dense grit will be used during the feed and 1/5 of feed time after feed
-        dt_sparse = (time - (feedTime + feedTime / 5)) / sparse_steps  # Time step size for sparse grid
+
+        # Define the time for which dense grid will be used
+        dense_time = feedTime + feedTime/5 # during the feed and 1/5 of feed time after feed
+
         # Create time vector with varying step sizes
-        t_dense = np.arange(0, dt_dense * dense_steps, dt_dense)  # Dense grid
-        t_sparse = np.arange(dt_dense * dense_steps, time, dt_sparse)  # Sparse grid
+        t_dense = np.linspace(0, dense_time, dense_steps)  # Dense grid
+        t_sparse = np.linspace(dense_time, time, sparse_steps)  # Sparse grid
         t = np.concatenate((t_dense, t_sparse))  # Combined time vector
+        dt_dense = t_dense[1] - t_dense[0] # Time step size for dense grid
+        dt_sparse = t_sparse[1] - t_sparse[0] # Time step size for sparse grid
+
         # Constructing pulse injection feed vector
         feedSteps = int(feedTime // dt_dense)  # Whole number of feed iterations
         feed = np.zeros(Nt)  # Initialize feed vector
+
         # Set feed concentration values
         for i in range(dense_steps):
             if i <= feedSteps:
