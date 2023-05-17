@@ -26,19 +26,19 @@ scheme in time direction. Danckwert's boudaries are implemented with usage of
 fictious point for left boundary.
 '''
 def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
-                  length = 235,         # Lenght of the packed section in the column [mm]
-                  diameter = 16,        # Column diameter [mm]
-                  feedVol = 30,         # Feed injection volume [mL]
-                  feedConc = 150e-3,    # Concentration of the balanced component in the feed [g/mL] or [mg/mm^3]
-                  porosity = 0.4,       # Total porosity of the sorbent packing [-]
-                  langmuirConst = 1.5,  # Langmuir's constant of the linear isotherm [-]
-                  disperCoef = 5,       # Axial dispersion coefficient [mm^2/s]
-                  saturCoef = 15,       # Saturation Coefficient
-                  Nx = 30,              # Number of spatial differences - Nx
-                  Nt = 3000,            # Number of time differences - Nt
-                  time = 3000,          # Finite time of the experiment [s]
-                  denserFeed = True,
-                  denseSparseRatio = 0.4, # define ratio between dense and sparse steps
+                  length=235,         # Length of the packed section in the column [mm]
+                  diameter=16,        # Column diameter [mm]
+                  feedVol=30,         # Feed injection volume [mL]
+                  feedConc=150e-3,    # Concentration of the balanced component in the feed [g/mL] or [mg/mm^3]
+                  porosity=0.4,       # Total porosity of the adsorbent packing [-]
+                  langmuirConst=1.5,  # Langmuir's constant of the linear isotherm [-]
+                  disperCoef=5,       # Axial dispersion coefficient [mm^2/s]
+                  saturCoef=15,       # Saturation Coefficient
+                  Nx=30,              # Number of spatial differences - Nx
+                  Nt=3000,            # Number of time differences - Nt
+                  time=3000,          # Finite time of the experiment [s]
+                  denserFeed=True,
+                  denseSparseRatio=0.4,  # define ratio between dense and sparse steps
                   debugPrint=False,
                   debugGraph=False,
                   full=False
@@ -63,21 +63,32 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
     x = np.linspace(0, length, Nx)  # Preparation of space vector
     dx = length / Nx  # Calculating space step [mm]
 
+    # Define the time for which dense grid will be used considering feed time in comparison with total time
+    # If feed time is more than 1/2 of total time, then denser feed does not make sense
+    if feedTime > (time/2):
+        denserFeed = False  # denser feed does not make sense
+    elif feedTime > (time/4):
+        dense_time = feedTime + (feedTime/10)
+    elif feedTime > (time/8):
+        dense_time = feedTime + (feedTime/2)
+    elif feedTime > (time/40):
+        dense_time = feedTime + (feedTime*2)
+    elif feedTime > (time/80):
+        dense_time = feedTime + (feedTime*4)
+    else:
+        dense_time = feedTime + (feedTime*10)
+
     if denserFeed:
-        denseSparseRatio = 0.4  # define ratio between dense and sparse steps
 
         dense_steps = int(Nt * denseSparseRatio)  # Determine number of dense steps
         sparse_steps = Nt - dense_steps  # Determine number of sparse steps
-
-        # Define the time for which dense grid will be used
-        dense_time = feedTime + feedTime/2 # during the feed and 1/5 of feed time after feed
 
         # Create time vector with varying step sizes
         t_dense = np.linspace(0, dense_time, dense_steps)  # Dense grid
         t_sparse = np.linspace(dense_time, time, sparse_steps)  # Sparse grid
         t = np.concatenate((t_dense, t_sparse))  # Combined time vector
-        dt_dense = t_dense[1] - t_dense[0] # Time step size for dense grid
-        dt_sparse = t_sparse[1] - t_sparse[0] # Time step size for sparse grid
+        dt_dense = t_dense[1] - t_dense[0]  # Time step size for dense grid
+        dt_sparse = t_sparse[1] - t_sparse[0]  # Time step size for sparse grid
 
         # Constructing pulse injection feed vector
         feedSteps = int(feedTime // dt_dense)  # Whole number of feed iterations
