@@ -68,13 +68,13 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
     if feedTime > (time/2):
         denserFeed = False  # denser feed does not make sense
     elif feedTime > (time/4):
-        dense_time = feedTime + (feedTime/10)
+        dense_time = feedTime + (feedTime*0.1)
     elif feedTime > (time/8):
-        dense_time = feedTime + (feedTime/2)
+        dense_time = feedTime + (feedTime*0.5)
     elif feedTime > (time/40):
-        dense_time = feedTime + (feedTime*2)
+        dense_time = feedTime + (feedTime*2.5)
     elif feedTime > (time/80):
-        dense_time = feedTime + (feedTime*4)
+        dense_time = feedTime + (feedTime*5)
     else:
         dense_time = feedTime + (feedTime*10)
 
