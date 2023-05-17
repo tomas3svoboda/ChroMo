@@ -8,6 +8,7 @@ from IPython.display import display
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from numba import jit
+import warnings
 
 # ***Numerical solution of Equilibrium Dispersive Model of Chromatography***
 #                       ***Langmuir isotherm***
@@ -42,6 +43,9 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
                   debugGraph=False,
                   full=False
                   ):
+    # Ignore runtime warnings
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
+
     # Calculation of the feed time [s]
     feedTime = (feedVol / flowRate) * 3600
 
@@ -66,7 +70,7 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
         sparse_steps = Nt - dense_steps  # Determine number of sparse steps
 
         # Define the time for which dense grid will be used
-        dense_time = feedTime + feedTime/5 # during the feed and 1/5 of feed time after feed
+        dense_time = feedTime + feedTime/2 # during the feed and 1/5 of feed time after feed
 
         # Create time vector with varying step sizes
         t_dense = np.linspace(0, dense_time, dense_steps)  # Dense grid
