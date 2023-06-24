@@ -43,10 +43,10 @@ Application was tested on [MongoDB Community Server 6.0](https://www.mongodb.com
 
 1. Pull Git project from this repository.
 2. Open command line and navigate to projects root folder.
-3. Activate virtual environment
-  On Windows run:
-  `venv\Scripts\activate.bat`
-  On Linux run:
+3. Activate virtual environment\
+  On Windows run:\
+  `venv\Scripts\activate.bat`\
+  On Linux run:\
   `source venv/Scripts/activate`
 5. Install requirements `pip install -r requirements.txt`.
 6. Run application `python main.py`.
