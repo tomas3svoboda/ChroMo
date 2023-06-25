@@ -1,6 +1,7 @@
 import pandas as pd
 from objects.ExperimentClusters import ExperimentClusters
 
+# Retired
 def Select_Iso_Exp(experimentSetCor3, experimentClustersComp):
     componentDict = {}
     for key, value in experimentClustersComp.clusters.items():

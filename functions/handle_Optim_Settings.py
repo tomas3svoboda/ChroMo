@@ -2,6 +2,7 @@ from scipy.optimize import minimize
 from scipy.optimize import brute
 from scipy.optimize import shgo
 
+# Function that handles calling correct optimization function based on input parameters
 def handle_Optim_Settings(func, x, args, bounds, optimInfo, default=0):
     if not optimInfo:
         if default == 0:

@@ -9,6 +9,8 @@ from objects.ExperimentClusters import ExperimentClusters
 x axis - Henry constant
 y axis - Dispersion coeficient
 """
+# Function showing graphs of loss function values based on model parameters
+# Not used in web version
 def Loss_Function_Analysis(experimentClusterComp,
                             component = 'Sac',
                             xstart = 0,

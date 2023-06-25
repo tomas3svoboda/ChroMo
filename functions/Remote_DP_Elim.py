@@ -1,6 +1,7 @@
 from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 
-
+# Retired preprocess function
+# Removes out of place concentration points
 def Remote_DP_Elim(experimentSetCor1, experimentSetGauss, absTolerance = 0.1):
     experimentSetCor2 = Deep_Copy_ExperimentSet(experimentSetCor1)
     for exp1, expG, exp2 in zip(experimentSetCor1.experiments, experimentSetGauss.experiments, experimentSetCor2.experiments):

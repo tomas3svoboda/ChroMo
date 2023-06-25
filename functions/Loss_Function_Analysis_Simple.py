@@ -12,6 +12,7 @@ from objects.ExperimentClusters import ExperimentClusters
 x axis - Henry constant
 y axis - Dispersion coeficient
 """
+# Function handling loss function analysis functionality
 def Loss_Function_Analysis_Simple(experimentClusterComp,
                             component,
                             path,

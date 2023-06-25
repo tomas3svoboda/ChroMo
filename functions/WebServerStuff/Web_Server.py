@@ -353,6 +353,7 @@ def Web_Server():
         def run(self):
             formInfo = formInfos[self.user_id]
             result = []
+            print(self.params)
             if self.compIdx != "all":
                 result.append(
                     Solver_Choice(self.solver, self.params, self.exp.experimentComponents[self.compIdx], formInfo["spacialDiff"], formInfo["timeDiff"],
@@ -865,7 +866,10 @@ def Web_Server():
             compIdx = compForm
             params = []
             for comp in result["lossfunctionprogress"].keys():
-                params.append([result["porosity"], result["compparams"][comp][0], result["compparams"][comp][1]])
+                tmp = [result["porosity"]]
+                for param in result["compparams"][comp]:
+                    tmp.append(param)
+                params.append(tmp)
             comp = compIdx
         gauss = bool(request.form.get("gauss"))
         retCorr = bool(request.form.get("retCorr"))

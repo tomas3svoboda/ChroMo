@@ -2,6 +2,7 @@ from objects.ExperimentSet import ExperimentSet
 from objects.Metadata import Metadata
 import pandas as pd
 
+# Retired
 class Solution:
     def __init__(self):
         self.experimentSet = ExperimentSet()

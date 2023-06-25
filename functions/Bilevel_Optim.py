@@ -1,26 +1,39 @@
-# Function which calls Lev1_Optim.py.
-# Initializes bi-level optimization proces based on IsoSelect and InitParams from Iso_Decision.py.
-# Generates FinalResults data object.
 from functions.Lev1_Optim import Lev1_Optim
 import functions.global_ as gl
 
-
-def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, KDIntervals, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, lvl1optim = None, lvl2optim = None):
+# Starts bilevel optimization
+def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, KDIntervals, lossFunction, factor,
+                  solver, spacialDiff=30, timeDiff=3000, time=10800, optimId=1, lvl1optim=None, lvl2optim=None):
     print("Calling Bilevel_Optim!")
+
+    # Initialize dictionaries to store computation parameters, ranges, and loss function values
     gl.compParamDict[optimId] = {}
     gl.compRangeDict[optimId] = {}
     gl.lossFunctionProgress[optimId] = {}
     gl.lv2LossFunctionVals[optimId] = {}
+
+    # Iterate over experiment clusters
     for key in experimentClustersComp.clusters:
         if solver == "Lin":
+            # Store computation parameters for linear solver
             gl.compParamDict[optimId][key] = [KDIntervals[key]["kinit"], KDIntervals[key]["dinit"]]
             gl.compRangeDict[optimId][key] = [KDIntervals[key]["krange"], KDIntervals[key]["drange"]]
         elif solver == "Nonlin":
-            gl.compParamDict[optimId][key] = [KDIntervals[key]["kinit"], KDIntervals[key]["dinit"], KDIntervals[key]["qinit"]]
-            gl.compRangeDict[optimId][key] = [KDIntervals[key]["krange"], KDIntervals[key]["drange"], KDIntervals[key]["qrange"]]
+            # Store computation parameters for nonlinear solver
+            gl.compParamDict[optimId][key] = [KDIntervals[key]["kinit"], KDIntervals[key]["dinit"],
+                                              KDIntervals[key]["qinit"]]
+            gl.compRangeDict[optimId][key] = [KDIntervals[key]["krange"], KDIntervals[key]["drange"],
+                                              KDIntervals[key]["qrange"]]
+
+    # Store porosity parameters
     gl.porosity[optimId] = porosityIntervals["init"]
     gl.porosityRange[optimId] = porosityIntervals["range"]
-    Lev1_Optim(experimentClustersComp, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl1optim, lvl2optim)
+
+    # Call Lev1_Optim function
+    Lev1_Optim(experimentClustersComp, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl1optim,
+               lvl2optim)
+
+    # Build the result dictionary
     result = {}
     result["optimparams"] = {}
     result["optimparams"]["porosityIntervals"] = porosityIntervals
@@ -36,11 +49,4 @@ def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, 
     result["lv2lossfunctionvals"] = gl.bestLvl2LossFunctionVals[optimId]
     result["lossfunctionprogress"] = gl.lossFunctionProgress[optimId]
 
-    '''cond = experimentSetCor3.experiments[0].experimentCondition
-    comp = experimentSetCor3.experiments[0].experimentComponents[0]
-    res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, gl.porosity, gl.compParamDict['Sac'][0], gl.compParamDict['Sac'][1], debugPrint=True)
-    t = np.linspace(0, 10800, 200)
-    plt.plot(t, res[:, -1])
-    comp.concentrationTime.plot.line(x=0)
-    plt.show()'''
     return result

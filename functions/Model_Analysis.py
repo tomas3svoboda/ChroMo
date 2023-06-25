@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 from functions.solvers.Solver_Choice import Solver_Choice
 from functions.Dead_Volume_Adjustment import Dead_Volume_Adjustment
 
+# Function handling manual estimation functionality
 def Model_Analysis(experimentComp, solver, params, spacialDiff = 30, timeDiff = 3000, time = 10800, webMode = False, title = False, full = False):
     df = experimentComp.concentrationTime
     model = Solver_Choice(solver, params, experimentComp, spacialDiff, timeDiff, time, full=full, debugPrint=True)
