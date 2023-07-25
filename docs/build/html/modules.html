@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>ChroMo &#8212; ChroMo 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="chromo">
+<h1>ChroMo<a class="headerlink" href="#chromo" title="Permalink to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">functions package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.WebServerStuff.html">functions.WebServerStuff package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="functions.WebServerStuff.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functions.WebServerStuff.html#module-functions.WebServerStuff.Serialize_File_To_JSON">functions.WebServerStuff.Serialize_File_To_JSON module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functions.WebServerStuff.html#module-functions.WebServerStuff.Web_Server">functions.WebServerStuff.Web_Server module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functions.WebServerStuff.html#module-functions.WebServerStuff">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="functions.singleLossFunctions.html">functions.singleLossFunctions package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="functions.singleLossFunctions.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functions.singleLossFunctions.html#module-functions.singleLossFunctions.Single_Loss_Function_Choice">functions.singleLossFunctions.Single_Loss_Function_Choice module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functions.singleLossFunctions.html#module-functions.singleLossFunctions.Single_Loss_Function_LogSimple">functions.singleLossFunctions.Single_Loss_Function_LogSimple module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functions.singleLossFunctions.html#module-functions.singleLossFunctions.Single_Loss_Function_LogSquares">functions.singleLossFunctions.Single_Loss_Function_LogSquares module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functions.singleLossFunctions.html#module-functions.singleLossFunctions.Single_Loss_Function_Simple">functions.singleLossFunctions.Single_Loss_Function_Simple module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functions.singleLossFunctions.html#module-functions.singleLossFunctions.Single_Loss_Function_Squares">functions.singleLossFunctions.Single_Loss_Function_Squares module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functions.singleLossFunctions.html#module-functions.singleLossFunctions">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="functions.solvers.html">functions.solvers package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="functions.solvers.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functions.solvers.html#module-functions.solvers.Lin_Solver">functions.solvers.Lin_Solver module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functions.solvers.html#module-functions.solvers.Nonlin_Solver">functions.solvers.Nonlin_Solver module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functions.solvers.html#module-functions.solvers.Solver_Choice">functions.solvers.Solver_Choice module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="functions.solvers.html#module-functions.solvers">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Bilevel_Optim">functions.Bilevel_Optim module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Bilevel_Optim.Bilevel_Optim"><code class="docutils literal notranslate"><span class="pre">Bilevel_Optim()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Cluster_Exp">functions.Cluster_Exp module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Cluster_Exp.Cluster_Exp"><code class="docutils literal notranslate"><span class="pre">Cluster_Exp()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Compare_ExperimentSets">functions.Compare_ExperimentSets module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Compare_ExperimentSets.Compare_ExperimentSets"><code class="docutils literal notranslate"><span class="pre">Compare_ExperimentSets()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Convergence_Check">functions.Convergence_Check module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Convergence_Check.Covergence_Check"><code class="docutils literal notranslate"><span class="pre">Covergence_Check()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Dead_Volume_Adjustment">functions.Dead_Volume_Adjustment module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Dead_Volume_Adjustment.Dead_Volume_Adjustment"><code class="docutils literal notranslate"><span class="pre">Dead_Volume_Adjustment()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Dead_Volume_Preprocess">functions.Dead_Volume_Preprocess module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Dead_Volume_Preprocess.Dead_Volume_Preprocess"><code class="docutils literal notranslate"><span class="pre">Dead_Volume_Preprocess()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Deep_Copy_ExperimentSet">functions.Deep_Copy_ExperimentSet module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Deep_Copy_ExperimentSet.Deep_Copy_ExperimentSet"><code class="docutils literal notranslate"><span class="pre">Deep_Copy_ExperimentSet()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Fit_Gauss">functions.Fit_Gauss module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Fit_Gauss.Fit_Gauss"><code class="docutils literal notranslate"><span class="pre">Fit_Gauss()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Handle_File_Creation">functions.Handle_File_Creation module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Handle_File_Creation.Handle_File_Creation"><code class="docutils literal notranslate"><span class="pre">Handle_File_Creation()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Iso_Decision">functions.Iso_Decision module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Iso_Decision.Iso_Decision"><code class="docutils literal notranslate"><span class="pre">Iso_Decision()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Lev1_Loss_Function">functions.Lev1_Loss_Function module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Lev1_Loss_Function.Lev1_Loss_Function"><code class="docutils literal notranslate"><span class="pre">Lev1_Loss_Function()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Lev1_Optim">functions.Lev1_Optim module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Lev1_Optim.Lev1_Optim"><code class="docutils literal notranslate"><span class="pre">Lev1_Optim()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Lev2_Loss_Function">functions.Lev2_Loss_Function module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Lev2_Loss_Function.Lev2_Loss_Function"><code class="docutils literal notranslate"><span class="pre">Lev2_Loss_Function()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Lev2_Optim">functions.Lev2_Optim module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Lev2_Optim.Lev2_Optim"><code class="docutils literal notranslate"><span class="pre">Lev2_Optim()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Loss_Function_Analysis">functions.Loss_Function_Analysis module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Loss_Function_Analysis.Loss_Function_Analysis"><code class="docutils literal notranslate"><span class="pre">Loss_Function_Analysis()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Loss_Function_Analysis_Simple">functions.Loss_Function_Analysis_Simple module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Loss_Function_Analysis_Simple.Loss_Function_Analysis_Simple"><code class="docutils literal notranslate"><span class="pre">Loss_Function_Analysis_Simple()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Loss_Function_Porosity_Analysis">functions.Loss_Function_Porosity_Analysis module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Loss_Function_Porosity_Analysis.Loss_Function_Porosity_Analysis"><code class="docutils literal notranslate"><span class="pre">Loss_Function_Porosity_Analysis()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Mass_Balance_Cor">functions.Mass_Balance_Cor module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Mass_Balance_Cor.Mass_Balance_Cor"><code class="docutils literal notranslate"><span class="pre">Mass_Balance_Cor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Model_Analysis">functions.Model_Analysis module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Model_Analysis.Model_Analysis"><code class="docutils literal notranslate"><span class="pre">Model_Analysis()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Remote_DP_Elim">functions.Remote_DP_Elim module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Remote_DP_Elim.Remote_DP_Elim"><code class="docutils literal notranslate"><span class="pre">Remote_DP_Elim()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Ret_Time_Cor">functions.Ret_Time_Cor module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Ret_Time_Cor.Ret_Time_Cor"><code class="docutils literal notranslate"><span class="pre">Ret_Time_Cor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Select_Iso_Exp">functions.Select_Iso_Exp module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Select_Iso_Exp.Select_Iso_Exp"><code class="docutils literal notranslate"><span class="pre">Select_Iso_Exp()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Single_Optim">functions.Single_Optim module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.Solver_Analysis">functions.Solver_Analysis module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.Solver_Analysis.Solver_Analysis"><code class="docutils literal notranslate"><span class="pre">Solver_Analysis()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.global_">functions.global_ module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions.handle_Optim_Settings">functions.handle_Optim_Settings module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#functions.handle_Optim_Settings.handle_Optim_Settings"><code class="docutils literal notranslate"><span class="pre">handle_Optim_Settings()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-functions">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="main.html">main module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="objects.html">objects package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#module-objects.Experiment">objects.Experiment module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="objects.html#objects.Experiment.Experiment"><code class="docutils literal notranslate"><span class="pre">Experiment</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#module-objects.ExperimentClusters">objects.ExperimentClusters module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="objects.html#objects.ExperimentClusters.ExperimentClusters"><code class="docutils literal notranslate"><span class="pre">ExperimentClusters</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#module-objects.ExperimentComponent">objects.ExperimentComponent module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="objects.html#objects.ExperimentComponent.ExperimentComponent"><code class="docutils literal notranslate"><span class="pre">ExperimentComponent</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#module-objects.ExperimentCondition">objects.ExperimentCondition module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="objects.html#objects.ExperimentCondition.ExperimentCondition"><code class="docutils literal notranslate"><span class="pre">ExperimentCondition</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.ExperimentCondition.ExperimentCondition.feedTime"><code class="docutils literal notranslate"><span class="pre">ExperimentCondition.feedTime</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.ExperimentCondition.ExperimentCondition.feedVolume"><code class="docutils literal notranslate"><span class="pre">ExperimentCondition.feedVolume</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.ExperimentCondition.ExperimentCondition.flowRate"><code class="docutils literal notranslate"><span class="pre">ExperimentCondition.flowRate</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#module-objects.ExperimentSet">objects.ExperimentSet module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="objects.html#objects.ExperimentSet.ExperimentSet"><code class="docutils literal notranslate"><span class="pre">ExperimentSet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.ExperimentSet.ExperimentSet.get_exp_by_name"><code class="docutils literal notranslate"><span class="pre">ExperimentSet.get_exp_by_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.ExperimentSet.ExperimentSet.get_exps_by_names"><code class="docutils literal notranslate"><span class="pre">ExperimentSet.get_exps_by_names()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#module-objects.Metadata">objects.Metadata module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="objects.html#objects.Metadata.Metadata"><code class="docutils literal notranslate"><span class="pre">Metadata</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#module-objects.Operator">objects.Operator module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="objects.html#objects.Operator.Operator"><code class="docutils literal notranslate"><span class="pre">Operator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Operator.Operator.Cluster_By_Component"><code class="docutils literal notranslate"><span class="pre">Operator.Cluster_By_Component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Operator.Operator.Cluster_By_Condition"><code class="docutils literal notranslate"><span class="pre">Operator.Cluster_By_Condition()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Operator.Operator.Cluster_By_Condition2"><code class="docutils literal notranslate"><span class="pre">Operator.Cluster_By_Condition2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Operator.Operator.Cluster_By_Experiment"><code class="docutils literal notranslate"><span class="pre">Operator.Cluster_By_Experiment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Operator.Operator.Cluster_Match"><code class="docutils literal notranslate"><span class="pre">Operator.Cluster_Match()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Operator.Operator.Cluster_Match_Exp"><code class="docutils literal notranslate"><span class="pre">Operator.Cluster_Match_Exp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Operator.Operator.Create_Key"><code class="docutils literal notranslate"><span class="pre">Operator.Create_Key()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Operator.Operator.Load_Experiment_Set"><code class="docutils literal notranslate"><span class="pre">Operator.Load_Experiment_Set()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Operator.Operator.Load_Experimet_JSON"><code class="docutils literal notranslate"><span class="pre">Operator.Load_Experimet_JSON()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Operator.Operator.Preprocess"><code class="docutils literal notranslate"><span class="pre">Operator.Preprocess()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Operator.Operator.Print_Component_Graph"><code class="docutils literal notranslate"><span class="pre">Operator.Print_Component_Graph()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Operator.Operator.Save_Graphs_To_Directory"><code class="docutils literal notranslate"><span class="pre">Operator.Save_Graphs_To_Directory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Operator.Operator.Save_Result"><code class="docutils literal notranslate"><span class="pre">Operator.Save_Result()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Operator.Operator.Start"><code class="docutils literal notranslate"><span class="pre">Operator.Start()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Operator.Operator.Start_For_Testing"><code class="docutils literal notranslate"><span class="pre">Operator.Start_For_Testing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Operator.Operator.Web_Start"><code class="docutils literal notranslate"><span class="pre">Operator.Web_Start()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="objects.html#objects.Operator.timeit"><code class="docutils literal notranslate"><span class="pre">timeit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#module-objects.Solution">objects.Solution module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="objects.html#objects.Solution.Solution"><code class="docutils literal notranslate"><span class="pre">Solution</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Solution.Solution.Add_Result"><code class="docutils literal notranslate"><span class="pre">Solution.Add_Result()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="objects.html#objects.Solution.Solution.Export_To_CSV"><code class="docutils literal notranslate"><span class="pre">Solution.Export_To_CSV()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="objects.html#module-objects">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">ChroMo</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Adam Svoboda, Tomas Svoboda.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/modules.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

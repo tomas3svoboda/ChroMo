@@ -46,10 +46,8 @@ def timeit(method):
     return timed
 
 
-"""
-Main class orchestrating program functions and user interface
-"""
 class Operator:
+    """Class orchestrating optimization workflow and command line user interface"""
     def Start(self):
         path = input('Enter path to Experiment set: ')
         experimentSet = self.Load_Experiment_Set(path)

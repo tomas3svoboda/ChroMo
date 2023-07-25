@@ -1,8 +1,8 @@
 import pandas as pd
 from objects.ExperimentClusters import ExperimentClusters
 
-# Retired
 def Select_Iso_Exp(experimentSetCor3, experimentClustersComp):
+    """Retired."""
     componentDict = {}
     for key, value in experimentClustersComp.clusters.items():
         maxConc = [0, 0]

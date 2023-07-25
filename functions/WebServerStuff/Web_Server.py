@@ -23,6 +23,7 @@ from os import walk
 from waitress import serve
 
 def Web_Server():
+    """Class implementing all the web server functionalities."""
     matplotlib.use('Agg')
 
     plotFileCounter = 1

@@ -11,6 +11,9 @@ Loss Function options:
     'LogSquares' - Single_Loss_Function_LogSquares
 """
 def Lev2_Loss_Function(params, experimentCluster, porosity, lossFunction = 'Simple', factor = 1, solver = "Lin", spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1):
+    """Loss function for level 2 optimization.
+    Part of the parameter estimation workflow.
+    """
     if solver == "Lin":
         params2 = [porosity, params[0], params[1]]
     elif solver == "Nonlin":

@@ -1,11 +1,7 @@
 import math
 import numpy as np
 from scipy import linalg
-import pandas as pd
-from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-
-# Numerical solver of the EDM with Linear Isotherm - linear parabolic PDE
 
 def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
                length=235,          # Length of the packed section in the column [mm]
@@ -21,6 +17,7 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
                debugPrint=False,
                debugGraph=False,
                full=False):
+    """Numerical solver of the EDM with Linear Isotherm - linear parabolic PDE"""
 
     def diagonal_form(a, lower=1, upper=1):
         # Transforms banded matrix into diagonal ordered form

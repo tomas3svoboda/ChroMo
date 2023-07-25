@@ -6,8 +6,8 @@ import os
 import math
 
 
-# Define function to adjust retention times for experiments
 def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold=0, writeToFile=False):
+    """Function implementing retention time correction on experiment set data."""
     # If writeToFile flag is set, create a file to write output to
     if writeToFile:
         filePath = experimentSet.metadata.path + "\\Time_Shifts.txt"

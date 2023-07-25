@@ -2,9 +2,10 @@ from functions.solvers.Solver_Choice import Solver_Choice
 from scipy.interpolate import interp1d
 import math
 import numpy as np
-# Calculates loss value of sigle particular solution and according time series. Serves for isotherm decision.
 
 def Single_Loss_Function_LogSimple(params, experimentComp, solver, factor, spacialDiff, timeDiff, time):
+    """Calculates a loss value, representing difference between experimental and model data with given parameters.
+    Natural log is applied to final value."""
     errSum = 0
     df = experimentComp.concentrationTime
     model = Solver_Choice(solver, params, experimentComp, spacialDiff, timeDiff, time)

@@ -3,10 +3,12 @@ import math
 import functions.global_ as gl
 from functions.singleLossFunctions.Single_Loss_Function_Choice import Single_Loss_Function_Choice
 
-# Function witch assign linear or nonlinear isotherm to each compound
-# based on ExpIso (one timeseries for each component).
 
 def Iso_Decision(expIso, params, lossFunc = 'Simple'):
+    """Function witch assign linear or nonlinear isotherm to each compound
+    based on ExpIso (one timeseries for each component).
+    retired
+    """
     choices = dict()
     for key, value in expIso.clusters.items():
         res = math.inf

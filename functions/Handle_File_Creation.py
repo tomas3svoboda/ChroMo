@@ -1,8 +1,8 @@
 import os
 import shutil
 
-# Function that handles file and directory creation inside project
 def Handle_File_Creation(path, dir = False):
+    """Function that handles file and directory creation inside project"""
     exists = os.path.exists(path)
     if exists:
         head, tail = os.path.split(path)

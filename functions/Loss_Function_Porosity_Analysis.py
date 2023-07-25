@@ -3,8 +3,7 @@ import matplotlib.pyplot as plt
 from functions.Lev2_Loss_Function import Lev2_Loss_Function
 from objects.ExperimentClusters import ExperimentClusters
 
-# Function showing graphs of loss function values based on porosity
-# Not used in web verison
+
 def Loss_Function_Porosity_Analysis(experimentClusterComp,
                             component = 'Sac',
                             henryConst = 20,
@@ -13,6 +12,8 @@ def Loss_Function_Porosity_Analysis(experimentClusterComp,
                             porosotyEnd = 1,
                             porosityStep = 0.1,
                             lossFunctionChoice = "Simple"):
+    """Function showing graphs of loss function values based on porosity
+    Not used in web verison"""
     experimentCluster = experimentClusterComp.clusters[component]
     resultArr = []
     porosityArr = []

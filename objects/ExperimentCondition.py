@@ -1,13 +1,13 @@
 
-"""
-Object describing conditions of experiment
-Contains:
+
+class ExperimentCondition:
+    """Object describing conditions of experiment
+    Contains:
     column_diameter (float) - diameter of column
     column_length (float) - length of column
     feed_volume (float) - volume of feed
     flow_rate (float) - flow rate
-"""
-class ExperimentCondition:
+    """
     def __init__(self):
         self.columnDiameter = -1.0
         self.columnLength = -1.0

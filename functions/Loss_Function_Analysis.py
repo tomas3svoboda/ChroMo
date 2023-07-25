@@ -9,8 +9,7 @@ from objects.ExperimentClusters import ExperimentClusters
 x axis - Henry constant
 y axis - Dispersion coeficient
 """
-# Function showing graphs of loss function values based on model parameters
-# Not used in web version
+
 def Loss_Function_Analysis(experimentClusterComp,
                             component = 'Sac',
                             xstart = 0,
@@ -25,6 +24,8 @@ def Loss_Function_Analysis(experimentClusterComp,
                             lossFunctionChoice = "Simple",
                             factor = 1,
                             logScale = False):
+    """Function showing graphs of loss function values based on model parameters.
+    Not used in web version."""
     experimentCluster = experimentClusterComp.clusters[component]
     for porosity in np.arange(porosityStart, porosotyEnd, porosityStep):
         x = 0

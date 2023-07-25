@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>objects package &#8212; ChroMo 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="objects-package">
+<h1>objects package<a class="headerlink" href="#objects-package" title="Permalink to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="module-objects.Experiment">
+<span id="objects-experiment-module"></span><h2>objects.Experiment module<a class="headerlink" href="#module-objects.Experiment" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="objects.Experiment.Experiment">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">objects.Experiment.</span></span><span class="sig-name descname"><span class="pre">Experiment</span></span><a class="reference internal" href="_modules/objects/Experiment.html#Experiment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Experiment.Experiment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class representing experiments
+Contains:
+metadata (Metadata) - additional information
+experiment_condition (Experiment_condition) - describing conditions of experiment
+experiment_components (list(Experiment_component)) - list of components and their concentration in time</p>
+</dd></dl>
+
+</section>
+<section id="module-objects.ExperimentClusters">
+<span id="objects-experimentclusters-module"></span><h2>objects.ExperimentClusters module<a class="headerlink" href="#module-objects.ExperimentClusters" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="objects.ExperimentClusters.ExperimentClusters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">objects.ExperimentClusters.</span></span><span class="sig-name descname"><span class="pre">ExperimentClusters</span></span><a class="reference internal" href="_modules/objects/ExperimentClusters.html#ExperimentClusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.ExperimentClusters.ExperimentClusters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>List of clusters of components
+Contains:
+cluster (list(Experiment_component)) - cluster of components
+metadata - additional information</p>
+</dd></dl>
+
+</section>
+<section id="module-objects.ExperimentComponent">
+<span id="objects-experimentcomponent-module"></span><h2>objects.ExperimentComponent module<a class="headerlink" href="#module-objects.ExperimentComponent" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="objects.ExperimentComponent.ExperimentComponent">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">objects.ExperimentComponent.</span></span><span class="sig-name descname"><span class="pre">ExperimentComponent</span></span><a class="reference internal" href="_modules/objects/ExperimentComponent.html#ExperimentComponent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.ExperimentComponent.ExperimentComponent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Object describing component in specific experiment
+Contains:
+concentration_time (pandas.DataFrame) - describing progress of concentration in time
+feed_concentration (float) - concentration of component in feed
+name (string) - name of component
+experiment (Experiment) - reference to experiment</p>
+</dd></dl>
+
+</section>
+<section id="module-objects.ExperimentCondition">
+<span id="objects-experimentcondition-module"></span><h2>objects.ExperimentCondition module<a class="headerlink" href="#module-objects.ExperimentCondition" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="objects.ExperimentCondition.ExperimentCondition">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">objects.ExperimentCondition.</span></span><span class="sig-name descname"><span class="pre">ExperimentCondition</span></span><a class="reference internal" href="_modules/objects/ExperimentCondition.html#ExperimentCondition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.ExperimentCondition.ExperimentCondition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Object describing conditions of experiment
+Contains:
+column_diameter (float) - diameter of column
+column_length (float) - length of column
+feed_volume (float) - volume of feed
+flow_rate (float) - flow rate</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="objects.ExperimentCondition.ExperimentCondition.feedTime">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">feedTime</span></span><a class="headerlink" href="#objects.ExperimentCondition.ExperimentCondition.feedTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="objects.ExperimentCondition.ExperimentCondition.feedVolume">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">feedVolume</span></span><a class="headerlink" href="#objects.ExperimentCondition.ExperimentCondition.feedVolume" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="objects.ExperimentCondition.ExperimentCondition.flowRate">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">flowRate</span></span><a class="headerlink" href="#objects.ExperimentCondition.ExperimentCondition.flowRate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-objects.ExperimentSet">
+<span id="objects-experimentset-module"></span><h2>objects.ExperimentSet module<a class="headerlink" href="#module-objects.ExperimentSet" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="objects.ExperimentSet.ExperimentSet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">objects.ExperimentSet.</span></span><span class="sig-name descname"><span class="pre">ExperimentSet</span></span><a class="reference internal" href="_modules/objects/ExperimentSet.html#ExperimentSet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.ExperimentSet.ExperimentSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Set of experiments for analysis
+Contains:
+metadata (Metadata) - additional information
+experiments (set(Experiment)) - set of experiments</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.ExperimentSet.ExperimentSet.get_exp_by_name">
+<span class="sig-name descname"><span class="pre">get_exp_by_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/ExperimentSet.html#ExperimentSet.get_exp_by_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.ExperimentSet.ExperimentSet.get_exp_by_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.ExperimentSet.ExperimentSet.get_exps_by_names">
+<span class="sig-name descname"><span class="pre">get_exps_by_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/ExperimentSet.html#ExperimentSet.get_exps_by_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.ExperimentSet.ExperimentSet.get_exps_by_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-objects.Metadata">
+<span id="objects-metadata-module"></span><h2>objects.Metadata module<a class="headerlink" href="#module-objects.Metadata" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="objects.Metadata.Metadata">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">objects.Metadata.</span></span><span class="sig-name descname"><span class="pre">Metadata</span></span><a class="reference internal" href="_modules/objects/Metadata.html#Metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Metadata.Metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Object containing additional information
+Contains:
+date (string) - date
+description (string) - description</p>
+</dd></dl>
+
+</section>
+<section id="module-objects.Operator">
+<span id="objects-operator-module"></span><h2>objects.Operator module<a class="headerlink" href="#module-objects.Operator" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="objects.Operator.Operator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">objects.Operator.</span></span><span class="sig-name descname"><span class="pre">Operator</span></span><a class="reference internal" href="_modules/objects/Operator.html#Operator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class orchestrating optimization workflow and command line user interface</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Operator.Operator.Cluster_By_Component">
+<span class="sig-name descname"><span class="pre">Cluster_By_Component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experimentSet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#Operator.Cluster_By_Component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator.Cluster_By_Component" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Operator.Operator.Cluster_By_Condition">
+<span class="sig-name descname"><span class="pre">Cluster_By_Condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experimentSet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#Operator.Cluster_By_Condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator.Cluster_By_Condition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Operator.Operator.Cluster_By_Condition2">
+<span class="sig-name descname"><span class="pre">Cluster_By_Condition2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experimentSet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#Operator.Cluster_By_Condition2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator.Cluster_By_Condition2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Operator.Operator.Cluster_By_Experiment">
+<span class="sig-name descname"><span class="pre">Cluster_By_Experiment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experimentSet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#Operator.Cluster_By_Experiment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator.Cluster_By_Experiment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Operator.Operator.Cluster_Match">
+<span class="sig-name descname"><span class="pre">Cluster_Match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comp1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comp2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#Operator.Cluster_Match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator.Cluster_Match" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Operator.Operator.Cluster_Match_Exp">
+<span class="sig-name descname"><span class="pre">Cluster_Match_Exp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exp1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#Operator.Cluster_Match_Exp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator.Cluster_Match_Exp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Operator.Operator.Create_Key">
+<span class="sig-name descname"><span class="pre">Create_Key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#Operator.Create_Key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator.Create_Key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Operator.Operator.Load_Experiment_Set">
+<span class="sig-name descname"><span class="pre">Load_Experiment_Set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#Operator.Load_Experiment_Set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator.Load_Experiment_Set" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Operator.Operator.Load_Experimet_JSON">
+<span class="sig-name descname"><span class="pre">Load_Experimet_JSON</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experimentSet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonString</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#Operator.Load_Experimet_JSON"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator.Load_Experimet_JSON" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Operator.Operator.Preprocess">
+<span class="sig-name descname"><span class="pre">Preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experimentSet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gauss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retCorr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">massBal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retThreshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#Operator.Preprocess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator.Preprocess" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Operator.Operator.Print_Component_Graph">
+<span class="sig-name descname"><span class="pre">Print_Component_Graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experimentComponent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#Operator.Print_Component_Graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator.Print_Component_Graph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Operator.Operator.Save_Graphs_To_Directory">
+<span class="sig-name descname"><span class="pre">Save_Graphs_To_Directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experimentSet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experimentSetGauss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parentDir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#Operator.Save_Graphs_To_Directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator.Save_Graphs_To_Directory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Operator.Operator.Save_Result">
+<span class="sig-name descname"><span class="pre">Save_Result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parentDir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#Operator.Save_Result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator.Save_Result" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Operator.Operator.Start">
+<span class="sig-name descname"><span class="pre">Start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#Operator.Start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator.Start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Operator.Operator.Start_For_Testing">
+<span class="sig-name descname"><span class="pre">Start_For_Testing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#Operator.Start_For_Testing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator.Start_For_Testing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Operator.Operator.Web_Start">
+<span class="sig-name descname"><span class="pre">Web_Start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experimentSet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gauss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retCorr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">massBal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lossFunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">porosityStart</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">porosityEnd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">porosityInit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">KDQDict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacialDiff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeDiff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimId</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retThreshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lvl1optim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lvl2optim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#Operator.Web_Start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.Operator.Web_Start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="objects.Operator.timeit">
+<span class="sig-prename descclassname"><span class="pre">objects.Operator.</span></span><span class="sig-name descname"><span class="pre">timeit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Operator.html#timeit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Operator.timeit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-objects.Solution">
+<span id="objects-solution-module"></span><h2>objects.Solution module<a class="headerlink" href="#module-objects.Solution" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="objects.Solution.Solution">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">objects.Solution.</span></span><span class="sig-name descname"><span class="pre">Solution</span></span><a class="reference internal" href="_modules/objects/Solution.html#Solution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Solution.Solution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Retired</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Solution.Solution.Add_Result">
+<span class="sig-name descname"><span class="pre">Add_Result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pathToExp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">henryConst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disperCoef</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">porosity</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Solution.html#Solution.Add_Result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Solution.Solution.Add_Result" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="objects.Solution.Solution.Export_To_CSV">
+<span class="sig-name descname"><span class="pre">Export_To_CSV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/objects/Solution.html#Solution.Export_To_CSV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#objects.Solution.Solution.Export_To_CSV" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-objects">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-objects" title="Permalink to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">ChroMo</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Adam Svoboda, Tomas Svoboda.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/objects.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

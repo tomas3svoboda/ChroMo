@@ -2,8 +2,8 @@ from objects.ExperimentSet import ExperimentSet
 from objects.Metadata import Metadata
 import pandas as pd
 
-# Retired
 class Solution:
+    """Retired"""
     def __init__(self):
         self.experimentSet = ExperimentSet()
         self.modelExperimentSet = ExperimentSet()

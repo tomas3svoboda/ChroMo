@@ -7,6 +7,9 @@ from functions.handle_Optim_Settings import handle_Optim_Settings
 
 
 def Lev2_Optim(porosity, experimentCluster, key, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, lvl2optim=None):
+    """Optimizazion function for level 2.
+    Part of the parameter estimation workflow.
+    """
     if not optimId in gl.lossFunctionProgress:
         gl.lossFunctionProgress[optimId] = {}
     if not key in gl.lossFunctionProgress[optimId]:

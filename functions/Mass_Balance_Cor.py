@@ -7,8 +7,8 @@ import scipy
 import os
 
 
-# Define a function to perform mass balance correction on an experiment set
 def Mass_Balance_Cor(experimentSetCor2, writeToFile=False):
+    """Function implementing mass balance correction on experiment set data."""
     # Create a deep copy of the input experiment set to avoid modifying the original data
     experimentSetCor3 = Deep_Copy_ExperimentSet(experimentSetCor2)
 

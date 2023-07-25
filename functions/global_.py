@@ -1,4 +1,4 @@
-# Global variables used in Bilevel Optimization
+"""Global variables used in Bilevel Optimization"""
 compParamDict = dict()
 compRangeDict = dict()
 porosity = dict()

@@ -8,6 +8,9 @@ import datetime
 
 
 def Lev1_Loss_Function(porosity, experimentClustersComp, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, lvl2optim=None):
+    """Loss function for level 1 optimization.
+    Part of the parameter estimation workflow.
+    """
     sum = 0
     timeStart = t.time()
     for key in experimentClustersComp.clusters:

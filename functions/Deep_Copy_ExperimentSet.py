@@ -2,8 +2,8 @@ from objects.ExperimentSet import ExperimentSet
 from objects.ExperimentComponent import ExperimentComponent
 from objects.Experiment import Experiment
 
-# Function that creates a deep copy of experiment set
 def Deep_Copy_ExperimentSet(experimentSet):
+    """Function that creates a deep copy of experiment set"""
     newExperimentSet = ExperimentSet()
     newExperimentSet.metadata.path = experimentSet.metadata.path
     newExperimentSet.metadata.date = experimentSet.metadata.date

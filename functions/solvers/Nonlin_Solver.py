@@ -17,14 +17,6 @@ import warnings
 # University of Chemistry and Technology in Prague, Czech Republic
 # Department of Carbohydrates and Cereals
 # tomas3.svoboda@vscht.cz
-'''
-This script implements Cranck-Nicolson implicit method for numerical solution of
-non-linear second order convection-diffusion PDE used to describe concentration 
-wave propagation trough the chromatographic column. Numerical scheme utilizes
-averaged centred difference scheme in spatial direction and forward difference
-scheme in time direction. Danckwert's boudaries are implemented with usage of
-fictious point for left boundary.
-'''
 def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
                   length=235,         # Length of the packed section in the column [mm]
                   diameter=16,        # Column diameter [mm]
@@ -43,6 +35,13 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
                   debugGraph=False,
                   full=False
                   ):
+    '''This script implements Cranck-Nicolson implicit method for numerical solution of
+    non-linear second order convection-diffusion PDE used to describe concentration
+    wave propagation trough the chromatographic column. Numerical scheme utilizes
+    averaged centred difference scheme in spatial direction and forward difference
+    scheme in time direction. Danckwert's boudaries are implemented with usage of
+    fictious point for left boundary.
+    '''
     # Ignore runtime warnings
     warnings.filterwarnings("ignore", category=RuntimeWarning)
 

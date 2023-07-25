@@ -2,14 +2,14 @@
 from functions.solvers.Lin_Solver import Lin_Solver
 from functions.solvers.Nonlin_Solver import Nonlin_Solver
 
-'''
-Function allowing to choose between solvers based on choice parameter
-Choices:
-    'Lin' - Lin_Solver
-Other choices will raise an exception
-IN PROGRESS - needs add more solvers
-'''
+
 def Solver_Choice(choice, params, experimentComp, spacialDiff = 30, timeDiff = 3000, time = 10800, debugPrint=False, full=False):
+    """Function allowing to choose between solvers based on choice parameter
+    Choices:
+    'Lin' - Lin_Solver
+    'Nonlin' - Nonlin_Solver
+    Other choices will raise an exception.
+    """
     if choice == 'Lin':
         res = Lin_Solver(experimentComp.experiment.experimentCondition.flowRate,
                             experimentComp.experiment.experimentCondition.columnLength,

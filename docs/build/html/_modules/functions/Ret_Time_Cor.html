@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>functions.Ret_Time_Cor &#8212; ChroMo 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for functions.Ret_Time_Cor</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Import necessary modules</span>
+<span class="kn">from</span> <span class="nn">functions.Handle_File_Creation</span> <span class="kn">import</span> <span class="n">Handle_File_Creation</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+
+<div class="viewcode-block" id="Ret_Time_Cor"><a class="viewcode-back" href="../../functions.html#functions.Ret_Time_Cor.Ret_Time_Cor">[docs]</a><span class="k">def</span> <span class="nf">Ret_Time_Cor</span><span class="p">(</span><span class="n">experimentSet</span><span class="p">,</span> <span class="n">experimentClustersExp</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">writeToFile</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function implementing retention time correction on experiment set data.&quot;&quot;&quot;</span>
+    <span class="c1"># If writeToFile flag is set, create a file to write output to</span>
+    <span class="k">if</span> <span class="n">writeToFile</span><span class="p">:</span>
+        <span class="n">filePath</span> <span class="o">=</span> <span class="n">experimentSet</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">Time_Shifts.txt&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="n">Handle_File_Creation</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+
+    <span class="c1"># Calculate maximum negative shifts for each experiment to not lose non-zero values</span>
+    <span class="c1"># This is stored as a temporary property on the experiment object</span>
+    <span class="k">for</span> <span class="n">key1</span><span class="p">,</span> <span class="n">cluster</span> <span class="ow">in</span> <span class="n">experimentClustersExp</span><span class="o">.</span><span class="n">clusters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">cluster</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">maxShift</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span>
+            <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">exp</span><span class="o">.</span><span class="n">experimentComponents</span><span class="p">:</span>
+                <span class="n">column</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">comp</span><span class="o">.</span><span class="n">concentrationTime</span><span class="p">[</span><span class="n">comp</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+                <span class="n">gtRes</span> <span class="o">=</span> <span class="n">column</span><span class="o">.</span><span class="n">gt</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+                <span class="n">firstNonZeroIndex</span> <span class="o">=</span> <span class="n">gtRes</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">firstNonZeroIndex</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">gtRes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">comp</span><span class="o">.</span><span class="n">concentrationTime</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">maxShift</span><span class="p">:</span>
+                        <span class="n">maxShift</span> <span class="o">=</span> <span class="n">comp</span><span class="o">.</span><span class="n">concentrationTime</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                    <span class="k">continue</span>
+                <span class="n">firstNonZeroTime</span> <span class="o">=</span> <span class="n">comp</span><span class="o">.</span><span class="n">concentrationTime</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">firstNonZeroIndex</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">firstNonZeroTime</span> <span class="o">&lt;</span> <span class="n">maxShift</span><span class="p">:</span>
+                    <span class="n">maxShift</span> <span class="o">=</span> <span class="n">firstNonZeroTime</span>
+            <span class="n">exp</span><span class="o">.</span><span class="n">maxShift</span> <span class="o">=</span> <span class="o">-</span><span class="n">maxShift</span>
+
+    <span class="c1"># Define loss function for minimization task</span>
+    <span class="k">def</span> <span class="nf">Shift_Loss_Function</span><span class="p">(</span><span class="n">shifts</span><span class="p">,</span> <span class="n">avgPeakTimes</span><span class="p">,</span> <span class="n">cluster</span><span class="p">):</span>
+        <span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">exp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cluster</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">exp</span><span class="o">.</span><span class="n">experimentComponents</span><span class="p">:</span>
+                <span class="n">column</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">comp</span><span class="o">.</span><span class="n">concentrationTime</span><span class="p">[</span><span class="n">comp</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+                <span class="n">peakIndex</span> <span class="o">=</span> <span class="n">column</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()</span>
+                <span class="n">peakTime</span> <span class="o">=</span> <span class="n">comp</span><span class="o">.</span><span class="n">concentrationTime</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">peakIndex</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="nb">sum</span> <span class="o">+=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">peakTime</span> <span class="o">+</span> <span class="n">shifts</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">-</span> <span class="n">avgPeakTimes</span><span class="p">[</span><span class="n">comp</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">sum</span>
+
+    <span class="c1"># Calculate average peak time and shift for each cluster</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">experimentClustersExp</span><span class="o">.</span><span class="n">clusters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">avgPeakTimes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key2</span><span class="p">,</span> <span class="n">value2</span> <span class="ow">in</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">peakTimeSum</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">value2</span><span class="p">:</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;display.max_colwidth&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">column</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">comp</span><span class="o">.</span><span class="n">concentrationTime</span><span class="p">[</span><span class="n">comp</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+                <span class="n">peakIndex</span> <span class="o">=</span> <span class="n">column</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()</span>
+                <span class="n">peakTime</span> <span class="o">=</span> <span class="n">comp</span><span class="o">.</span><span class="n">concentrationTime</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">peakIndex</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">peakTimeSum</span> <span class="o">+=</span> <span class="n">peakTime</span>
+            <span class="n">peakTimeAvg</span> <span class="o">=</span> <span class="n">peakTimeSum</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">value2</span><span class="p">)</span>
+            <span class="n">avgPeakTimes</span><span class="p">[</span><span class="n">key2</span><span class="p">]</span> <span class="o">=</span> <span class="n">peakTimeAvg</span>
+        <span class="n">initalGuess</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">initalGuess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">bounds</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">exp</span><span class="o">.</span><span class="n">maxShift</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span><span class="n">Shift_Loss_Function</span><span class="p">,</span> <span class="n">initalGuess</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">avgPeakTimes</span><span class="p">,</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                        <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span>  <span class="n">method</span><span class="o">=</span><span class="s1">&#39;Nelder-Mead&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">exp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">exp</span><span class="o">.</span><span class="n">experimentComponents</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">comp</span><span class="o">.</span><span class="n">concentrationTime</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">exp</span><span class="o">.</span><span class="n">shift</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">writeToFile</span><span class="p">:</span>
+                <span class="n">head2</span><span class="p">,</span> <span class="n">tail2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+                <span class="n">experimentName</span><span class="p">,</span> <span class="n">extesion</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">tail2</span><span class="p">)</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Experiment: &quot;</span> <span class="o">+</span> <span class="n">experimentName</span> <span class="o">+</span> <span class="s2">&quot;, Shift: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># If writeToFile flag is set, close the file</span>
+    <span class="k">if</span> <span class="n">writeToFile</span><span class="p">:</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># Return the updated experiment set</span>
+    <span class="k">return</span> <span class="n">experimentSet</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">ChroMo</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Adam Svoboda, Tomas Svoboda.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

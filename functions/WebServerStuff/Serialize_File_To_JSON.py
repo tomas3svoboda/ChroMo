@@ -3,6 +3,7 @@ import pandas as pd
 import datetime
 
 def Serialize_File_To_JSON(file):
+    """Converts experiment file into json string."""
     jsonDict = {}
     jsonDict["name"] = file
     jsonDict["projectDate"] = str(datetime.date.today().strftime("%m/%d/%Y"))

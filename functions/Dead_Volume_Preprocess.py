@@ -1,7 +1,7 @@
 from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 
-# Function that adds dead volume to experiment set before optimization
 def Dead_Volume_Preprocess(experimentSet):
+    """Function that adds dead volume to experiment set before optimization"""
     currExperimentSet = Deep_Copy_ExperimentSet(experimentSet)
     for exp in currExperimentSet.experiments:
         # calculates time of dead volume as t

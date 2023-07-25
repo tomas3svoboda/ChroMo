@@ -12,7 +12,6 @@ from objects.ExperimentClusters import ExperimentClusters
 x axis - Henry constant
 y axis - Dispersion coeficient
 """
-# Function handling loss function analysis functionality
 def Loss_Function_Analysis_Simple(experimentClusterComp,
                             component,
                             path,
@@ -32,6 +31,7 @@ def Loss_Function_Analysis_Simple(experimentClusterComp,
                             expTime = 10800,
                             webMode = False,
                             optimId = 1):
+    """Function handling loss function analysis functionality"""
     experimentCluster = experimentClusterComp.clusters[component]
     x = 0
     resultArr = np.zeros((len(np.arange(xstart, xend, xstep)), len(np.arange(ystart, yend, ystep))))

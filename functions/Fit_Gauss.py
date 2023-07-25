@@ -6,12 +6,12 @@ from scipy.special import erf
 from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 
 def Fit_Gauss(experimentSetGauss):
+    """Defines a typical gaussian function, of independent variable x,
+    amplitude a, position b, width parameter c, and erf parameter d.
+    """
     print('Fitting Gauss started!')
 
     # ---------------------Start of external code-------------------------------
-
-    # defines a typical gaussian function, of independent variable x,
-    # amplitude a, position b, width parameter c, and erf parameter d.
     def gaussian(x, a, b, c, d):
         amp = (a / (c * np.sqrt(2 * np.pi)))
         spread = np.exp((-(x - b) ** 2.0) / 2 * c ** 2.0)

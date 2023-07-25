@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>functions.singleLossFunctions package &#8212; ChroMo 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="functions-singlelossfunctions-package">
+<h1>functions.singleLossFunctions package<a class="headerlink" href="#functions-singlelossfunctions-package" title="Permalink to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="module-functions.singleLossFunctions.Single_Loss_Function_Choice">
+<span id="functions-singlelossfunctions-single-loss-function-choice-module"></span><h2>functions.singleLossFunctions.Single_Loss_Function_Choice module<a class="headerlink" href="#module-functions.singleLossFunctions.Single_Loss_Function_Choice" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.singleLossFunctions.Single_Loss_Function_Choice.Single_Loss_Function_Choice">
+<span class="sig-prename descclassname"><span class="pre">functions.singleLossFunctions.Single_Loss_Function_Choice.</span></span><span class="sig-name descname"><span class="pre">Single_Loss_Function_Choice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">choice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experimentComp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Lin'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacialDiff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeDiff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10800</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions/singleLossFunctions/Single_Loss_Function_Choice.html#Single_Loss_Function_Choice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.singleLossFunctions.Single_Loss_Function_Choice.Single_Loss_Function_Choice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function allowing to choose between loss function based on choice parameter
+Choices:
+‘Simple’ - Single_Loss_Function_Simple
+‘Squares’ - Single_Loss_Function_Squares
+‘LogSimple’ - Single_Loss_Function_LogSimple
+‘LogSquares’ - Single_Loss_Function_LogSquares
+Other choices will raise an exception</p>
+</dd></dl>
+
+</section>
+<section id="module-functions.singleLossFunctions.Single_Loss_Function_LogSimple">
+<span id="functions-singlelossfunctions-single-loss-function-logsimple-module"></span><h2>functions.singleLossFunctions.Single_Loss_Function_LogSimple module<a class="headerlink" href="#module-functions.singleLossFunctions.Single_Loss_Function_LogSimple" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.singleLossFunctions.Single_Loss_Function_LogSimple.Single_Loss_Function_LogSimple">
+<span class="sig-prename descclassname"><span class="pre">functions.singleLossFunctions.Single_Loss_Function_LogSimple.</span></span><span class="sig-name descname"><span class="pre">Single_Loss_Function_LogSimple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experimentComp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacialDiff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeDiff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions/singleLossFunctions/Single_Loss_Function_LogSimple.html#Single_Loss_Function_LogSimple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.singleLossFunctions.Single_Loss_Function_LogSimple.Single_Loss_Function_LogSimple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a loss value, representing difference between experimental and model data with given parameters.
+Natural log is applied to final value.</p>
+</dd></dl>
+
+</section>
+<section id="module-functions.singleLossFunctions.Single_Loss_Function_LogSquares">
+<span id="functions-singlelossfunctions-single-loss-function-logsquares-module"></span><h2>functions.singleLossFunctions.Single_Loss_Function_LogSquares module<a class="headerlink" href="#module-functions.singleLossFunctions.Single_Loss_Function_LogSquares" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.singleLossFunctions.Single_Loss_Function_LogSquares.Single_Loss_Function_LogSquares">
+<span class="sig-prename descclassname"><span class="pre">functions.singleLossFunctions.Single_Loss_Function_LogSquares.</span></span><span class="sig-name descname"><span class="pre">Single_Loss_Function_LogSquares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experimentComp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacialDiff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeDiff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions/singleLossFunctions/Single_Loss_Function_LogSquares.html#Single_Loss_Function_LogSquares"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.singleLossFunctions.Single_Loss_Function_LogSquares.Single_Loss_Function_LogSquares" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a loss value, representing difference between experimental and model data with given parameters.
+Summed values are squared.
+Natural log is applied to final value.</p>
+</dd></dl>
+
+</section>
+<section id="module-functions.singleLossFunctions.Single_Loss_Function_Simple">
+<span id="functions-singlelossfunctions-single-loss-function-simple-module"></span><h2>functions.singleLossFunctions.Single_Loss_Function_Simple module<a class="headerlink" href="#module-functions.singleLossFunctions.Single_Loss_Function_Simple" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.singleLossFunctions.Single_Loss_Function_Simple.Single_Loss_Function_Simple">
+<span class="sig-prename descclassname"><span class="pre">functions.singleLossFunctions.Single_Loss_Function_Simple.</span></span><span class="sig-name descname"><span class="pre">Single_Loss_Function_Simple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experimentComp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacialDiff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeDiff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions/singleLossFunctions/Single_Loss_Function_Simple.html#Single_Loss_Function_Simple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.singleLossFunctions.Single_Loss_Function_Simple.Single_Loss_Function_Simple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a loss value, representing difference between experimental and model data with given parameters.</p>
+</dd></dl>
+
+</section>
+<section id="module-functions.singleLossFunctions.Single_Loss_Function_Squares">
+<span id="functions-singlelossfunctions-single-loss-function-squares-module"></span><h2>functions.singleLossFunctions.Single_Loss_Function_Squares module<a class="headerlink" href="#module-functions.singleLossFunctions.Single_Loss_Function_Squares" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.singleLossFunctions.Single_Loss_Function_Squares.Single_Loss_Function_Squares">
+<span class="sig-prename descclassname"><span class="pre">functions.singleLossFunctions.Single_Loss_Function_Squares.</span></span><span class="sig-name descname"><span class="pre">Single_Loss_Function_Squares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experimentComp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacialDiff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeDiff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions/singleLossFunctions/Single_Loss_Function_Squares.html#Single_Loss_Function_Squares"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.singleLossFunctions.Single_Loss_Function_Squares.Single_Loss_Function_Squares" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a loss value, representing difference between experimental and model data with given parameters.
+Summed values are squared.</p>
+</dd></dl>
+
+</section>
+<section id="module-functions.singleLossFunctions">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-functions.singleLossFunctions" title="Permalink to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">ChroMo</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Adam Svoboda, Tomas Svoboda.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/functions.singleLossFunctions.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

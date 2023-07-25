@@ -1,7 +1,7 @@
 import numpy as np
 
-# Function that adds dead volume to result vector
 def Dead_Volume_Adjustment(dataArray, deadVolume, flowRate, dt = 3.6):
+    """Function that adds dead volume to result vector"""
     t = (deadVolume/flowRate)*3600
     deadSteps = int(t//dt)
     remainder = t%dt

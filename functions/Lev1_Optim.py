@@ -20,6 +20,9 @@ import math
 # Returns:
 #     The value of the level 1 loss function
 def Lev1_Optim(experimentClustersComp, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, lvl1optim = None, lvl2optim = None):
+    """Optimizazion function for level 1.
+    Part of the parameter estimation workflow.
+    """
     gl.index[optimId] = 0
     gl.bestLvl1LossFunctionVal[optimId] = math.inf
     res = handle_Optim_Settings(Lev1_Loss_Function, gl.porosity[optimId],

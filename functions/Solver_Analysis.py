@@ -4,8 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from functions.Dead_Volume_Adjustment import Dead_Volume_Adjustment
 
-# Function handling manual estimation function in command line version
 def Solver_Analysis(experimentSet, componentList, paramList, solver):
+    """Function handling manual estimation function in command line version"""
     time = np.linspace(0, 10800, 3000)
     resultsDict = dict()
     cntr = 0

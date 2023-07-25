@@ -2,9 +2,9 @@ from functions.solvers.Nonlin_Solver import Nonlin_Solver
 import numpy as np
 import math
 
-# retired - unused - not supported
 def Covergence_Check(threshold = 0.01, flowRate = 800, length = 235, diameter = 16, feedVol = 5, feedConc = 2, porosity = 0.5,
                   langmuirConst = 2.5, disperCoef = 0.95, saturationConst = 1):
+    """retired"""
     feedTime = (feedVol / flowRate) * 3600
     flowSpeed = (flowRate * 1000 / 3600) / (math.pi * ((diameter / 2) ** 2) * porosity)
     def Loss_Func(Nt):

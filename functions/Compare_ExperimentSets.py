@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# Function compares two experiment sets
+
 def Compare_ExperimentSets(experimentSet1, experimentSet2):
+    """Function compares two experiment sets"""
     flag = True
 
     # Check if the number of experiments in the sets is equal

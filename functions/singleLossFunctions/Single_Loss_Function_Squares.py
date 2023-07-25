@@ -4,6 +4,8 @@ import numpy as np
 # Calculates loss value of sigle particular solution and according time series. Serves for isotherm decision.
 
 def Single_Loss_Function_Squares(params, experimentComp, solver, factor, spacialDiff, timeDiff, time):
+    """Calculates a loss value, representing difference between experimental and model data with given parameters.
+    Summed values are squared."""
     errSum = 0
     df = experimentComp.concentrationTime
     model = Solver_Choice(solver, params, experimentComp, spacialDiff, timeDiff, time)
