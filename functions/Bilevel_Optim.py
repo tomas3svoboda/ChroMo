@@ -17,8 +17,8 @@ def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, 
         if solver == "Lin":
             # Store computation parameters for linear solver
             if optimType == "singlelevel":
-                gl.compParamDict[optimId][key] = [porosityIntervals["init"], KDIntervals[key]["kinit"], KDIntervals[key]["dinit"]]
-                gl.compRangeDict[optimId][key] = [porosityIntervals["range"], KDIntervals[key]["krange"], KDIntervals[key]["drange"]]
+                gl.compParamDict[optimId][key] = [KDIntervals[key]["pinit"], KDIntervals[key]["kinit"], KDIntervals[key]["dinit"]]
+                gl.compRangeDict[optimId][key] = [KDIntervals[key]["prange"], KDIntervals[key]["krange"], KDIntervals[key]["drange"]]
             elif optimType == "bilevel":
                 gl.compParamDict[optimId][key] = [KDIntervals[key]["kinit"], KDIntervals[key]["dinit"]]
                 gl.compRangeDict[optimId][key] = [KDIntervals[key]["krange"], KDIntervals[key]["drange"]]
@@ -27,9 +27,9 @@ def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, 
         elif solver == "Nonlin":
             # Store computation parameters for nonlinear solver
             if optimType == "singlelevel":
-                gl.compParamDict[optimId][key] = [porosityIntervals["init"], KDIntervals[key]["kinit"],
+                gl.compParamDict[optimId][key] = [KDIntervals[key]["pinit"], KDIntervals[key]["kinit"],
                                                   KDIntervals[key]["dinit"], KDIntervals[key]["qinit"]]
-                gl.compRangeDict[optimId][key] = [porosityIntervals["range"], KDIntervals[key]["krange"],
+                gl.compRangeDict[optimId][key] = [KDIntervals[key]["prange"], KDIntervals[key]["krange"],
                                                   KDIntervals[key]["drange"], KDIntervals[key]["qrange"]]
             elif optimType == "bilevel":
                 gl.compParamDict[optimId][key] = [KDIntervals[key]["kinit"], KDIntervals[key]["dinit"],
@@ -39,12 +39,8 @@ def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, 
             else:
                 raise Exception("Unknown optimization type in Bilevel_Optim.")
     # Store porosity parameters
-    if optimType == "bilevel":
-        gl.porosity[optimId] = porosityIntervals["init"]
-        gl.porosityRange[optimId] = porosityIntervals["range"]
-    else:
-        gl.porosity[optimId] = "-"
-        gl.porosityRange[optimId] = "-"
+    gl.porosity[optimId] = porosityIntervals["init"]
+    gl.porosityRange[optimId] = porosityIntervals["range"]
 
 
     # Call Lev1_Optim function

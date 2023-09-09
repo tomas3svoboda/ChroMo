@@ -14,11 +14,17 @@ def Lev1_Loss_Function(porosity, experimentClustersComp, lossFunction, factor, s
     sum = 0
     timeStart = t.time()
     for key in experimentClustersComp.clusters:
-        res = Lev2_Optim(porosity[0], experimentClustersComp.clusters[key], key, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl2optim, optimType)
+        if optimType == "bilevel":
+            res = Lev2_Optim(porosity[0], experimentClustersComp.clusters[key], key, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl2optim, optimType)
+        elif optimType == "singlelevel":
+            res = Lev2_Optim(0, experimentClustersComp.clusters[key], key, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl2optim, optimType)
         sum += res
     if sum < gl.bestLvl1LossFunctionVal[optimId]:
         gl.bestLvl1LossFunctionVal[optimId] = sum
-        gl.bestPorosity[optimId] = porosity[0]
+        if optimType == "bilevel":
+            gl.bestPorosity[optimId] = porosity[0]
+        elif optimType == "singlelevel":
+            gl.bestPorosity[optimId] = 0
         gl.bestCompParamDict[optimId] = copy.deepcopy(gl.compParamDict[optimId])
         gl.bestLvl2LossFunctionVals[optimId] = copy.deepcopy(gl.lv2LossFunctionVals[optimId])
 

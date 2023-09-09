@@ -55,7 +55,7 @@
             <tr>
               <td>{{comp}}</td>
               {% if result["optimparams"]["optimType"] == "singlelevel" %}
-              <td><div class="boldText">{{result["compparams"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["porosityIntervals"]["init"]}}&nbsp;:&nbsp;{{result["optimparams"]["porosityIntervals"]["range"][0]}}-{{result["optimparams"]["porosityIntervals"]["range"][1]}})</td>
+              <td><div class="boldText">{{result["compparams"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["KDIntervals"][comp]["pinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["KDIntervals"][comp]["prange"][0]}}-{{result["optimparams"]["KDIntervals"][comp]["prange"][1]}})</td>
               {% set paramIndex = paramIndex + 1 %}
               {% endif %}
               <td><div class="boldText">{{result["compparams"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["KDIntervals"][comp]["kinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["KDIntervals"][comp]["krange"][0]}}-{{result["optimparams"]["KDIntervals"][comp]["krange"][1]}})</td>

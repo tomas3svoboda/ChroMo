@@ -193,6 +193,16 @@ function retTimeTresholdInput(){
     }
 }
 
+function optimTypeInput(){
+    let divSingle = document.getElementsByClassName("porositySinglelevelDiv")
+    let divBi = document.getElementById("porosityBilevelDiv")
+    let tmpDisplay = divSingle[0].style.display
+    for(let i = 0; i < divSingle.length; i++)
+        divSingle[i].style.display = divBi.style.display
+    divBi.style.display = tmpDisplay
+
+}
+
 async function showGraph3(f = "mainform", aurl = "/prograph", i = "imgdiv"){
     let form = document.getElementById(f)
     let data = new FormData(form)

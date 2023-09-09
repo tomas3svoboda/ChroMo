@@ -130,6 +130,9 @@ def Web_Server():
                 KDQDict = {}
                 for comp in compList[self.user_id]:
                     tmpDict = {}
+                    if formInfo["optimType"] == "singlelevel":
+                        tmpDict["pinit"] = formInfo[comp + "P"]
+                        tmpDict["prange"] = [formInfo[comp + "PStart"], formInfo[comp + "PEnd"]]
                     tmpDict["kinit"] = formInfo[comp + "K"]
                     tmpDict["krange"] = [formInfo[comp + "KStart"], formInfo[comp + "KEnd"]]
                     tmpDict["dinit"] = formInfo[comp + "D"]
@@ -141,10 +144,17 @@ def Web_Server():
                         tmpDict["qinit"] = 0
                         tmpDict["qrange"] = [0, 0]
                     KDQDict[comp] = tmpDict
-                tmp = operator.Web_Start(usedExpSet,
+                if formInfo["optimType"] == "bilevel":
+                    tmp = operator.Web_Start(usedExpSet,
                         formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["lossFunc"],
                         formInfo["solver"], formInfo["factor"], formInfo["porosityStart"], formInfo["porosityEnd"],
                         formInfo["porosity"], KDQDict, formInfo["spacialDiff"],
+                        formInfo["timeDiff"], formInfo["time"], self.thr_id, formInfo["retCorrThreshold"],
+                        formInfo["lvl1optimsettings"], formInfo["lvl2optimsettings"], formInfo["optimType"])
+                elif formInfo["optimType"] == "singlelevel":
+                    tmp = operator.Web_Start(usedExpSet,
+                        formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["lossFunc"],
+                        formInfo["solver"], formInfo["factor"], 0, 0, 0, KDQDict, formInfo["spacialDiff"],
                         formInfo["timeDiff"], formInfo["time"], self.thr_id, formInfo["retCorrThreshold"],
                         formInfo["lvl1optimsettings"], formInfo["lvl2optimsettings"], formInfo["optimType"])
                 if formInfo["retCorr"]:
@@ -702,10 +712,15 @@ def Web_Server():
         formInfo["solver"] = str(request.form.get("solver"))
         formInfo['optimType'] = str(request.form.get("optimType"))
         formInfo["factor"] = int(request.form.get("factor"))
-        formInfo["porosityStart"] = float(request.form.get("porosityStart"))
-        formInfo["porosityEnd"] = float(request.form.get("porosityEnd"))
-        formInfo["porosity"] = float(request.form.get("porosityInit"))
+        if formInfo['optimType'] == "bilevel":
+            formInfo["porosityStart"] = float(request.form.get("porosityStart"))
+            formInfo["porosityEnd"] = float(request.form.get("porosityEnd"))
+            formInfo["porosity"] = float(request.form.get("porosityInit"))
         for comp in compList[flask_login.current_user.id]:
+            if formInfo['optimType'] == "singlelevel":
+                formInfo[comp + "PStart"] = float(request.form.get(comp + "PStart"))
+                formInfo[comp + "PEnd"] = float(request.form.get(comp + "PEnd"))
+                formInfo[comp + "P"] = float(request.form.get(comp + "PInit"))
             formInfo[comp + "KStart"] = float(request.form.get(comp + "KStart"))
             formInfo[comp + "KEnd"] = float(request.form.get(comp + "KEnd"))
             formInfo[comp + "K"] = float(request.form.get(comp + "KInit"))

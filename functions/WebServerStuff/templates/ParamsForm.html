@@ -52,7 +52,7 @@
           <option value="Nonlin" {% if formInfo and formInfo['solver'] == "Nonlin" %}selected{% endif %}>Noncompetetive Langmuir</option>
         </select><br>
         <label for="optimType">Optimization type<div class="required">*</div></label>
-        <select name="optimType" id="optimType">
+        <select name="optimType" id="optimType" oninput="optimTypeInput()">
           <option value="singlelevel" {% if formInfo and formInfo['optimType'] == "Lin" %}selected{% endif %}>Single level</option>
           <option value="bilevel" {% if formInfo and formInfo['optimType'] == "Nonlin" %}selected{% endif %}>Bilevel</option>
         </select><br>
@@ -66,12 +66,20 @@
           <option value="6" {% if formInfo and formInfo['factor'] == 6 %}selected{% endif %}>1/feedMass</option>
           <option value="7" {% if formInfo and formInfo['factor'] == 7 %}selected{% endif %}>1/feedMass^2</option>
         </select><br><br>
+         <div id="porosityBilevelDiv" style="display: none;">
         <label for="porosityStart">Porosity interval <div class="required">*</div></label>
-        <input type="number" id="porosityStart" name="porosityStart" min="0.01" max="1" step="any" required> - <input type="number" id="porosityEnd" name="porosityEnd" min="0.01" max="1" step="any" required><br>
+        <input type="number" id="porosityStart" name="porosityStart" min="0.01" max="1" step="any"> - <input type="number" id="porosityEnd" name="porosityEnd" min="0.01" max="1" step="any"><br>
         <label for="porosityInit">Porosity initial guess<div class="required">*</div></label>
-        <input type="number" id="porosityInit" name="porosityInit" min="0.01" max="1" step="any" required><br><br>
+        <input type="number" id="porosityInit" name="porosityInit" min="0.01" max="1" step="any"><br><br>
+          </div>
          {% for comp in compList %}
          <div class="variableParams {{comp}}">
+            <div class="porositySinglelevelDiv">
+            <label for="{{comp}}PStart">Porosity interval for {{comp}} <div class="required">*</div></label>
+            <input type="number" id="{{comp}}PStart" name="{{comp}}PStart" min="0" step="any"> - <input type="number" id="{{comp}}PEnd" name="{{comp}}PEnd" min="0" step="any"><br>
+            <label for="{{comp}}PInit">Porosity initial guess for {{comp}} <div class="required">*</div></label>
+            <input type="number" id="{{comp}}PInit" name="{{comp}}PInit" min="0" step="any"><br>
+            </div>
             <label for="{{comp}}KStart">Henry constant interval for {{comp}} <div class="required">*</div></label>
             <input type="number" id="{{comp}}KStart" name="{{comp}}KStart" min="0" step="any" required> - <input type="number" id="{{comp}}KEnd" name="{{comp}}KEnd" min="0" step="any" required><br>
             <label for="{{comp}}KInit">Henry constant initial guess for {{comp}} <div class="required">*</div></label>
