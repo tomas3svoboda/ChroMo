@@ -19,22 +19,28 @@ import math
 #     lvl2optim: the level 2 optimization settings
 # Returns:
 #     The value of the level 1 loss function
-def Lev1_Optim(experimentClustersComp, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, lvl1optim = None, lvl2optim = None):
+def Lev1_Optim(experimentClustersComp, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, lvl1optim = None, lvl2optim = None, optimType=None):
     """Optimizazion function for level 1.
     Part of the parameter estimation workflow.
     """
     gl.index[optimId] = 0
     gl.bestLvl1LossFunctionVal[optimId] = math.inf
-    res = handle_Optim_Settings(Lev1_Loss_Function, gl.porosity[optimId],
-                              (experimentClustersComp, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl2optim),
-                               [(gl.porosityRange[optimId][0], gl.porosityRange[optimId][1])],
-                               lvl1optim, 1)
-    if lvl1optim["algorithm"] == "1":
-        gl.porosity[optimId] = res[0]
-        gl.lv1LossFunctionVal[optimId] = res[1]
-    else:
-        gl.porosity[optimId] = res.x[0]
-        gl.lv1LossFunctionVal[optimId] = res.fun
+    if optimType == "bilevel":
+        res = handle_Optim_Settings(Lev1_Loss_Function, gl.porosity[optimId],
+                                  (experimentClustersComp, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl2optim, optimType),
+                                   [(gl.porosityRange[optimId][0], gl.porosityRange[optimId][1])],
+                                   lvl1optim, 1)
+    elif optimType == "singlelevel":
+        res = Lev1_Loss_Function(gl.porosity[optimId], experimentClustersComp, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl2optim, optimType)
+    if optimType == "bilevel":
+        if lvl1optim["algorithm"] == "1":
+            gl.porosity[optimId] = res[0]
+            gl.lv1LossFunctionVal[optimId] = res[1]
+        else:
+            gl.porosity[optimId] = res.x[0]
+            gl.lv1LossFunctionVal[optimId] = res.fun
+    elif optimType == "singlelevel":
+        gl.lv1LossFunctionVal[optimId] = res
     '''print("*********Difference Print******************")
     print("old porosity: ", gl.porosity[optimId])
     print("new porosity: ", gl.bestPorosity[optimId])

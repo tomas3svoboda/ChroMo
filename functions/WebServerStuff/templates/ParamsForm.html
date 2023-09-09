@@ -51,6 +51,11 @@
           <option value="Lin" {% if formInfo and formInfo['solver'] == "Lin" %}selected{% endif %}>Linear</option>
           <option value="Nonlin" {% if formInfo and formInfo['solver'] == "Nonlin" %}selected{% endif %}>Noncompetetive Langmuir</option>
         </select><br>
+        <label for="optimType">Optimization type<div class="required">*</div></label>
+        <select name="optimType" id="optimType">
+          <option value="singlelevel" {% if formInfo and formInfo['optimType'] == "Lin" %}selected{% endif %}>Single level</option>
+          <option value="bilevel" {% if formInfo and formInfo['optimType'] == "Nonlin" %}selected{% endif %}>Bilevel</option>
+        </select><br>
         <label for="factor">Factor <div class="required">*</div></label>
         <select name="factor" id="factor">
           <option value="1" {% if formInfo and formInfo['factor'] == 1 %}selected{% endif %}>1</option>

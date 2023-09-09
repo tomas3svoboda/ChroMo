@@ -197,7 +197,7 @@ class Operator:
                 resultDF.to_csv(filePath, index=False, compression=None)
                 chromatogramSelection = input("More Chromatograms?[Y - yes, N - no]")
 
-    def Web_Start(self, experimentSet, gauss, retCorr, massBal, lossFunc, solver, factor, porosityStart, porosityEnd, porosityInit, KDQDict, spacialDiff, timeDiff, time, optimId, retThreshold, lvl1optim, lvl2optim) :
+    def Web_Start(self, experimentSet, gauss, retCorr, massBal, lossFunc, solver, factor, porosityStart, porosityEnd, porosityInit, KDQDict, spacialDiff, timeDiff, time, optimId, retThreshold, lvl1optim, lvl2optim, optimType) :
         currentExperimentSet = self.Preprocess(experimentSet, gauss, retCorr, massBal, retThreshold)
         experimentClusterComp = self.Cluster_By_Component(currentExperimentSet)
         lossFunctionSelection = lossFunc
@@ -206,7 +206,7 @@ class Operator:
         porosityDict = dict()
         porosityDict["init"] = porosityInit
         porosityDict["range"] = [porosityStart, porosityEnd]
-        result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, porosityDict, KDQDict, lossFunctionSelection, factorSelection, solverSelection, spacialDiff, timeDiff, time, optimId, lvl1optim, lvl2optim)
+        result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, porosityDict, KDQDict, lossFunctionSelection, factorSelection, solverSelection, spacialDiff, timeDiff, time, optimId, lvl1optim, lvl2optim, optimType)
         if retCorr:
             result["shifts"] = {}
             for exp in currentExperimentSet.experiments:

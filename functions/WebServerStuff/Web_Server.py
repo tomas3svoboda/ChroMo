@@ -146,7 +146,7 @@ def Web_Server():
                         formInfo["solver"], formInfo["factor"], formInfo["porosityStart"], formInfo["porosityEnd"],
                         formInfo["porosity"], KDQDict, formInfo["spacialDiff"],
                         formInfo["timeDiff"], formInfo["time"], self.thr_id, formInfo["retCorrThreshold"],
-                        formInfo["lvl1optimsettings"], formInfo["lvl2optimsettings"])
+                        formInfo["lvl1optimsettings"], formInfo["lvl2optimsettings"], formInfo["optimType"])
                 if formInfo["retCorr"]:
                     formInfo["shifts"] = tmp["shifts"]
                 else:
@@ -158,6 +158,7 @@ def Web_Server():
                     formInfo["originalFeedTimes"] = None
                 timer = time.time() - timers[self.thr_id]
                 newResult = DBResult(results = tmp, thr_id=self.thr_id, name=self.name, experiments=[os.path.split(exp.metadata.path)[1] for exp in usedExpSet.experiments], time=str(datetime.timedelta(seconds=timer)))
+                print("thr_id: ", self.thr_id)
                 with db_mutex:
                     newResult.save()
                     self.dbuser.reload()
@@ -699,6 +700,7 @@ def Web_Server():
         formInfo["massBal"] = bool(request.form.get("massBal"))
         formInfo["lossFunc"] = str(request.form.get("lossFunc"))
         formInfo["solver"] = str(request.form.get("solver"))
+        formInfo['optimType'] = str(request.form.get("optimType"))
         formInfo["factor"] = int(request.form.get("factor"))
         formInfo["porosityStart"] = float(request.form.get("porosityStart"))
         formInfo["porosityEnd"] = float(request.form.get("porosityEnd"))

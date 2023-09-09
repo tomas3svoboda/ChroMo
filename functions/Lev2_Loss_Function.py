@@ -10,14 +10,20 @@ Loss Function options:
     'LogSimple' - Single_Loss_Function_LogSimple
     'LogSquares' - Single_Loss_Function_LogSquares
 """
-def Lev2_Loss_Function(params, experimentCluster, porosity, lossFunction = 'Simple', factor = 1, solver = "Lin", spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1):
+def Lev2_Loss_Function(params, experimentCluster, porosity, lossFunction = 'Simple', factor = 1, solver = "Lin", spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, optimType=None):
     """Loss function for level 2 optimization.
     Part of the parameter estimation workflow.
     """
-    if solver == "Lin":
-        params2 = [porosity, params[0], params[1]]
-    elif solver == "Nonlin":
-        params2 = [porosity, params[0], params[1], params[2]]
+    if optimType == "bilevel":
+        if solver == "Lin":
+            params2 = [porosity, params[0], params[1]]
+        elif solver == "Nonlin":
+            params2 = [porosity, params[0], params[1], params[2]]
+    elif optimType == "singlelevel":
+        if solver == "Lin":
+            params2 = [params[0], params[1], params[2]]
+        elif solver == "Nonlin":
+            params2 = [params[0], params[1], params[2], params[3]]
     sum = 0
     for comp in experimentCluster:
         head, tail = os.path.split(comp.experiment.metadata.path)
