@@ -7,25 +7,19 @@ import time as t
 import datetime
 
 
-def Lev1_Loss_Function(porosity, experimentClustersComp, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, lvl2optim=None, optimType=None):
+def Lev1_Loss_Function(lvl1Params, experimentClustersComp, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, lvl2optim=None, optimType=None):
     """Loss function for level 1 optimization.
     Part of the parameter estimation workflow.
     """
     sum = 0
     timeStart = t.time()
     for key in experimentClustersComp.clusters:
-        if optimType == "bilevel":
-            res = Lev2_Optim(porosity[0], experimentClustersComp.clusters[key], key, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl2optim, optimType)
-        elif optimType == "singlelevel":
-            res = Lev2_Optim(0, experimentClustersComp.clusters[key], key, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl2optim, optimType)
+        res = Lev2_Optim(lvl1Params, experimentClustersComp.clusters[key], key, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl2optim, optimType)
         sum += res
     if sum < gl.bestLvl1LossFunctionVal[optimId]:
         gl.bestLvl1LossFunctionVal[optimId] = sum
-        if optimType == "bilevel":
-            gl.bestPorosity[optimId] = porosity[0]
-        elif optimType == "singlelevel":
-            gl.bestPorosity[optimId] = 0
-        gl.bestCompParamDict[optimId] = copy.deepcopy(gl.compParamDict[optimId])
+        gl.bestLvl1ParamDict[optimId] = copy.deepcopy(gl.lvl1ParamDict[optimId])
+        gl.bestLvl2ParamDict[optimId] = copy.deepcopy(gl.lvl2ParamDict[optimId])
         gl.bestLvl2LossFunctionVals[optimId] = copy.deepcopy(gl.lv2LossFunctionVals[optimId])
 
     gl.index[optimId] += 1
@@ -34,14 +28,22 @@ def Lev1_Loss_Function(porosity, experimentClustersComp, lossFunction, factor, s
     print(sum)
     if optimType == "bilevel":
         print('porosity:')
-        print(porosity[0])
-        for key, val in gl.compParamDict[optimId].items():
+        print(lvl1Params[0])
+        for key, val in gl.lvl2ParamDict[optimId].items():
             print('K, D, (Q) for', key, ':')
             for par in val:
                 print(par)
     elif optimType == "singlelevel":
-        for key, val in gl.compParamDict[optimId].items():
+        for key, val in gl.lvl2ParamDict[optimId].items():
             print('Porosity, K, D, (Q) for', key, ':')
+            for par in val:
+                print(par)
+    elif optimType == "calcDisper":
+        for par in gl.lvl1ParamDict[optimId]:
+            print('porosity, A :')
+            print(par)
+        for key, val in gl.lvl2ParamDict[optimId].items():
+            print('K, (Q) for', key, ':')
             for par in val:
                 print(par)
     print('time:')

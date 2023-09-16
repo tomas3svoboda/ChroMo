@@ -1,14 +1,14 @@
 from functions.Lev1_Optim import Lev1_Optim
 import functions.global_ as gl
 
-def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, KDIntervals, lossFunction, factor,
+def Bilevel_Optim(experimentSetCor3, experimentClustersComp, Lvl1ParamDict, Lvl2ParamDict, lossFunction, factor,
                   solver, spacialDiff=30, timeDiff=3000, time=10800, optimId=1, lvl1optim=None, lvl2optim=None, optimType=None):
     """Starts bilevel optimization"""
     print("Calling Bilevel_Optim!")
 
     # Initialize dictionaries to store computation parameters, ranges, and loss function values
-    gl.compParamDict[optimId] = {}
-    gl.compRangeDict[optimId] = {}
+    gl.lvl2ParamDict[optimId] = {}
+    gl.lvl2RangeDict[optimId] = {}
     gl.lossFunctionProgress[optimId] = {}
     gl.lv2LossFunctionVals[optimId] = {}
 
@@ -17,30 +17,43 @@ def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, 
         if solver == "Lin":
             # Store computation parameters for linear solver
             if optimType == "singlelevel":
-                gl.compParamDict[optimId][key] = [KDIntervals[key]["pinit"], KDIntervals[key]["kinit"], KDIntervals[key]["dinit"]]
-                gl.compRangeDict[optimId][key] = [KDIntervals[key]["prange"], KDIntervals[key]["krange"], KDIntervals[key]["drange"]]
+                gl.lvl2ParamDict[optimId][key] = [Lvl2ParamDict[key]["pinit"], Lvl2ParamDict[key]["kinit"], Lvl2ParamDict[key]["dinit"]]
+                gl.lvl2RangeDict[optimId][key] = [Lvl2ParamDict[key]["prange"], Lvl2ParamDict[key]["krange"], Lvl2ParamDict[key]["drange"]]
             elif optimType == "bilevel":
-                gl.compParamDict[optimId][key] = [KDIntervals[key]["kinit"], KDIntervals[key]["dinit"]]
-                gl.compRangeDict[optimId][key] = [KDIntervals[key]["krange"], KDIntervals[key]["drange"]]
+                gl.lvl2ParamDict[optimId][key] = [Lvl2ParamDict[key]["kinit"], Lvl2ParamDict[key]["dinit"]]
+                gl.lvl2RangeDict[optimId][key] = [Lvl2ParamDict[key]["krange"], Lvl2ParamDict[key]["drange"]]
+            elif optimType == "calcDisper":
+                gl.lvl2ParamDict[optimId][key] = [Lvl2ParamDict[key]["kinit"]]
+                gl.lvl2RangeDict[optimId][key] = [Lvl2ParamDict[key]["krange"]]
             else:
                 raise Exception("Unknown optimization type in Bilevel_Optim.")
         elif solver == "Nonlin":
             # Store computation parameters for nonlinear solver
             if optimType == "singlelevel":
-                gl.compParamDict[optimId][key] = [KDIntervals[key]["pinit"], KDIntervals[key]["kinit"],
-                                                  KDIntervals[key]["dinit"], KDIntervals[key]["qinit"]]
-                gl.compRangeDict[optimId][key] = [KDIntervals[key]["prange"], KDIntervals[key]["krange"],
-                                                  KDIntervals[key]["drange"], KDIntervals[key]["qrange"]]
+                gl.lvl2ParamDict[optimId][key] = [Lvl2ParamDict[key]["pinit"], Lvl2ParamDict[key]["kinit"],
+                                                  Lvl2ParamDict[key]["dinit"], Lvl2ParamDict[key]["qinit"]]
+                gl.lvl2RangeDict[optimId][key] = [Lvl2ParamDict[key]["prange"], Lvl2ParamDict[key]["krange"],
+                                                  Lvl2ParamDict[key]["drange"], Lvl2ParamDict[key]["qrange"]]
             elif optimType == "bilevel":
-                gl.compParamDict[optimId][key] = [KDIntervals[key]["kinit"], KDIntervals[key]["dinit"],
-                                                  KDIntervals[key]["qinit"]]
-                gl.compRangeDict[optimId][key] = [KDIntervals[key]["range"], KDIntervals[key]["drange"],
-                                                  KDIntervals[key]["qrange"]]
+                gl.lvl2ParamDict[optimId][key] = [Lvl2ParamDict[key]["kinit"], Lvl2ParamDict[key]["dinit"],
+                                                  Lvl2ParamDict[key]["qinit"]]
+                gl.lvl2RangeDict[optimId][key] = [Lvl2ParamDict[key]["range"], Lvl2ParamDict[key]["drange"],
+                                                  Lvl2ParamDict[key]["qrange"]]
+            elif optimType == "calcDisper":
+                gl.lvl2ParamDict[optimId][key] = [Lvl2ParamDict[key]["kinit"], Lvl2ParamDict[key]["qinit"]]
+                gl.lvl2RangeDict[optimId][key] = [Lvl2ParamDict[key]["krange"], Lvl2ParamDict[key]["qrange"]]
             else:
                 raise Exception("Unknown optimization type in Bilevel_Optim.")
     # Store porosity parameters
-    gl.porosity[optimId] = porosityIntervals["init"]
-    gl.porosityRange[optimId] = porosityIntervals["range"]
+    if optimType == "singlelevel":
+        gl.lvl1ParamDict[optimId] = []
+        gl.lvl1RangeDict[optimId] = []
+    elif optimType != "calcDisper":
+        gl.lvl1ParamDict[optimId] = [Lvl1ParamDict["pinit"]]
+        gl.lvl1RangeDict[optimId] = [Lvl1ParamDict["prange"]]
+    else:
+        gl.lvl1ParamDict[optimId] = [Lvl1ParamDict["pinit"], Lvl1ParamDict["ainit"]]
+        gl.lvl1RangeDict[optimId] = [Lvl1ParamDict["prange"], Lvl1ParamDict["arange"]]
 
 
     # Call Lev1_Optim function
@@ -50,17 +63,17 @@ def Bilevel_Optim(experimentSetCor3, experimentClustersComp, porosityIntervals, 
     # Build the result dictionary
     result = {}
     result["optimparams"] = {}
-    result["optimparams"]["porosityIntervals"] = porosityIntervals
-    result["optimparams"]["KDIntervals"] = KDIntervals
+    result["optimparams"]["Lvl1ParamDict"] = Lvl1ParamDict
+    result["optimparams"]["Lvl2ParamDict"] = Lvl2ParamDict
     result["optimparams"]["lossFunction"] = lossFunction
     result["optimparams"]["factor"] = factor
     result["optimparams"]["solver"] = solver
     result["optimparams"]["lvl1optim"] = lvl1optim
     result["optimparams"]["lvl2optim"] = lvl2optim
     result["optimparams"]["optimType"] = optimType
-    result["porosity"] = gl.bestPorosity[optimId]
-    result["lv1lossfunctionval"] = gl.bestLvl1LossFunctionVal[optimId]
-    result["compparams"] = gl.bestCompParamDict[optimId]
+    result["bestLvl1Params"] = gl.bestLvl1ParamDict[optimId]
+    result["bestLvl1LossFunctionVal"] = gl.bestLvl1LossFunctionVal[optimId]
+    result["bestLvl2Params"] = gl.bestLvl2ParamDict[optimId]
     result["lv2lossfunctionvals"] = gl.bestLvl2LossFunctionVals[optimId]
     result["lossfunctionprogress"] = gl.lossFunctionProgress[optimId]
 

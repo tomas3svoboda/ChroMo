@@ -33,7 +33,7 @@
         <input type="checkbox" name="gauss" value="True" id="gauss" {% if formInfo and formInfo['gauss'] == True %}checked{% endif %}><br>
         <label for="retCorr">Retention time correction <div class="required">*</div></label>
         <input type="checkbox" name="retCorr" value="True" id="retCorr" oninput="retTimeTresholdInput()" {% if formInfo and formInfo['retCorr'] == True %}checked{% endif %}>
-         <div id="retCorrTresholdDiv" style="display: none;">
+         <div id="retCorrTresholdDiv">
             <label for="retCorrThreshold">Retention time zero threshold<div class="required">*</div></label>
             <input type="number" id="retCorrThreshold" name="retCorrThreshold" step="any">
          </div><br>
@@ -53,8 +53,9 @@
         </select><br>
         <label for="optimType">Optimization type<div class="required">*</div></label>
         <select name="optimType" id="optimType" oninput="optimTypeInput()">
-          <option value="singlelevel" {% if formInfo and formInfo['optimType'] == "Lin" %}selected{% endif %}>Single level</option>
-          <option value="bilevel" {% if formInfo and formInfo['optimType'] == "Nonlin" %}selected{% endif %}>Bilevel</option>
+          <option value="singlelevel" {% if formInfo and formInfo['optimType'] == "singlelevel" %}selected{% endif %}>Single level</option>
+          <option value="bilevel" {% if formInfo and formInfo['optimType'] == "bilevel" %}selected{% endif %}>Bilevel</option>
+          <option value="calcDisper" {% if formInfo and formInfo['optimType'] == "calcDisper" %}selected{% endif %}>Calculate Disperion Coeficien</option>
         </select><br>
         <label for="factor">Factor <div class="required">*</div></label>
         <select name="factor" id="factor">
@@ -66,12 +67,18 @@
           <option value="6" {% if formInfo and formInfo['factor'] == 6 %}selected{% endif %}>1/feedMass</option>
           <option value="7" {% if formInfo and formInfo['factor'] == 7 %}selected{% endif %}>1/feedMass^2</option>
         </select><br><br>
-         <div id="porosityBilevelDiv" style="display: none;">
-        <label for="porosityStart">Porosity interval <div class="required">*</div></label>
-        <input type="number" id="porosityStart" name="porosityStart" min="0.01" max="1" step="any"> - <input type="number" id="porosityEnd" name="porosityEnd" min="0.01" max="1" step="any"><br>
-        <label for="porosityInit">Porosity initial guess<div class="required">*</div></label>
-        <input type="number" id="porosityInit" name="porosityInit" min="0.01" max="1" step="any"><br><br>
-          </div>
+        <div id="porosityBilevelDiv">
+            <label for="porosityStart">Porosity interval <div class="required">*</div></label>
+            <input type="number" id="porosityStart" name="porosityStart" min="0.01" max="1" step="any"> - <input type="number" id="porosityEnd" name="porosityEnd" min="0.01" max="1" step="any"><br>
+            <label for="porosityInit">Porosity initial guess<div class="required">*</div></label>
+            <input type="number" id="porosityInit" name="porosityInit" min="0.01" max="1" step="any"><br><br>
+        </div>
+        <div class="ABParam">
+            <label for="AStart">Parameter A interval:</label>
+            <input type="number" id="AStart" name="AStart" min="0" step="any"> - <input type="number" id="AEnd" name="AEnd" min="0" step="any"><br>
+            <label for="AInit">Parameter A initial guess:</label>
+            <input type="number" id="AInit" name="AInit" min="0" step="any"><br><br>
+        </div>
          {% for comp in compList %}
          <div class="variableParams {{comp}}">
             <div class="porositySinglelevelDiv">
@@ -84,10 +91,16 @@
             <input type="number" id="{{comp}}KStart" name="{{comp}}KStart" min="0" step="any" required> - <input type="number" id="{{comp}}KEnd" name="{{comp}}KEnd" min="0" step="any" required><br>
             <label for="{{comp}}KInit">Henry constant initial guess for {{comp}} <div class="required">*</div></label>
             <input type="number" id="{{comp}}KInit" name="{{comp}}KInit" min="0" step="any" required><br>
-            <label for="{{comp}}DStart">Dispersion coefficient interval for {{comp}} <div class="required">*</div></label>
-            <input type="number" id="{{comp}}DStart" name="{{comp}}DStart" min="0" step="any" required> - <input type="number" id="{{comp}}DEnd" name="{{comp}}DEnd" min="0" step="any" required><br>
-            <label for="{{comp}}DInit">Dispersion coefficient initial guess for {{comp}} <div class="required">*</div></label>
-            <input type="number" id="{{comp}}DInit" name="{{comp}}DInit" min="0" step="any" required><br>
+            <div class="DParam">
+                <label for="{{comp}}DStart">Dispersion coefficient interval for {{comp}} <div class="required">*</div></label>
+                <input type="number" id="{{comp}}DStart" name="{{comp}}DStart" min="0" step="any"> - <input type="number" id="{{comp}}DEnd" name="{{comp}}DEnd" min="0" step="any"><br>
+                <label for="{{comp}}DInit">Dispersion coefficient initial guess for {{comp}} <div class="required">*</div></label>
+                <input type="number" id="{{comp}}DInit" name="{{comp}}DInit" min="0" step="any"><br>
+            </div>
+            <div class="ABParam">
+                <label for="{{comp}}B">Parameter B for {{comp}} <div class="required">*</div></label>
+                <input type="number" id="{{comp}}B" name="{{comp}}B" min="0" step="any"><br>
+            </div>
             <div class="nonLinParam">
                 <label for="{{comp}}QStart">Saturation coefficient interval for {{comp}}:</label>
                 <input type="number" id="{{comp}}QStart" name="{{comp}}QStart" min="0" step="any" required> - <input type="number" id="{{comp}}QEnd" name="{{comp}}QEnd" min="0" step="any" required><br>
@@ -203,6 +216,7 @@
 </div>
 <script type="text/javascript">
     formSolverChange()
+    optimTypeInput()
     retTimeTresholdInput()
     {% if formInfo %}
         {% if formInfo['porosityStart'] %}

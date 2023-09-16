@@ -127,36 +127,38 @@ def Web_Server():
             try:
                 formInfo = formInfos[self.user_id]
                 usedExpSet = experimentSet[self.user_id]
-                KDQDict = {}
+                Lvl1ParamDict = {}
+                if formInfo["optimType"] != "singlelevel":
+                    Lvl1ParamDict["pinit"] = formInfo["porosity"]
+                    Lvl1ParamDict["prange"] = [formInfo["porosityStart"], formInfo["porosityEnd"]]
+                    if formInfo["optimType"] == "calcDisper":
+                        Lvl1ParamDict["ainit"] = formInfo["A"]
+                        Lvl1ParamDict["arange"] = [formInfo["AStart"], formInfo["AEnd"]]
+                Lvl2ParamDict = {}
                 for comp in compList[self.user_id]:
                     tmpDict = {}
                     if formInfo["optimType"] == "singlelevel":
                         tmpDict["pinit"] = formInfo[comp + "P"]
                         tmpDict["prange"] = [formInfo[comp + "PStart"], formInfo[comp + "PEnd"]]
+                    if formInfo["optimType"] == "calcDisper":
+                        tmpDict["b"] = formInfo[comp + "B"]
                     tmpDict["kinit"] = formInfo[comp + "K"]
                     tmpDict["krange"] = [formInfo[comp + "KStart"], formInfo[comp + "KEnd"]]
-                    tmpDict["dinit"] = formInfo[comp + "D"]
-                    tmpDict["drange"] = [formInfo[comp + "DStart"], formInfo[comp + "DEnd"]]
+                    if formInfo["optimType"] != "calcDisper":
+                        tmpDict["dinit"] = formInfo[comp + "D"]
+                        tmpDict["drange"] = [formInfo[comp + "DStart"], formInfo[comp + "DEnd"]]
                     if formInfo["solver"] == "Nonlin":
                         tmpDict["qinit"] = formInfo[comp + "Q"]
                         tmpDict["qrange"] = [formInfo[comp + "QStart"], formInfo[comp + "QEnd"]]
                     else:
                         tmpDict["qinit"] = 0
                         tmpDict["qrange"] = [0, 0]
-                    KDQDict[comp] = tmpDict
-                if formInfo["optimType"] == "bilevel":
-                    tmp = operator.Web_Start(usedExpSet,
-                        formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["lossFunc"],
-                        formInfo["solver"], formInfo["factor"], formInfo["porosityStart"], formInfo["porosityEnd"],
-                        formInfo["porosity"], KDQDict, formInfo["spacialDiff"],
-                        formInfo["timeDiff"], formInfo["time"], self.thr_id, formInfo["retCorrThreshold"],
-                        formInfo["lvl1optimsettings"], formInfo["lvl2optimsettings"], formInfo["optimType"])
-                elif formInfo["optimType"] == "singlelevel":
-                    tmp = operator.Web_Start(usedExpSet,
-                        formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["lossFunc"],
-                        formInfo["solver"], formInfo["factor"], 0, 0, 0, KDQDict, formInfo["spacialDiff"],
-                        formInfo["timeDiff"], formInfo["time"], self.thr_id, formInfo["retCorrThreshold"],
-                        formInfo["lvl1optimsettings"], formInfo["lvl2optimsettings"], formInfo["optimType"])
+                    Lvl2ParamDict[comp] = tmpDict
+                tmp = operator.Web_Start(usedExpSet,
+                    formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["lossFunc"],
+                    formInfo["solver"], formInfo["factor"], Lvl1ParamDict, Lvl2ParamDict, formInfo["spacialDiff"],
+                    formInfo["timeDiff"], formInfo["time"], self.thr_id, formInfo["retCorrThreshold"],
+                    formInfo["lvl1optimsettings"], formInfo["lvl2optimsettings"], formInfo["optimType"])
                 if formInfo["retCorr"]:
                     formInfo["shifts"] = tmp["shifts"]
                 else:
@@ -167,7 +169,7 @@ def Web_Server():
                 else:
                     formInfo["originalFeedTimes"] = None
                 timer = time.time() - timers[self.thr_id]
-                newResult = DBResult(results = tmp, thr_id=self.thr_id, name=self.name, experiments=[os.path.split(exp.metadata.path)[1] for exp in usedExpSet.experiments], time=str(datetime.timedelta(seconds=timer)))
+                newResult = DBResult(thr_id=self.thr_id, results = tmp, name=self.name, experiments=[os.path.split(exp.metadata.path)[1] for exp in usedExpSet.experiments], time=str(datetime.timedelta(seconds=timer)))
                 print("thr_id: ", self.thr_id)
                 with db_mutex:
                     newResult.save()
@@ -180,7 +182,7 @@ def Web_Server():
                 self.result = "FAIL"
             numberOfRunningOptims -= 1
 
-    class ApiWorkThread(threading.Thread):
+    '''class ApiWorkThread(threading.Thread):
 
         def __init__(self, data, thr_id):
             self.data = data
@@ -205,6 +207,13 @@ def Web_Server():
                 porosityStart = float(self.data['settings']['porosityStart'])
                 porosityEnd = float(self.data['settings']['porosityEnd'])
                 porosity = float(self.data['settings']['porosityInit'])
+                Lvl1ParamDict = {}
+                if formInfo["optimType"] != "singlelevel":
+                    Lvl1ParamDict["pinit"] = formInfo["porosity"]
+                    Lvl1ParamDict["prange"] = [formInfo["porosityStart"], formInfo["porosityEnd"]]
+                    if formInfo["optimType"] == "calcDisper":
+                        Lvl1ParamDict["ainit"] = formInfo["A"]
+                        Lvl1ParamDict["arange"] = [formInfo["AStart"], formInfo["AEnd"]]
                 KDQDict = {}
                 for key, val in self.data['settings']['components'].items():
                     tmpDict = {}
@@ -232,7 +241,7 @@ def Web_Server():
                 self.result = tmp
             except Exception as e:
                 print(e)
-                self.result = "FAIL"
+                self.result = "FAIL"'''
 
     class SimpleThread(threading.Thread):
         nonlocal experimentSet, formInfos, clusterComp, BASE_FOLDER
@@ -712,10 +721,14 @@ def Web_Server():
         formInfo["solver"] = str(request.form.get("solver"))
         formInfo['optimType'] = str(request.form.get("optimType"))
         formInfo["factor"] = int(request.form.get("factor"))
-        if formInfo['optimType'] == "bilevel":
+        if formInfo['optimType'] == "bilevel" or formInfo['optimType'] == "calcDisper":
             formInfo["porosityStart"] = float(request.form.get("porosityStart"))
             formInfo["porosityEnd"] = float(request.form.get("porosityEnd"))
             formInfo["porosity"] = float(request.form.get("porosityInit"))
+        if formInfo["optimType"] == "calcDisper":
+            formInfo["AStart"] = float(request.form.get("AStart"))
+            formInfo["AEnd"] = float(request.form.get("AEnd"))
+            formInfo["A"] = float(request.form.get("AInit"))
         for comp in compList[flask_login.current_user.id]:
             if formInfo['optimType'] == "singlelevel":
                 formInfo[comp + "PStart"] = float(request.form.get(comp + "PStart"))
@@ -724,9 +737,12 @@ def Web_Server():
             formInfo[comp + "KStart"] = float(request.form.get(comp + "KStart"))
             formInfo[comp + "KEnd"] = float(request.form.get(comp + "KEnd"))
             formInfo[comp + "K"] = float(request.form.get(comp + "KInit"))
-            formInfo[comp + "DStart"] = float(request.form.get(comp + "DStart"))
-            formInfo[comp + "DEnd"] = float(request.form.get(comp + "DEnd"))
-            formInfo[comp + "D"] = float(request.form.get(comp + "DInit"))
+            if formInfo["optimType"] != "calcDisper":
+                formInfo[comp + "DStart"] = float(request.form.get(comp + "DStart"))
+                formInfo[comp + "DEnd"] = float(request.form.get(comp + "DEnd"))
+                formInfo[comp + "D"] = float(request.form.get(comp + "DInit"))
+            else:
+                formInfo[comp + "B"] = float(request.form.get(comp + "B"))
             if formInfo["solver"] == "Nonlin":
                 formInfo[comp + "QStart"] = float(request.form.get(comp + "QStart"))
                 formInfo[comp + "QEnd"] = float(request.form.get(comp + "QEnd"))
@@ -810,7 +826,7 @@ def Web_Server():
                     compExperimentDict = {}
                     for key, val in result.results["lossfunctionprogress"].items():
                         compExperimentDict[key] = val.keys()
-                    return render_template('ResultPage.html', compList=result.results["compparams"].keys(),
+                    return render_template('ResultPage.html', compList=result.results["bestLvl2Params"].keys(),
                                            compExpDict=compExperimentDict, expDict=expCompDict, result=result.results,
                                            timer=result.time, user=flask_login.current_user.id, name=result.name, id=id)
         return "Result not found"
@@ -1048,6 +1064,7 @@ def Web_Server():
         dbuser = flask_login.current_user.db
         id = int(id)
         for result in dbuser.results:
+            print(result.thr_id)
             if result.thr_id == id:
                 expCompDict = {}
                 for exp in result.experiments:
@@ -1058,7 +1075,7 @@ def Web_Server():
                 compExperimentDict = {}
                 for key, val in result.results["lossfunctionprogress"].items():
                     compExperimentDict[key] = val.keys()
-                return render_template('ResultPage.html', compList=result.results["compparams"].keys(),
+                return render_template('ResultPage.html', compList=result.results["bestLvl2Params"].keys(),
                                            compExpDict=compExperimentDict, expDict=expCompDict, result=result.results,
                                            timer=result.time, user=flask_login.current_user.id, name=result.name, id=id)
         return "Unknown result"
@@ -1236,7 +1253,7 @@ def Web_Server():
 
         return render_template('Index.html', badLogin=True)
 
-    @api.route('/api/experiment', methods=['POST'])
+    '''@api.route('/api/experiment', methods=['POST'])
     def api_post_experiment():
         nonlocal threadCounter
         try:
@@ -1266,7 +1283,7 @@ def Web_Server():
             newResult = DBResult(results = thread.result, thr_id=id, name=thread.data['settings']['expName'])
             with db_mutex:
                 newResult.save()
-            return newResult.to_json()
+            return newResult.to_json()'''
 
     #api.run(debug=True)
     print("localhost:6969")

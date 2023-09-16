@@ -194,12 +194,43 @@ function retTimeTresholdInput(){
 }
 
 function optimTypeInput(){
-    let divSingle = document.getElementsByClassName("porositySinglelevelDiv")
-    let divBi = document.getElementById("porosityBilevelDiv")
-    let tmpDisplay = divSingle[0].style.display
-    for(let i = 0; i < divSingle.length; i++)
-        divSingle[i].style.display = divBi.style.display
-    divBi.style.display = tmpDisplay
+    let optimTypeVal = document.getElementById("optimType").value
+    if(optimTypeVal == "singlelevel"){
+        let divSingle = document.getElementsByClassName("porositySinglelevelDiv")
+        for(let i = 0; i < divSingle.length; i++)
+            divSingle[i].style.display = "inline"
+        let divDisper = document.getElementsByClassName("DParam")
+        for(let i = 0; i < divDisper.length; i++)
+            divDisper[i].style.display = "inline"
+        document.getElementById("porosityBilevelDiv").style.display = "none"
+        let divDisperCalc = document.getElementsByClassName("ABParam")
+        for(let i = 0; i < divDisperCalc.length; i++)
+            divDisperCalc[i].style.display = "none"
+    }
+    else if(optimTypeVal == "bilevel"){
+        let divSingle = document.getElementsByClassName("porositySinglelevelDiv")
+        for(let i = 0; i < divSingle.length; i++)
+            divSingle[i].style.display = "none"
+        let divDisper = document.getElementsByClassName("DParam")
+        for(let i = 0; i < divDisper.length; i++)
+            divDisper[i].style.display = "inline"
+        document.getElementById("porosityBilevelDiv").style.display = "inline"
+        let divDisperCalc = document.getElementsByClassName("ABParam")
+        for(let i = 0; i < divDisperCalc.length; i++)
+            divDisperCalc[i].style.display = "none"
+    }
+    else if(optimTypeVal == "calcDisper"){
+        let divSingle = document.getElementsByClassName("porositySinglelevelDiv")
+        for(let i = 0; i < divSingle.length; i++)
+            divSingle[i].style.display = "none"
+        let divDisper = document.getElementsByClassName("DParam")
+        for(let i = 0; i < divDisper.length; i++)
+            divDisper[i].style.display = "none"
+        document.getElementById("porosityBilevelDiv").style.display = "inline"
+        let divDisperCalc = document.getElementsByClassName("ABParam")
+        for(let i = 0; i < divDisperCalc.length; i++)
+            divDisperCalc[i].style.display = "inline"
+    }
 
 }
 

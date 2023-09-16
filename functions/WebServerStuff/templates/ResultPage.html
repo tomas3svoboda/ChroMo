@@ -30,9 +30,13 @@
     <div id="resultDiv">
     {% if result != "-" %}
       <p id="timer">Run time: <div class="boldText">{{timer}}</div></p>
-      {% if result["optimparams"]["optimType"] == "bilevel" %}
-      <p id="finalPorosity">Final porosity: <div class="boldText">{{result["porosity"]}}</div>({{result["optimparams"]["porosityIntervals"]["init"]}}&nbsp;:&nbsp;{{result["optimparams"]["porosityIntervals"]["range"][0]}}-{{result["optimparams"]["porosityIntervals"]["range"][1]}})</p>
+      {% if result["optimparams"]["optimType"] != "singlelevel" %}
+      <p id="finalPorosity">Final porosity: <div class="boldText">{{result["bestLvl1Params"][0]}}</div>({{result["optimparams"]["Lvl1ParamDict"]["pinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl1ParamDict"]["prange"][0]}}-{{result["optimparams"]["Lvl1ParamDict"]["prange"][1]}})</p>
       {% endif %}
+      {% if result["optimparams"]["optimType"] == "calcDisper" %}
+      <p id="finalA">Final A: <div class="boldText">{{result["bestLvl1Params"][1]}}</div>({{result["optimparams"]["Lvl1ParamDict"]["ainit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl1ParamDict"]["arange"][0]}}-{{result["optimparams"]["Lvl1ParamDict"]["arange"][1]}})</p>
+      {% endif %}
+
       <p id="finalLossFuncVal">Final loss function value: <div class="boldText">{{result["lv1lossfunctionval"]}}</div></p><br>
         <table>
           <thead>
@@ -42,9 +46,14 @@
               <th>Porosity</th>
               {% endif %}
               <th>K</th>
+              {% if result["optimparams"]["optimType"] != "calcDisper" %}
               <th>D</th>
+              {% endif %}
               {% if result["optimparams"]["solver"] == "Nonlin" %}
               <th>Q</th>
+              {% endif %}
+              {% if result["optimparams"]["optimType"] == "calcDisper" %}
+                <th>B</th>
               {% endif %}
               <th>Loss Function Value</th>
             </tr>
@@ -55,15 +64,21 @@
             <tr>
               <td>{{comp}}</td>
               {% if result["optimparams"]["optimType"] == "singlelevel" %}
-              <td><div class="boldText">{{result["compparams"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["KDIntervals"][comp]["pinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["KDIntervals"][comp]["prange"][0]}}-{{result["optimparams"]["KDIntervals"][comp]["prange"][1]}})</td>
-              {% set paramIndex = paramIndex + 1 %}
+                <td><div class="boldText">{{result["bestLvl2Params"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["Lvl2ParamDict"][comp]["pinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl2ParamDict"][comp]["prange"][0]}}-{{result["optimparams"]["Lvl2ParamDict"][comp]["prange"][1]}})</td>
+                {% set paramIndex = paramIndex + 1 %}
               {% endif %}
-              <td><div class="boldText">{{result["compparams"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["KDIntervals"][comp]["kinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["KDIntervals"][comp]["krange"][0]}}-{{result["optimparams"]["KDIntervals"][comp]["krange"][1]}})</td>
+              <td><div class="boldText">{{result["bestLvl2Params"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["Lvl2ParamDict"][comp]["kinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl2ParamDict"][comp]["krange"][0]}}-{{result["optimparams"]["Lvl2ParamDict"][comp]["krange"][1]}})</td>
               {% set paramIndex = paramIndex + 1 %}
-              <td><div class="boldText">{{result["compparams"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["KDIntervals"][comp]["dinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["KDIntervals"][comp]["drange"][0]}}-{{result["optimparams"]["KDIntervals"][comp]["drange"][1]}})</td>
-              {% set paramIndex = paramIndex + 1 %}
+              {% if result["optimparams"]["optimType"] != "calcDisper" %}
+                <td><div class="boldText">{{result["bestLvl2Params"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["Lvl2ParamDict"][comp]["dinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl2ParamDict"][comp]["drange"][0]}}-{{result["optimparams"]["Lvl2ParamDict"][comp]["drange"][1]}})</td>
+                {% set paramIndex = paramIndex + 1 %}
+              {% endif %}
               {% if result["optimparams"]["solver"] == "Nonlin" %}
-              <td><div class="boldText">{{result["compparams"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["KDIntervals"][comp]["qinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["KDIntervals"][comp]["qrange"][0]}}-{{result["optimparams"]["KDIntervals"][comp]["qrange"][1]}})</td>
+                <td><div class="boldText">{{result["bestLvl2Params"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["Lvl2ParamDict"][comp]["qinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl2ParamDict"][comp]["qrange"][0]}}-{{result["optimparams"]["Lvl2ParamDict"][comp]["qrange"][1]}})</td>
+              {% endif %}
+              {% if result["optimparams"]["optimType"] == "calcDisper" %}
+                <td><div class="boldText">{{result["optimparams"]["Lvl2ParamDict"][comp]["b"]|round(2)}}</div></td>
+              {% set paramIndex = paramIndex + 1 %}
               {% endif %}
               <td><div class="boldText">{{result["lv2lossfunctionvals"][comp]|round(2)}}</div></td>
             </tr>
@@ -76,6 +91,8 @@
           Single level
         {% elif result["optimparams"]["optimType"] == "bilevel"%}
           Bilevel
+        {% elif result["optimparams"]["optimType"] == "calcDisper"%}
+          Calculate Disperion Coeficien
         {% endif %}
         </div></p>
         <p id="lv1optim">Level 1 optimization algorithm: <div class="boldText">
