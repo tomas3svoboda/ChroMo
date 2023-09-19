@@ -1,5 +1,6 @@
 # Function calculates loss value for level 2 sub-optimization of the main bi-level optimization
 import os
+import math
 import functions.global_ as gl
 from functions.singleLossFunctions.Single_Loss_Function_Choice import Single_Loss_Function_Choice
 
@@ -10,15 +11,15 @@ Loss Function options:
     'LogSimple' - Single_Loss_Function_LogSimple
     'LogSquares' - Single_Loss_Function_LogSquares
 """
-def Lev2_Loss_Function(params, experimentCluster, lvl1Params, lossFunction ='Simple', factor = 1, solver ="Lin", spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, optimType=None):
+def Lev2_Loss_Function(params, experimentCluster, fixedParams, lossFunction ='Simple', factor = 1, solver ="Lin", spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, optimType=None):
     """Loss function for level 2 optimization.
     Part of the parameter estimation workflow.
     """
     if optimType == "bilevel":
         if solver == "Lin":
-            params2 = [lvl1Params[0], params[0], params[1]]
+            params2 = [fixedParams[0], params[0], params[1]]
         elif solver == "Nonlin":
-            params2 = [lvl1Params[0], params[0], params[1], params[2]]
+            params2 = [fixedParams[0], params[0], params[1], params[2]]
     elif optimType == "singlelevel":
         if solver == "Lin":
             params2 = [params[0], params[1], params[2]]
@@ -26,11 +27,16 @@ def Lev2_Loss_Function(params, experimentCluster, lvl1Params, lossFunction ='Sim
             params2 = [params[0], params[1], params[2], params[3]]
     elif optimType == "calcDisper":
         # CALCULATE DISPERSION
-        disperCoef = 1+1
+        flowRate = experimentCluster[0].experiment.experimentCondition.flowRate
+        diameter = experimentCluster[0].experiment.experimentCondition.columnDiameter
+        flowSpeed = (flowRate * 1000 / 3600) / ((math.pi * (diameter ** 2) / 4) * fixedParams[0])
+        disperCoef = ((fixedParams[1] * diameter * flowSpeed) / (1 + flowSpeed)) + fixedParams[2]
+        print("A", fixedParams[1])
+        print("B", fixedParams[2])
         if solver == "Lin":
-            params2 = [lvl1Params[0], params[0], disperCoef]
+            params2 = [fixedParams[0], params[0], disperCoef]
         elif solver == "Nonlin":
-            params2 = [lvl1Params[0], params[0], disperCoef, params[1]]
+            params2 = [fixedParams[0], params[0], disperCoef, params[1]]
     sum = 0
     for comp in experimentCluster:
         head, tail = os.path.split(comp.experiment.metadata.path)

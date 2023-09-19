@@ -11,6 +11,7 @@ def Bilevel_Optim(experimentSetCor3, experimentClustersComp, Lvl1ParamDict, Lvl2
     gl.lvl2RangeDict[optimId] = {}
     gl.lossFunctionProgress[optimId] = {}
     gl.lv2LossFunctionVals[optimId] = {}
+    gl.bVars[optimId] = {}
 
     # Iterate over experiment clusters
     for key in experimentClustersComp.clusters:
@@ -25,6 +26,7 @@ def Bilevel_Optim(experimentSetCor3, experimentClustersComp, Lvl1ParamDict, Lvl2
             elif optimType == "calcDisper":
                 gl.lvl2ParamDict[optimId][key] = [Lvl2ParamDict[key]["kinit"]]
                 gl.lvl2RangeDict[optimId][key] = [Lvl2ParamDict[key]["krange"]]
+                gl.bVars[optimId][key] = Lvl2ParamDict[key]["b"]
             else:
                 raise Exception("Unknown optimization type in Bilevel_Optim.")
         elif solver == "Nonlin":
@@ -42,6 +44,7 @@ def Bilevel_Optim(experimentSetCor3, experimentClustersComp, Lvl1ParamDict, Lvl2
             elif optimType == "calcDisper":
                 gl.lvl2ParamDict[optimId][key] = [Lvl2ParamDict[key]["kinit"], Lvl2ParamDict[key]["qinit"]]
                 gl.lvl2RangeDict[optimId][key] = [Lvl2ParamDict[key]["krange"], Lvl2ParamDict[key]["qrange"]]
+                gl.bVars[optimId][key] = Lvl2ParamDict[key]["b"]
             else:
                 raise Exception("Unknown optimization type in Bilevel_Optim.")
     # Store porosity parameters

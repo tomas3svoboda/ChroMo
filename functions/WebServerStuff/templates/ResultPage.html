@@ -77,7 +77,7 @@
                 <td><div class="boldText">{{result["bestLvl2Params"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["Lvl2ParamDict"][comp]["qinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl2ParamDict"][comp]["qrange"][0]}}-{{result["optimparams"]["Lvl2ParamDict"][comp]["qrange"][1]}})</td>
               {% endif %}
               {% if result["optimparams"]["optimType"] == "calcDisper" %}
-                <td><div class="boldText">{{result["optimparams"]["Lvl2ParamDict"][comp]["b"]|round(2)}}</div></td>
+                <td><div class="boldText">{{result["optimparams"]["Lvl2ParamDict"][comp]["b"]}}</div></td>
               {% set paramIndex = paramIndex + 1 %}
               {% endif %}
               <td><div class="boldText">{{result["lv2lossfunctionvals"][comp]|round(2)}}</div></td>

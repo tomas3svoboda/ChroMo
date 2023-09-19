@@ -4,6 +4,7 @@
 from functions.Lev2_Loss_Function import Lev2_Loss_Function
 import functions.global_ as gl
 from functions.handle_Optim_Settings import handle_Optim_Settings
+import numpy as np
 
 
 def Lev2_Optim(lvl1Params, experimentCluster, key, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, lvl2optim=None, optimType=None):
@@ -32,7 +33,7 @@ def Lev2_Optim(lvl1Params, experimentCluster, key, lossFunction, factor, solver,
         raise "Unknown solver choice in Lev2_Optim"
     res = handle_Optim_Settings(Lev2_Loss_Function,
                                 gl.lvl2ParamDict[optimId][key],
-                                (experimentCluster, lvl1Params, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, optimType),
+                                (experimentCluster, np.append(lvl1Params, [gl.bVars[optimId][key]]), lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, optimType),
                                 bnds,
                                 lvl2optim)
     if lvl2optim["algorithm"] == "1":
