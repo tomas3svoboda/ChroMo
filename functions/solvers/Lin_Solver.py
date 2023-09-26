@@ -1,7 +1,23 @@
 import math
 import numpy as np
-from scipy import linalg
+from scipy import sparse
 import matplotlib.pyplot as plt
+
+# ***Numerical solution of Equilibrium Dispersive Model of Chromatography***
+#                  ***Lumped Model; Linear isotherm***
+#                 ***Cranck-Nicolson Implicid Method***
+# Developed by Ing. Tomas Svoboda
+# University of Chemistry and Technology in Prague, Czech Republic
+# Department of Carbohydrates and Cereals
+# tomas3.svoboda@vscht.cz
+'''
+This script implements Cranck-Nicolson implicit method for numerical solution of
+semi-linear second order convection-diffusion PDE used to describe concentration
+wave propagation trough the chromatographic column. Numerical scheme utilizes
+averaged centred difference scheme in spatial direction and forward difference
+scheme in time direction. Danckwert's boudaries are implemented with usage of
+fictious point for left boundary.
+'''
 
 def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
                length=235,          # Length of the packed section in the column [mm]
@@ -17,28 +33,8 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
                debugPrint=False,
                debugGraph=False,
                full=False):
-    """Numerical solver of the EDM with Linear Isotherm - linear parabolic PDE"""
 
-    def diagonal_form(a, lower=1, upper=1):
-        # Transforms banded matrix into diagonal ordered form
-        # allows to use scipy.linalg.solve_banded
-        n = a.shape[1]
-        assert (np.all(a.shape == (n, n)))
-        ab = np.zeros((2 * n - 1, n))
-        for i in range(n):
-            ab[i, (n - 1) - i:] = np.diagonal(a, (n - 1) - i)
-        for i in range(n - 1):
-            ab[(2 * n - 2) - i, :i + 1] = np.diagonal(a, i - (n - 1))
-        mid_row_inx = int(ab.shape[0] / 2)
-        upper_rows = [mid_row_inx - i for i in range(1, upper + 1)]
-        upper_rows.reverse()
-        upper_rows.append(mid_row_inx)
-        lower_rows = [mid_row_inx + i for i in range(1, lower + 1)]
-        keep_rows = upper_rows + lower_rows
-        ab = ab[keep_rows, :]
-        return ab
-
-# Calculation of the feed time [s]
+    # Calculation of the feed time [s]
     feedTime = (feedVol / flowRate) * 3600
 
     # Calculation of the flow speed [mm/s]
@@ -55,25 +51,16 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
     x = np.linspace(0, length, Nx)  # Preparation of space vector
     dx = length / Nx  # Calculating space step [mm]
 
-    denseSparseRatio = 0.4  # define ratio between dense and sparse steps
+    denseSparseRatio = 0.7  # define ratio between dense and sparse steps
 
     dense_steps = int(Nt * denseSparseRatio)  # Determine number of dense steps
-    sparse_steps = Nt + 1 - dense_steps  # Determine number of sparse steps
+    sparse_steps = Nt - dense_steps  # Determine number of sparse steps
 
-    if feedTime > (time/4):
-        dense_time = feedTime + (feedTime*0.1)
-    elif feedTime > (time/8):
-        dense_time = feedTime + (feedTime*0.2)
-    elif feedTime > (time/40):
-        dense_time = feedTime + (feedTime*2)
-    elif feedTime > (time/80):
-        dense_time = feedTime + (feedTime*4)
-    else:
-        dense_time = feedTime + (feedTime*8)
+    dense_time = feedTime + feedTime * ((time/feedTime)/20) # formula for calculating time of dense steps
 
     # Create time vector with varying step sizes
     t_dense = np.linspace(0, dense_time, dense_steps)  # Dense grid
-    t_sparse = np.delete(np.linspace(dense_time, time, sparse_steps),0)  # Sparse grid
+    t_sparse = np.linspace(dense_time, time, sparse_steps)  # Sparse grid
     t = np.concatenate((t_dense, t_sparse))  # Combined time vector
     dt_dense = t_dense[1] - t_dense[0] # Time step size for dense grid
     dt_sparse = t_sparse[1] - t_sparse[0] # Time step size for sparse grid
@@ -91,11 +78,12 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
 
     # Preparation of the solution matrix
     c = np.zeros((Nt, Nx))
+    # Initial conditions
+    c0 = np.zeros(len(x))
 
-    C_0 = np.zeros(len(x))  # Implementing initial conditions
-    c[0, :] = C_0
+    # ________________________________________________________________________
+    # DISCRETIZATION AND SOLUTION
 
-    # Implementing discretization
     for i in range(1, Nt):  # Advance in time
         if debugPrint:
             if i == 1:
@@ -109,24 +97,24 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
         else:
             dt = dt_sparse
 
-        # Crank-Nicolson matrices
+        # Crank-Nicolson matrices preparation
         # A.c(t+1) = B.c(t)x, where c(t+1) and c(t) are vectors of c(x) values
-        # boundaries in matrix A
+        # Preparation of boundaries in matrix A
         A = np.zeros((Nx, Nx))  # A matrix data structure
-        A[0, 0] = flowSpeed + 1/(2*dx)  # Left boundary
+        A[0, 0] = flowSpeed/disperCoef + 1/(2*dx)  # Left boundary
         A[0, 1] = -1/(2*dx)  # Left boundary
         A[Nx - 1, Nx - 2] = -1/(2*dx)  # Right boundary
         A[Nx - 1, Nx - 1] = 1/(2*dx)  # Right Boundary
-        # boundaries in matrix B
+        # Preparation of boundaries in matrix B
         B = np.zeros((Nx, Nx))  # B matrix data structure
         B[0, 0] = -1/(2*dx)  # Left boundary
         B[0, 1] = 1/(2*dx)  # Left boundary
         B[Nx - 1, Nx - 2] = 1/(2*dx)  # Right boundary
         B[Nx - 1, Nx - 1] = -1/(2*dx)  # Right Boundary
-        # Defining constants
-        a = disperCoef/((((1-porosity)*henryConst)/porosity)+1)
-        b = flowSpeed/((((1-porosity)*henryConst)/porosity)+1)
         # Filling up Matrices A and B
+        # Defining constants
+        a = disperCoef/((((1-porosity)*henryConst)/porosity)+1)  # *** !!! PODLE DOKUMENTU
+        b = flowSpeed/((((1-porosity)*henryConst)/porosity)+1)  # *** !!! PODLE DOKUMENTU
         for j in range(1, Nx - 1):
             A[j, j - 1] = -((dt*a)/(2*(dx**2)))-((dt*b)/(4*dx))
             A[j, j] = 1 + ((dt*a)/(dx**2))
@@ -134,11 +122,10 @@ def Lin_Solver(flowRate = 50,       # Volume flowrate in [mL/h]
             B[j, j - 1] = ((dt*a)/(2*(dx**2)))+((dt*b)/(4*dx))
             B[j, j] = 1 - ((dt*a)/(dx**2))
             B[j, j + 1] = ((dt*a)/(2*(dx**2)))-((dt*b)/(4*dx))
-        A_diag = diagonal_form(A)
 
         b = B.dot(c[i - 1, :])
-        b[0] = b[0] + flowSpeed * feed[i]  # From left boundary (start at 1 ???)
-        c[i, :] = linalg.solve_banded((1, 1), A_diag, b)
+        b[0] = b[0] + flowSpeed/disperCoef * feed[i]  # From left boundary
+        c[i, :] = sparse.linalg.splu(A).solve(b) # Solve linear system of algebraic equations
 
     if debugPrint:
         feedMass = feedVol * feedConc  # Calculating theoretical mass fed into system
