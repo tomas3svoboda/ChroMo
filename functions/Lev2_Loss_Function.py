@@ -20,23 +20,29 @@ def Lev2_Loss_Function(params, experimentCluster, fixedParams, lossFunction ='Si
             params2 = [fixedParams[0], params[0], params[1]]
         elif solver == "Nonlin":
             params2 = [fixedParams[0], params[0], params[1], params[2]]
+        else:
+            raise Exception("unknown solver " + solver)
     elif optimType == "singlelevel":
         if solver == "Lin":
             params2 = [params[0], params[1], params[2]]
         elif solver == "Nonlin":
             params2 = [params[0], params[1], params[2], params[3]]
+        else:
+            raise Exception("unknown solver " + solver)
     elif optimType == "calcDisper":
         # CALCULATE DISPERSION
         flowRate = experimentCluster[0].experiment.experimentCondition.flowRate
         diameter = experimentCluster[0].experiment.experimentCondition.columnDiameter
         flowSpeed = (flowRate * 1000 / 3600) / ((math.pi * (diameter ** 2) / 4) * fixedParams[0])
         disperCoef = ((fixedParams[1] * diameter * flowSpeed) / (1 + flowSpeed)) + fixedParams[2]
-        print("A", fixedParams[1])
-        print("B", fixedParams[2])
         if solver == "Lin":
             params2 = [fixedParams[0], params[0], disperCoef]
         elif solver == "Nonlin":
             params2 = [fixedParams[0], params[0], disperCoef, params[1]]
+        else:
+            raise Exception("unknown solver " + solver)
+    else:
+        raise Exception("unknown optimization type " + optimType)
     sum = 0
     for comp in experimentCluster:
         head, tail = os.path.split(comp.experiment.metadata.path)

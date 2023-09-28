@@ -39,8 +39,8 @@ def Lev1_Loss_Function(lvl1Params, experimentClustersComp, lossFunction, factor,
             for par in val:
                 print(par)
     elif optimType == "calcDisper":
+        print('porosity, A :')
         for par in gl.lvl1ParamDict[optimId]:
-            print('porosity, A :')
             print(par)
         for key, val in gl.lvl2ParamDict[optimId].items():
             print('K, (Q) for', key, ':')

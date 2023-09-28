@@ -228,8 +228,14 @@
         {% if formInfo['porosity'] %}
             document.getElementById("porosityInit").value = {{formInfo['porosity']}}
         {% endif %}
-        {% if formInfo['porosity'] %}
-            document.getElementById("porosityInit").value = {{formInfo['porosity']}}
+        {% if formInfo['AStart'] %}
+            document.getElementById("AStart").value = {{formInfo['AStart']}}
+        {% endif %}
+        {% if formInfo['AEnd'] %}
+            document.getElementById("AEnd").value = {{formInfo['AEnd']}}
+        {% endif %}
+        {% if formInfo['A'] %}
+            document.getElementById("AInit").value = {{formInfo['A']}}
         {% endif %}
         {% if formInfo['retCorrThreshold'] %}
             document.getElementById("retCorrThreshold").value = {{formInfo['retCorrThreshold']}}
@@ -264,6 +270,9 @@
                 {% endif %}
                 {% if formInfo[comp + 'Q'] %}
                     document.getElementById("{{comp}}QInit").value = {{formInfo[comp + 'Q']}}
+                {% endif %}
+                {% if formInfo[comp + 'B'] %}
+                    document.getElementById("{{comp}}B").value = {{formInfo[comp + 'B']}}
                 {% endif %}
         {% endfor %}
         {% if formInfo['lvl1optimsettings'] %}
