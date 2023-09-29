@@ -230,8 +230,31 @@ function optimTypeInput(){
         let divDisperCalc = document.getElementsByClassName("ABParam")
         for(let i = 0; i < divDisperCalc.length; i++)
             divDisperCalc[i].style.display = "inline"
+        let divDisperCalc2 = document.getElementsByClassName("Alvl1")
+        for(let i = 0; i < divDisperCalc2.length; i++)
+            divDisperCalc2[i].style.display = "inline"
+        let divDisperCalc3 = document.getElementsByClassName("Alvl2")
+        for(let i = 0; i < divDisperCalc3.length; i++)
+            divDisperCalc3[i].style.display = "none"
     }
-
+    else if(optimTypeVal == "calcDisper2"){
+        let divSingle = document.getElementsByClassName("porositySinglelevelDiv")
+        for(let i = 0; i < divSingle.length; i++)
+            divSingle[i].style.display = "none"
+        let divDisper = document.getElementsByClassName("DParam")
+        for(let i = 0; i < divDisper.length; i++)
+            divDisper[i].style.display = "none"
+        document.getElementById("porosityBilevelDiv").style.display = "inline"
+        let divDisperCalc = document.getElementsByClassName("ABParam")
+        for(let i = 0; i < divDisperCalc.length; i++)
+            divDisperCalc[i].style.display = "inline"
+        let divDisperCalc2 = document.getElementsByClassName("Alvl1")
+        for(let i = 0; i < divDisperCalc2.length; i++)
+            divDisperCalc2[i].style.display = "none"
+        let divDisperCalc3 = document.getElementsByClassName("Alvl2")
+        for(let i = 0; i < divDisperCalc3.length; i++)
+            divDisperCalc3[i].style.display = "inline"
+    }
 }
 
 async function showGraph3(f = "mainform", aurl = "/prograph", i = "imgdiv"){

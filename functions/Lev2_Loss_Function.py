@@ -15,6 +15,7 @@ def Lev2_Loss_Function(params, experimentCluster, fixedParams, lossFunction ='Si
     """Loss function for level 2 optimization.
     Part of the parameter estimation workflow.
     """
+    #print("Calling Lev2_Loss_Function!")
     if optimType == "bilevel":
         if solver == "Lin":
             params2 = [fixedParams[0], params[0], params[1]]
@@ -39,6 +40,18 @@ def Lev2_Loss_Function(params, experimentCluster, fixedParams, lossFunction ='Si
             params2 = [fixedParams[0], params[0], disperCoef]
         elif solver == "Nonlin":
             params2 = [fixedParams[0], params[0], disperCoef, params[1]]
+        else:
+            raise Exception("unknown solver " + solver)
+    elif optimType == "calcDisper2":
+        # CALCULATE DISPERSION
+        flowRate = experimentCluster[0].experiment.experimentCondition.flowRate
+        diameter = experimentCluster[0].experiment.experimentCondition.columnDiameter
+        flowSpeed = (flowRate * 1000 / 3600) / ((math.pi * (diameter ** 2) / 4) * fixedParams[0])
+        disperCoef = ((params[1] * diameter * flowSpeed) / (1 + flowSpeed)) + fixedParams[1]
+        if solver == "Lin":
+            params2 = [fixedParams[0], params[0], disperCoef]
+        elif solver == "Nonlin":
+            params2 = [fixedParams[0], params[0], disperCoef, params[2]]
         else:
             raise Exception("unknown solver " + solver)
     else:

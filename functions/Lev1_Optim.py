@@ -23,12 +23,13 @@ def Lev1_Optim(experimentClustersComp, lossFunction, factor, solver, spacialDiff
     """Optimizazion function for level 1.
     Part of the parameter estimation workflow.
     """
+    #print("Calling Lev1_Optim!")
     gl.index[optimId] = 0
     gl.bestLvl1LossFunctionVal[optimId] = math.inf
     if optimType != "singlelevel":
-        if optimType == "bilevel":
+        if optimType != "calcDisper":
             bnds = [(gl.lvl1RangeDict[optimId][0][0], gl.lvl1RangeDict[optimId][0][1])]
-        elif optimType == "calcDisper":
+        else:
             bnds = [(gl.lvl1RangeDict[optimId][0][0], gl.lvl1RangeDict[optimId][0][1]), (gl.lvl1RangeDict[optimId][1][0], gl.lvl1RangeDict[optimId][1][1])]
         res = handle_Optim_Settings(Lev1_Loss_Function, gl.lvl1ParamDict[optimId],
                                     (experimentClustersComp, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl2optim, optimType),

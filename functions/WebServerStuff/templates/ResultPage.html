@@ -37,7 +37,7 @@
       <p id="finalA">Final A: <div class="boldText">{{result["bestLvl1Params"][1]}}</div>({{result["optimparams"]["Lvl1ParamDict"]["ainit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl1ParamDict"]["arange"][0]}}-{{result["optimparams"]["Lvl1ParamDict"]["arange"][1]}})</p>
       {% endif %}
 
-      <p id="finalLossFuncVal">Final loss function value: <div class="boldText">{{result["lv1lossfunctionval"]}}</div></p><br>
+      <p id="finalLossFuncVal">Final loss function value: <div class="boldText">{{result["bestLvl1LossFunctionVal"]}}</div></p><br>
         <table>
           <thead>
             <tr>
@@ -46,13 +46,16 @@
               <th>Porosity</th>
               {% endif %}
               <th>K</th>
-              {% if result["optimparams"]["optimType"] != "calcDisper" %}
+              {% if result["optimparams"]["optimType"] != "calcDisper"  and result["optimparams"]["optimType"] != "calcDisper2" %}
               <th>D</th>
               {% endif %}
               {% if result["optimparams"]["solver"] == "Nonlin" %}
               <th>Q</th>
               {% endif %}
-              {% if result["optimparams"]["optimType"] == "calcDisper" %}
+              {% if result["optimparams"]["optimType"] == "calcDisper2" %}
+                <th>A</th>
+              {% endif %}
+              {% if result["optimparams"]["optimType"] == "calcDisper" or result["optimparams"]["optimType"] == "calcDisper2" %}
                 <th>B</th>
               {% endif %}
               <th>Loss Function Value</th>
@@ -69,14 +72,18 @@
               {% endif %}
               <td><div class="boldText">{{result["bestLvl2Params"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["Lvl2ParamDict"][comp]["kinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl2ParamDict"][comp]["krange"][0]}}-{{result["optimparams"]["Lvl2ParamDict"][comp]["krange"][1]}})</td>
               {% set paramIndex = paramIndex + 1 %}
-              {% if result["optimparams"]["optimType"] != "calcDisper" %}
+              {% if result["optimparams"]["optimType"] != "calcDisper" and result["optimparams"]["optimType"] != "calcDisper2" %}
                 <td><div class="boldText">{{result["bestLvl2Params"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["Lvl2ParamDict"][comp]["dinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl2ParamDict"][comp]["drange"][0]}}-{{result["optimparams"]["Lvl2ParamDict"][comp]["drange"][1]}})</td>
                 {% set paramIndex = paramIndex + 1 %}
+              {% endif %}
+              {% if result["optimparams"]["optimType"] == "calcDisper2" %}
+                <td><div class="boldText">{{result["bestLvl2Params"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["Lvl2ParamDict"][comp]["ainit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl2ParamDict"][comp]["arange"][0]}}-{{result["optimparams"]["Lvl2ParamDict"][comp]["arange"][1]}})</td>
+              {% set paramIndex = paramIndex + 1 %}
               {% endif %}
               {% if result["optimparams"]["solver"] == "Nonlin" %}
                 <td><div class="boldText">{{result["bestLvl2Params"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["Lvl2ParamDict"][comp]["qinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl2ParamDict"][comp]["qrange"][0]}}-{{result["optimparams"]["Lvl2ParamDict"][comp]["qrange"][1]}})</td>
               {% endif %}
-              {% if result["optimparams"]["optimType"] == "calcDisper" %}
+              {% if result["optimparams"]["optimType"] == "calcDisper" or result["optimparams"]["optimType"] == "calcDisper2" %}
                 <td><div class="boldText">{{result["optimparams"]["Lvl2ParamDict"][comp]["b"]}}</div></td>
               {% set paramIndex = paramIndex + 1 %}
               {% endif %}
@@ -92,7 +99,9 @@
         {% elif result["optimparams"]["optimType"] == "bilevel"%}
           Bilevel
         {% elif result["optimparams"]["optimType"] == "calcDisper"%}
-          Calculate Disperion Coeficien
+          Calculate Disperion - A on lvl1
+        {% elif result["optimparams"]["optimType"] == "calcDisper2"%}
+          Calculate Disperion - A on lvl2
         {% endif %}
         </div></p>
         <p id="lv1optim">Level 1 optimization algorithm: <div class="boldText">

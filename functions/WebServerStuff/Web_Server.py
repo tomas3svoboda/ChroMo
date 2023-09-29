@@ -140,13 +140,16 @@ def Web_Server():
                     if formInfo["optimType"] == "singlelevel":
                         tmpDict["pinit"] = formInfo[comp + "P"]
                         tmpDict["prange"] = [formInfo[comp + "PStart"], formInfo[comp + "PEnd"]]
-                    if formInfo["optimType"] == "calcDisper":
-                        tmpDict["b"] = formInfo[comp + "B"]
                     tmpDict["kinit"] = formInfo[comp + "K"]
                     tmpDict["krange"] = [formInfo[comp + "KStart"], formInfo[comp + "KEnd"]]
-                    if formInfo["optimType"] != "calcDisper":
+                    if formInfo["optimType"] != "calcDisper" and formInfo["optimType"] != "calcDisper2":
                         tmpDict["dinit"] = formInfo[comp + "D"]
                         tmpDict["drange"] = [formInfo[comp + "DStart"], formInfo[comp + "DEnd"]]
+                    else:
+                        tmpDict["b"] = formInfo[comp + "B"]
+                        if formInfo["optimType"] == "calcDisper2":
+                            tmpDict["ainit"] = formInfo[comp + "A"]
+                            tmpDict["arange"] = [formInfo[comp + "AStart"], formInfo[comp + "AEnd"]]
                     if formInfo["solver"] == "Nonlin":
                         tmpDict["qinit"] = formInfo[comp + "Q"]
                         tmpDict["qrange"] = [formInfo[comp + "QStart"], formInfo[comp + "QEnd"]]
@@ -721,7 +724,7 @@ def Web_Server():
         formInfo["solver"] = str(request.form.get("solver"))
         formInfo['optimType'] = str(request.form.get("optimType"))
         formInfo["factor"] = int(request.form.get("factor"))
-        if formInfo['optimType'] == "bilevel" or formInfo['optimType'] == "calcDisper":
+        if not formInfo['optimType'] == "singlelevel":
             formInfo["porosityStart"] = float(request.form.get("porosityStart"))
             formInfo["porosityEnd"] = float(request.form.get("porosityEnd"))
             formInfo["porosity"] = float(request.form.get("porosityInit"))
@@ -737,12 +740,16 @@ def Web_Server():
             formInfo[comp + "KStart"] = float(request.form.get(comp + "KStart"))
             formInfo[comp + "KEnd"] = float(request.form.get(comp + "KEnd"))
             formInfo[comp + "K"] = float(request.form.get(comp + "KInit"))
-            if formInfo["optimType"] != "calcDisper":
+            if formInfo["optimType"] != "calcDisper" and formInfo["optimType"] != "calcDisper2":
                 formInfo[comp + "DStart"] = float(request.form.get(comp + "DStart"))
                 formInfo[comp + "DEnd"] = float(request.form.get(comp + "DEnd"))
                 formInfo[comp + "D"] = float(request.form.get(comp + "DInit"))
             else:
                 formInfo[comp + "B"] = float(request.form.get(comp + "B"))
+                if formInfo["optimType"] == "calcDisper2":
+                    formInfo[comp + "AStart"] = float(request.form.get(comp + "AStart"))
+                    formInfo[comp + "AEnd"] = float(request.form.get(comp + "AEnd"))
+                    formInfo[comp + "A"] = float(request.form.get(comp + "AInit"))
             if formInfo["solver"] == "Nonlin":
                 formInfo[comp + "QStart"] = float(request.form.get(comp + "QStart"))
                 formInfo[comp + "QEnd"] = float(request.form.get(comp + "QEnd"))
@@ -1034,28 +1041,34 @@ def Web_Server():
         formInfo['optimType'] = optimparams["optimType"]
         formInfo['solver'] = optimparams["solver"]
         formInfo['factor'] = optimparams["factor"]
-        formInfo["porosityStart"] = optimparams["Lvl1ParamDict"]["prange"][0]
-        formInfo["porosityEnd"] = optimparams["Lvl1ParamDict"]["prange"][1]
-        formInfo['porosity'] = optimparams["Lvl1ParamDict"]["pinit"]
-        formInfo["AStart"] = optimparams["Lvl1ParamDict"]["arange"][0]
-        formInfo["AEnd"] = optimparams["Lvl1ParamDict"]["arange"][1]
-        formInfo['A'] = optimparams["Lvl1ParamDict"]["ainit"]
+        if formInfo['optimType'] != "singlelevel":
+            formInfo["porosityStart"] = optimparams["Lvl1ParamDict"]["prange"][0]
+            formInfo["porosityEnd"] = optimparams["Lvl1ParamDict"]["prange"][1]
+            formInfo['porosity'] = optimparams["Lvl1ParamDict"]["pinit"]
+        if formInfo["optimType"] == "calcDisper":
+            formInfo["AStart"] = optimparams["Lvl1ParamDict"]["arange"][0]
+            formInfo["AEnd"] = optimparams["Lvl1ParamDict"]["arange"][1]
+            formInfo['A'] = optimparams["Lvl1ParamDict"]["ainit"]
         cmpList = []
         for comp in optimparams["Lvl2ParamDict"]:
             cmpList.append(comp)
             formInfo[comp + "KStart"] = optimparams["Lvl2ParamDict"][comp]["krange"][0]
             formInfo[comp + "KEnd"] = optimparams["Lvl2ParamDict"][comp]["krange"][1]
             formInfo[comp + "K"] = optimparams["Lvl2ParamDict"][comp]["kinit"]
-            if formInfo["optimType"] != "calcDisper":
+            if formInfo["optimType"] != "calcDisper" and formInfo["optimType"] != "calcDisper2":
                 formInfo[comp + "DStart"] = optimparams["Lvl2ParamDict"][comp]["drange"][0]
                 formInfo[comp + "DEnd"] = optimparams["Lvl2ParamDict"][comp]["drange"][1]
                 formInfo[comp + "D"] = optimparams["Lvl2ParamDict"][comp]["dinit"]
+            else:
+                formInfo[comp + "B"] = optimparams["Lvl2ParamDict"][comp]["b"]
+                if formInfo["optimType"] == "calcDisper2":
+                    formInfo[comp + "AStart"] = optimparams["Lvl2ParamDict"][comp]["arange"][0]
+                    formInfo[comp + "AEnd"] = optimparams["Lvl2ParamDict"][comp]["arange"][1]
+                    formInfo[comp + "A"] = optimparams["Lvl2ParamDict"][comp]["ainit"]
             if formInfo["solver"] == "Nonlin":
                 formInfo[comp + "QStart"] = optimparams["Lvl2ParamDict"][comp]["qrange"][0]
                 formInfo[comp + "QEnd"] = optimparams["Lvl2ParamDict"][comp]["qrange"][1]
                 formInfo[comp + "Q"] = optimparams["Lvl2ParamDict"][comp]["qinit"]
-            if formInfo["optimType"] == "calcDisper":
-                formInfo[comp + "B"] = optimparams["Lvl2ParamDict"][comp]["b"]
         formInfo["lvl1optimsettings"] = optimparams["lvl1optim"]
         formInfo["lvl2optimsettings"] = optimparams["lvl2optim"]
         return redirect(url_for("get_projects_params"))

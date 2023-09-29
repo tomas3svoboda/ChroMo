@@ -11,6 +11,7 @@ def Lev1_Loss_Function(lvl1Params, experimentClustersComp, lossFunction, factor,
     """Loss function for level 1 optimization.
     Part of the parameter estimation workflow.
     """
+    #print("Calling Lev1_Loss_Function!")
     sum = 0
     timeStart = t.time()
     for key in experimentClustersComp.clusters:
@@ -44,6 +45,13 @@ def Lev1_Loss_Function(lvl1Params, experimentClustersComp, lossFunction, factor,
             print(par)
         for key, val in gl.lvl2ParamDict[optimId].items():
             print('K, (Q) for', key, ':')
+            for par in val:
+                print(par)
+    elif optimType == "calcDisper2":
+        print('porosity:')
+        print(lvl1Params[0])
+        for key, val in gl.lvl2ParamDict[optimId].items():
+            print('K, A, (Q) for', key, ':')
             for par in val:
                 print(par)
     print('time:')

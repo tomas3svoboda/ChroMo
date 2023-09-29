@@ -55,7 +55,8 @@
         <select name="optimType" id="optimType" oninput="optimTypeInput()">
           <option value="singlelevel" {% if formInfo and formInfo['optimType'] == "singlelevel" %}selected{% endif %}>Single level</option>
           <option value="bilevel" {% if formInfo and formInfo['optimType'] == "bilevel" %}selected{% endif %}>Bilevel</option>
-          <option value="calcDisper" {% if formInfo and formInfo['optimType'] == "calcDisper" %}selected{% endif %}>Calculate Disperion Coeficien</option>
+          <option value="calcDisper" {% if formInfo and formInfo['optimType'] == "calcDisper" %}selected{% endif %}>Calculate Disperion - A on lvl1</option>
+          <option value="calcDisper2" {% if formInfo and formInfo['optimType'] == "calcDisper2" %}selected{% endif %}>Calculate Disperion - A on lvl2</option>
         </select><br>
         <label for="factor">Factor <div class="required">*</div></label>
         <select name="factor" id="factor">
@@ -73,7 +74,7 @@
             <label for="porosityInit">Porosity initial guess<div class="required">*</div></label>
             <input type="number" id="porosityInit" name="porosityInit" min="0.01" max="1" step="any"><br><br>
         </div>
-        <div class="ABParam">
+        <div class="ABParam Alvl1">
             <label for="AStart">Parameter A interval:</label>
             <input type="number" id="AStart" name="AStart" min="0" step="any"> - <input type="number" id="AEnd" name="AEnd" min="0" step="any"><br>
             <label for="AInit">Parameter A initial guess:</label>
@@ -100,6 +101,12 @@
             <div class="ABParam">
                 <label for="{{comp}}B">Parameter B for {{comp}} <div class="required">*</div></label>
                 <input type="number" id="{{comp}}B" name="{{comp}}B" min="0" step="any"><br>
+                <div class="Alvl2">
+                    <label for="{{comp}}AStart">Parameter A interval for {{comp}}:</label>
+                    <input type="number" id="{{comp}}AStart" name="{{comp}}AStart" min="0" step="any"> - <input type="number" id="{{comp}}AEnd" name="{{comp}}AEnd" min="0" step="any"><br>
+                    <label for="{{comp}}AInit">Parameter A initial guess for {{comp}}:</label>
+                    <input type="number" id="{{comp}}AInit" name="{{comp}}AInit" min="0" step="any"><br><br>
+                </div>
             </div>
             <div class="nonLinParam">
                 <label for="{{comp}}QStart">Saturation coefficient interval for {{comp}}:</label>
@@ -253,6 +260,9 @@
                 {% if formInfo[comp + 'QStart'] %}
                     document.getElementById("{{comp}}QStart").value = {{formInfo[comp + 'QStart']}}
                 {% endif %}
+                {% if formInfo[comp + 'AStart'] %}
+                    document.getElementById("{{comp}}AStart").value = {{formInfo[comp + 'AStart']}}
+                {% endif %}
                 {% if formInfo[comp + 'DEnd'] %}
                     document.getElementById("{{comp}}DEnd").value = {{formInfo[comp + 'DEnd']}}
                 {% endif %}
@@ -261,6 +271,9 @@
                 {% endif %}
                 {% if formInfo[comp + 'QEnd'] %}
                     document.getElementById("{{comp}}QEnd").value = {{formInfo[comp + 'QEnd']}}
+                {% endif %}
+                {% if formInfo[comp + 'AEnd'] %}
+                    document.getElementById("{{comp}}AEnd").value = {{formInfo[comp + 'AEnd']}}
                 {% endif %}
                 {% if formInfo[comp + 'K'] %}
                     document.getElementById("{{comp}}KInit").value = {{formInfo[comp + 'K']}}
@@ -273,6 +286,9 @@
                 {% endif %}
                 {% if formInfo[comp + 'B'] %}
                     document.getElementById("{{comp}}B").value = {{formInfo[comp + 'B']}}
+                {% endif %}
+                {% if formInfo[comp + 'A'] %}
+                    document.getElementById("{{comp}}AInit").value = {{formInfo[comp + 'A']}}
                 {% endif %}
         {% endfor %}
         {% if formInfo['lvl1optimsettings'] %}
