@@ -49,5 +49,4 @@ def Lev2_Optim(lvl1Params, experimentCluster, key, lossFunction, factor, solver,
     else:
         gl.lvl2ParamDict[optimId][key] = res.x
         gl.lv2LossFunctionVals[optimId][key] = res.fun
-    print("lvl2 finished")
     return gl.lv2LossFunctionVals[optimId][key]
