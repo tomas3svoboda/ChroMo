@@ -11,7 +11,7 @@ Loss Function options:
     'LogSimple' - Single_Loss_Function_LogSimple
     'LogSquares' - Single_Loss_Function_LogSquares
 """
-def Lev2_Loss_Function(params, experimentCluster, fixedParams, lossFunction ='Simple', factor = 1, solver ="Lin", spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, optimType=None):
+def Lev2_Loss_Function(params, experimentCluster, fixedParams, lossFunction ='Simple', factor = 1, solver ="Lin", spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, optimType=None, fixporosity=False):
     """Loss function for level 2 optimization.
     Part of the parameter estimation workflow.
     """
@@ -24,12 +24,20 @@ def Lev2_Loss_Function(params, experimentCluster, fixedParams, lossFunction ='Si
         else:
             raise Exception("unknown solver " + solver)
     elif optimType == "singlelevel":
-        if solver == "Lin":
-            params2 = [params[0], params[1], params[2]]
-        elif solver == "Nonlin":
-            params2 = [params[0], params[1], params[2], params[3]]
+        if not fixporosity:
+            if solver == "Lin":
+                params2 = [params[0], params[1], params[2]]
+            elif solver == "Nonlin":
+                params2 = [params[0], params[1], params[2], params[3]]
+            else:
+                raise Exception("unknown solver " + solver)
         else:
-            raise Exception("unknown solver " + solver)
+            if solver == "Lin":
+                params2 = [fixedParams[0], params[0], params[1]]
+            elif solver == "Nonlin":
+                params2 = [fixedParams[0], params[0], params[1], params[2]]
+            else:
+                raise Exception("unknown solver " + solver)
     elif optimType == "calcDisper":
         # CALCULATE DISPERSION
         flowRate = experimentCluster[0].experiment.experimentCondition.flowRate

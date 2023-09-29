@@ -14,3 +14,4 @@ bestLvl2ParamDict = dict()
 bestLvl1LossFunctionVal = dict()
 bestLvl2LossFunctionVals = dict()
 bVars = dict()
+tmpporosity = 0

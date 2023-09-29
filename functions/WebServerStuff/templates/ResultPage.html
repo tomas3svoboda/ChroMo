@@ -31,7 +31,7 @@
     {% if result != "-" %}
       <p id="timer">Run time: <div class="boldText">{{timer}}</div></p>
       {% if result["optimparams"]["optimType"] != "singlelevel" %}
-      <p id="finalPorosity">Final porosity: <div class="boldText">{{result["bestLvl1Params"][0]}}</div>({{result["optimparams"]["Lvl1ParamDict"]["pinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl1ParamDict"]["prange"][0]}}-{{result["optimparams"]["Lvl1ParamDict"]["prange"][1]}})</p>
+      <p id="finalPorosity">Final porosity: <div class="boldText">{{result["bestLvl1Params"][0]}}</div>{% if not result["optimparams"]["fixporosity"] %}({{result["optimparams"]["Lvl1ParamDict"]["pinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl1ParamDict"]["prange"][0]}}-{{result["optimparams"]["Lvl1ParamDict"]["prange"][1]}}){% endif %}</p>
       {% endif %}
       {% if result["optimparams"]["optimType"] == "calcDisper" %}
       <p id="finalA">Final A: <div class="boldText">{{result["bestLvl1Params"][1]}}</div>({{result["optimparams"]["Lvl1ParamDict"]["ainit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl1ParamDict"]["arange"][0]}}-{{result["optimparams"]["Lvl1ParamDict"]["arange"][1]}})</p>
@@ -67,7 +67,7 @@
             <tr>
               <td>{{comp}}</td>
               {% if result["optimparams"]["optimType"] == "singlelevel" %}
-                <td><div class="boldText">{{result["bestLvl2Params"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["Lvl2ParamDict"][comp]["pinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl2ParamDict"][comp]["prange"][0]}}-{{result["optimparams"]["Lvl2ParamDict"][comp]["prange"][1]}})</td>
+                <td><div class="boldText">{{result["bestLvl2Params"][comp][paramIndex]|round(2)}}</div>{% if not result["optimparams"]["fixporosity"] %}({{result["optimparams"]["Lvl2ParamDict"][comp]["pinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl2ParamDict"][comp]["prange"][0]}}-{{result["optimparams"]["Lvl2ParamDict"][comp]["prange"][1]}}){% endif %}</td>
                 {% set paramIndex = paramIndex + 1 %}
               {% endif %}
               <td><div class="boldText">{{result["bestLvl2Params"][comp][paramIndex]|round(2)}}</div>({{result["optimparams"]["Lvl2ParamDict"][comp]["kinit"]}}&nbsp;:&nbsp;{{result["optimparams"]["Lvl2ParamDict"][comp]["krange"][0]}}-{{result["optimparams"]["Lvl2ParamDict"][comp]["krange"][1]}})</td>

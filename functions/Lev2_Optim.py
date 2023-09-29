@@ -7,7 +7,7 @@ from functions.handle_Optim_Settings import handle_Optim_Settings
 import numpy as np
 
 
-def Lev2_Optim(lvl1Params, experimentCluster, key, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, lvl2optim=None, optimType=None):
+def Lev2_Optim(lvl1Params, experimentCluster, key, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, lvl2optim=None, optimType=None, fixporosity=False):
     """Optimizazion function for level 2.
     Part of the parameter estimation workflow.
     """
@@ -20,7 +20,10 @@ def Lev2_Optim(lvl1Params, experimentCluster, key, lossFunction, factor, solver,
         if optimType == "bilevel":
             bnds = [(gl.lvl2RangeDict[optimId][key][0][0], gl.lvl2RangeDict[optimId][key][0][1]), (gl.lvl2RangeDict[optimId][key][1][0], gl.lvl2RangeDict[optimId][key][1][1])]
         elif optimType == "singlelevel":
-            bnds = [(gl.lvl2RangeDict[optimId][key][0][0], gl.lvl2RangeDict[optimId][key][0][1]), (gl.lvl2RangeDict[optimId][key][1][0], gl.lvl2RangeDict[optimId][key][1][1]), (gl.lvl2RangeDict[optimId][key][2][0], gl.lvl2RangeDict[optimId][key][2][1])]
+            if not fixporosity:
+                bnds = [(gl.lvl2RangeDict[optimId][key][0][0], gl.lvl2RangeDict[optimId][key][0][1]), (gl.lvl2RangeDict[optimId][key][1][0], gl.lvl2RangeDict[optimId][key][1][1]), (gl.lvl2RangeDict[optimId][key][2][0], gl.lvl2RangeDict[optimId][key][2][1])]
+            else:
+                bnds = [(gl.lvl2RangeDict[optimId][key][0][0], gl.lvl2RangeDict[optimId][key][0][1]), (gl.lvl2RangeDict[optimId][key][1][0], gl.lvl2RangeDict[optimId][key][1][1])]
         elif optimType == "calcDisper":
             bnds = [(gl.lvl2RangeDict[optimId][key][0][0], gl.lvl2RangeDict[optimId][key][0][1])]
         elif optimType == "calcDisper2":
@@ -29,7 +32,10 @@ def Lev2_Optim(lvl1Params, experimentCluster, key, lossFunction, factor, solver,
         if optimType == "bilevel":
             bnds = [(gl.lvl2RangeDict[optimId][key][0][0], gl.lvl2RangeDict[optimId][key][0][1]), (gl.lvl2RangeDict[optimId][key][1][0], gl.lvl2RangeDict[optimId][key][1][1]), (gl.lvl2RangeDict[optimId][key][2][0], gl.lvl2RangeDict[optimId][key][2][1])]
         elif optimType == "singlelevel":
-            bnds = [(gl.lvl2RangeDict[optimId][key][0][0], gl.lvl2RangeDict[optimId][key][0][1]), (gl.lvl2RangeDict[optimId][key][1][0], gl.lvl2RangeDict[optimId][key][1][1]), (gl.lvl2RangeDict[optimId][key][2][0], gl.lvl2RangeDict[optimId][key][2][1]), (gl.lvl2RangeDict[optimId][key][3][0], gl.lvl2RangeDict[optimId][key][3][1])]
+            if not fixporosity:
+                bnds = [(gl.lvl2RangeDict[optimId][key][0][0], gl.lvl2RangeDict[optimId][key][0][1]), (gl.lvl2RangeDict[optimId][key][1][0], gl.lvl2RangeDict[optimId][key][1][1]), (gl.lvl2RangeDict[optimId][key][2][0], gl.lvl2RangeDict[optimId][key][2][1]), (gl.lvl2RangeDict[optimId][key][3][0], gl.lvl2RangeDict[optimId][key][3][1])]
+            else:
+                bnds = [(gl.lvl2RangeDict[optimId][key][0][0], gl.lvl2RangeDict[optimId][key][0][1]), (gl.lvl2RangeDict[optimId][key][1][0], gl.lvl2RangeDict[optimId][key][1][1]), (gl.lvl2RangeDict[optimId][key][2][0], gl.lvl2RangeDict[optimId][key][2][1])]
         elif optimType == "calcDisper":
             bnds = [(gl.lvl2RangeDict[optimId][key][0][0], gl.lvl2RangeDict[optimId][key][0][1]), (gl.lvl2RangeDict[optimId][key][1][0], gl.lvl2RangeDict[optimId][key][1][1])]
         elif optimType == "calcDisper2":
@@ -38,15 +44,22 @@ def Lev2_Optim(lvl1Params, experimentCluster, key, lossFunction, factor, solver,
         raise "Unknown solver choice in Lev2_Optim"
     if optimType == "calcDisper" or optimType == "calcDisper2":
         lvl1Params = np.append(lvl1Params, [gl.bVars[optimId][key]])
+    if optimType == "singlelevel" and fixporosity:
+        lvl1Params = np.insert(lvl1Params, 0, gl.lvl2ParamDict[optimId][key][0])
+        gl.lvl2ParamDict[optimId][key] = gl.lvl2ParamDict[optimId][key][1:]
     res = handle_Optim_Settings(Lev2_Loss_Function,
                                 gl.lvl2ParamDict[optimId][key],
-                                (experimentCluster, lvl1Params, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, optimType),
+                                (experimentCluster, lvl1Params, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, optimType, fixporosity),
                                 bnds,
                                 lvl2optim)
+    if optimType == "singlelevel" and fixporosity:
+        gl.lvl2ParamDict[optimId][key] = np.insert(gl.lvl2ParamDict[optimId][key], 0, lvl1Params[0])
     if lvl2optim["algorithm"] == "1":
         gl.lvl2ParamDict[optimId][key] = np.array(res[0], ndmin=1)
         gl.lv2LossFunctionVals[optimId][key] = res[1]
     else:
         gl.lvl2ParamDict[optimId][key] = res.x
         gl.lv2LossFunctionVals[optimId][key] = res.fun
+    if optimType == "singlelevel" and fixporosity:
+        gl.lvl2ParamDict[optimId][key] = np.insert(gl.lvl2ParamDict[optimId][key], 0, lvl1Params[0])
     return gl.lv2LossFunctionVals[optimId][key]

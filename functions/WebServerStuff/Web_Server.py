@@ -130,7 +130,8 @@ def Web_Server():
                 Lvl1ParamDict = {}
                 if formInfo["optimType"] != "singlelevel":
                     Lvl1ParamDict["pinit"] = formInfo["porosity"]
-                    Lvl1ParamDict["prange"] = [formInfo["porosityStart"], formInfo["porosityEnd"]]
+                    if not formInfo["fixporosity"]:
+                        Lvl1ParamDict["prange"] = [formInfo["porosityStart"], formInfo["porosityEnd"]]
                     if formInfo["optimType"] == "calcDisper":
                         Lvl1ParamDict["ainit"] = formInfo["A"]
                         Lvl1ParamDict["arange"] = [formInfo["AStart"], formInfo["AEnd"]]
@@ -139,7 +140,8 @@ def Web_Server():
                     tmpDict = {}
                     if formInfo["optimType"] == "singlelevel":
                         tmpDict["pinit"] = formInfo[comp + "P"]
-                        tmpDict["prange"] = [formInfo[comp + "PStart"], formInfo[comp + "PEnd"]]
+                        if not formInfo["fixporosity"]:
+                            tmpDict["prange"] = [formInfo[comp + "PStart"], formInfo[comp + "PEnd"]]
                     tmpDict["kinit"] = formInfo[comp + "K"]
                     tmpDict["krange"] = [formInfo[comp + "KStart"], formInfo[comp + "KEnd"]]
                     if formInfo["optimType"] != "calcDisper" and formInfo["optimType"] != "calcDisper2":
@@ -161,7 +163,7 @@ def Web_Server():
                     formInfo["gauss"], formInfo["retCorr"], formInfo["massBal"], formInfo["lossFunc"],
                     formInfo["solver"], formInfo["factor"], Lvl1ParamDict, Lvl2ParamDict, formInfo["spacialDiff"],
                     formInfo["timeDiff"], formInfo["time"], self.thr_id, formInfo["retCorrThreshold"],
-                    formInfo["lvl1optimsettings"], formInfo["lvl2optimsettings"], formInfo["optimType"])
+                    formInfo["lvl1optimsettings"], formInfo["lvl2optimsettings"], formInfo["optimType"], formInfo["fixporosity"])
                 if formInfo["retCorr"]:
                     formInfo["shifts"] = tmp["shifts"]
                 else:
@@ -724,9 +726,11 @@ def Web_Server():
         formInfo["solver"] = str(request.form.get("solver"))
         formInfo['optimType'] = str(request.form.get("optimType"))
         formInfo["factor"] = int(request.form.get("factor"))
+        formInfo["fixporosity"] = bool(request.form.get("fixporosity"))
         if not formInfo['optimType'] == "singlelevel":
-            formInfo["porosityStart"] = float(request.form.get("porosityStart"))
-            formInfo["porosityEnd"] = float(request.form.get("porosityEnd"))
+            if not formInfo["fixporosity"]:
+                formInfo["porosityStart"] = float(request.form.get("porosityStart"))
+                formInfo["porosityEnd"] = float(request.form.get("porosityEnd"))
             formInfo["porosity"] = float(request.form.get("porosityInit"))
         if formInfo["optimType"] == "calcDisper":
             formInfo["AStart"] = float(request.form.get("AStart"))
@@ -734,8 +738,9 @@ def Web_Server():
             formInfo["A"] = float(request.form.get("AInit"))
         for comp in compList[flask_login.current_user.id]:
             if formInfo['optimType'] == "singlelevel":
-                formInfo[comp + "PStart"] = float(request.form.get(comp + "PStart"))
-                formInfo[comp + "PEnd"] = float(request.form.get(comp + "PEnd"))
+                if not formInfo["fixporosity"]:
+                    formInfo[comp + "PStart"] = float(request.form.get(comp + "PStart"))
+                    formInfo[comp + "PEnd"] = float(request.form.get(comp + "PEnd"))
                 formInfo[comp + "P"] = float(request.form.get(comp + "PInit"))
             formInfo[comp + "KStart"] = float(request.form.get(comp + "KStart"))
             formInfo[comp + "KEnd"] = float(request.form.get(comp + "KEnd"))
@@ -1042,8 +1047,9 @@ def Web_Server():
         formInfo['solver'] = optimparams["solver"]
         formInfo['factor'] = optimparams["factor"]
         if formInfo['optimType'] != "singlelevel":
-            formInfo["porosityStart"] = optimparams["Lvl1ParamDict"]["prange"][0]
-            formInfo["porosityEnd"] = optimparams["Lvl1ParamDict"]["prange"][1]
+            if not formInfo["fixporosity"]:
+                formInfo["porosityStart"] = optimparams["Lvl1ParamDict"]["prange"][0]
+                formInfo["porosityEnd"] = optimparams["Lvl1ParamDict"]["prange"][1]
             formInfo['porosity'] = optimparams["Lvl1ParamDict"]["pinit"]
         if formInfo["optimType"] == "calcDisper":
             formInfo["AStart"] = optimparams["Lvl1ParamDict"]["arange"][0]

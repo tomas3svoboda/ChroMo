@@ -298,3 +298,18 @@ function formExpChangeForResult(e, d){
     }
     document.getElementById(d + exp).style.display = "block"
 }
+
+function fixPorosity(){
+    let check = document.getElementById("fixporosity")
+    let divs = document.getElementsByClassName("fixporosity")
+    if (check.checked){
+        for(let i = 0; i < divs.length; i++){
+            divs[i].style.display = "none"
+        }
+    }
+    else{
+        for(let i = 0; i < divs.length; i++){
+            divs[i].style.display = "inline"
+        }
+    }
+}

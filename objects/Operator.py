@@ -197,13 +197,13 @@ class Operator:
                 resultDF.to_csv(filePath, index=False, compression=None)
                 chromatogramSelection = input("More Chromatograms?[Y - yes, N - no]")
 
-    def Web_Start(self, experimentSet, gauss, retCorr, massBal, lossFunc, solver, factor, Lvl1ParamDict, Lvl2ParamDict, spacialDiff, timeDiff, time, optimId, retThreshold, lvl1optim, lvl2optim, optimType) :
+    def Web_Start(self, experimentSet, gauss, retCorr, massBal, lossFunc, solver, factor, Lvl1ParamDict, Lvl2ParamDict, spacialDiff, timeDiff, time, optimId, retThreshold, lvl1optim, lvl2optim, optimType, fixporosity) :
         currentExperimentSet = self.Preprocess(experimentSet, gauss, retCorr, massBal, retThreshold)
         experimentClusterComp = self.Cluster_By_Component(currentExperimentSet)
         lossFunctionSelection = lossFunc
         solverSelection = solver
         factorSelection = factor
-        result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, Lvl1ParamDict, Lvl2ParamDict, lossFunctionSelection, factorSelection, solverSelection, spacialDiff, timeDiff, time, optimId, lvl1optim, lvl2optim, optimType)
+        result = Bilevel_Optim(currentExperimentSet, experimentClusterComp, Lvl1ParamDict, Lvl2ParamDict, lossFunctionSelection, factorSelection, solverSelection, spacialDiff, timeDiff, time, optimId, lvl1optim, lvl2optim, optimType, fixporosity)
         if retCorr:
             result["shifts"] = {}
             for exp in currentExperimentSet.experiments:
