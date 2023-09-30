@@ -1046,6 +1046,7 @@ def Web_Server():
         formInfo['optimType'] = optimparams["optimType"]
         formInfo['solver'] = optimparams["solver"]
         formInfo['factor'] = optimparams["factor"]
+        formInfo['fixporosity'] = optimparams["fixporosity"]
         if formInfo['optimType'] != "singlelevel":
             if not formInfo["fixporosity"]:
                 formInfo["porosityStart"] = optimparams["Lvl1ParamDict"]["prange"][0]
