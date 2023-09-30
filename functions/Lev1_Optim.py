@@ -42,8 +42,8 @@ def Lev1_Optim(experimentClustersComp, lossFunction, factor, solver, spacialDiff
                                     bnds,
                                     lvl1optim, 1)
         if fixporosity:
+            print("ERROR!!!!!!!!!!!")
             gl.lvl1ParamDict[optimId] = np.insert(gl.lvl1ParamDict[optimId], 0, gl.tmpporosity)
-            gl.bestLvl1ParamDict[optimId] = np.insert(gl.bestLvl1ParamDict[optimId], 0, gl.tmpporosity)
     if optimType == "singlelevel" or (fixporosity and optimType != "calcDisper"):
         gl.lv1LossFunctionVal[optimId] = res
     else:
