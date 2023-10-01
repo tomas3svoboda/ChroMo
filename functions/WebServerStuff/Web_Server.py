@@ -905,15 +905,19 @@ def Web_Server():
         if compForm != "all":
             compIdx = int(compForm)
             comp = list(result["lossfunctionprogress"].keys())[compIdx]
-            params = [result["porosity"], result["compparams"][comp][0], result["compparams"][comp][1]]
-            if result["optimparams"]["solver"] == "Nonlin":
-                params.append(result["compparams"][comp][2])
+            params = []
+            for param in result["bestLvl1Params"]:
+                params.append(param)
+            for param in result["bestLvl2Params"][comp]:
+                params.append(param)
         else:
             compIdx = compForm
             params = []
             for comp in result["lossfunctionprogress"].keys():
-                tmp = [result["porosity"]]
-                for param in result["compparams"][comp]:
+                tmp = []
+                for param in result["bestLvl1Params"]:
+                    tmp.append(param)
+                for param in result["bestLvl2Params"][comp]:
                     tmp.append(param)
                 params.append(tmp)
             comp = compIdx
