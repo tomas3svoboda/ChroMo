@@ -20,14 +20,11 @@ def Lev1_Loss_Function(lvl1Params, experimentClustersComp, lossFunction, factor,
     for key in experimentClustersComp.clusters:
         res = Lev2_Optim(lvl1Params, experimentClustersComp.clusters[key], key, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl2optim, optimType, fixporosity)
         sum += res
-    print("used lvl1 params", lvl1Params)
     if sum < gl.bestLvl1LossFunctionVal[optimId]:
         gl.bestLvl1LossFunctionVal[optimId] = sum
-        print("BETTER SAVING IT!")
         gl.bestLvl1ParamDict[optimId] = copy.deepcopy(lvl1Params)
         gl.bestLvl2ParamDict[optimId] = copy.deepcopy(gl.lvl2ParamDict[optimId])
         gl.bestLvl2LossFunctionVals[optimId] = copy.deepcopy(gl.lv2LossFunctionVals[optimId])
-    print("saved dict now", gl.bestLvl1ParamDict[optimId])
 
     gl.index[optimId] += 1
     print('__________________________________________')

@@ -27,23 +27,23 @@ def Lev1_Optim(experimentClustersComp, lossFunction, factor, solver, spacialDiff
     #print("Calling Lev1_Optim!")
     gl.index[optimId] = 0
     gl.bestLvl1LossFunctionVal[optimId] = math.inf
+    if fixporosity:
+            gl.tmpporosity = gl.lvl1ParamDict[optimId][0]
+            gl.lvl1ParamDict[optimId] = gl.lvl1ParamDict[optimId][1:]
     if optimType == "singlelevel" or (fixporosity and optimType != "calcDisper"):
-        res = Lev1_Loss_Function(gl.lvl1ParamDict[optimId], experimentClustersComp, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl2optim, optimType, fixporosity)
+        res = Lev1_Loss_Function(gl.lvl1ParamDict[optimId], experimentClustersComp, lossFunction, factor, solver,
+                                 spacialDiff, timeDiff, time, optimId, lvl2optim, optimType, fixporosity)
     else:
         if optimType != "calcDisper" or fixporosity:
             bnds = [(gl.lvl1RangeDict[optimId][0][0], gl.lvl1RangeDict[optimId][0][1])]
         else:
             bnds = [(gl.lvl1RangeDict[optimId][0][0], gl.lvl1RangeDict[optimId][0][1]), (gl.lvl1RangeDict[optimId][1][0], gl.lvl1RangeDict[optimId][1][1])]
-        if fixporosity:
-            gl.tmpporosity = gl.lvl1ParamDict[optimId][0]
-            gl.lvl1ParamDict[optimId] = gl.lvl1ParamDict[optimId][1:]
         res = handle_Optim_Settings(Lev1_Loss_Function, gl.lvl1ParamDict[optimId],
                                     (experimentClustersComp, lossFunction, factor, solver, spacialDiff, timeDiff, time, optimId, lvl2optim, optimType, fixporosity),
                                     bnds,
                                     lvl1optim, 1)
-        if fixporosity:
-            print("ERROR!!!!!!!!!!!")
-            gl.lvl1ParamDict[optimId] = np.insert(gl.lvl1ParamDict[optimId], 0, gl.tmpporosity)
+    if fixporosity:
+        gl.lvl1ParamDict[optimId] = np.insert(gl.lvl1ParamDict[optimId], 0, gl.tmpporosity)
     if optimType == "singlelevel" or (fixporosity and optimType != "calcDisper"):
         gl.lv1LossFunctionVal[optimId] = res
     else:
