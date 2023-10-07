@@ -27,6 +27,8 @@ from functions.solvers.Solver_Choice import Solver_Choice
 from functions.Handle_File_Creation import Handle_File_Creation
 from functions.Dead_Volume_Adjustment import Dead_Volume_Adjustment
 from functions.Dead_Volume_Preprocess import Dead_Volume_Preprocess
+from functions.singleLossFunctions.Multi_Loss_Function_Wrapper import Multi_Loss_Function_Wrapper
+from functions.handle_Optim_Settings import handle_Optim_Settings
 
 
 """
@@ -228,6 +230,68 @@ class Operator:
 
     @timeit
     def Start_For_Testing(self):
+        # !!!!!!!!!!!!! Tady vyplň !!!!!!!!!!!!!!!
+        path = "C:\\Users\\Adam\\ChroMo\\docu\\LossFunctionExperimentSet"
+        experimentSet = self.Load_Experiment_Set(path)
+        experimentSet = self.Preprocess(experimentSet, True, True, True, 0.005)
+        experimentCluster = self.Cluster_By_Component(experimentSet)
+        porosity = 0.4
+        porosity_bounds = (0.1, 0.9)
+        K_init_gal = 3
+        K_bounds_gal = (0.1, 500)
+        D_init_gal = 5
+        D_bounds_gal = (0.1, 500)
+        K_init_man = 3
+        K_bounds_man = (0.1, 500)
+        D_init_man = 5
+        D_bounds_man = (0.1, 500)
+        loss_function_type = 'Squares' # 'Simple', 'LogSimple', 'LogSquares'
+        solver = 'Lin' # 'Nonlin
+        factor = 1
+        optimInfo = {}
+        optimInfo["algorithm"] = "2" # "1" = bruteforce, "2" = neldermead, "3" = shgo
+        optimInfo["settings"] = {}
+        optimInfo["settings"]["maxiter"] = 0
+        optimInfo["settings"]["maxfev"] = 0
+        optimInfo["settings"]["xatol"] = 0
+        optimInfo["settings"]["fatol"] = 0
+        optimInfo["settings"]["aptive"] = False
+
+        spacialDiff = 30
+        timeDiff = 3000
+        time = 10800
+
+        # settings for brureforce...
+        # optimInfo["settings"]["Ns"] = 0
+
+        # settings for shgo...
+        # optimInfo["settings"]["n"] = 100
+        # optimInfo["settings"]["iters"] = 1
+        # optimInfo["settings"]["maxev"] = 0
+        # optimInfo["settings"]["maxiter"] = 0
+        # optimInfo["settings"]["maxfev"] = 0
+        # optimInfo["settings"]["maxtime"] = 0
+        # optimInfo["settings"]["f_tol"] = 0
+        # optimInfo["settings"]["f_min"] = 0
+
+
+        params = [porosity, K_init_gal, D_init_gal, K_init_man, D_init_man]
+        bnds = [porosity_bounds, K_bounds_gal, D_bounds_gal, K_bounds_man, D_bounds_man]
+        args = (loss_function_type, experimentCluster, solver, factor, spacialDiff, timeDiff, time)
+
+        result = handle_Optim_Settings(Multi_Loss_Function_Wrapper, params, args, bnds, optimInfo)
+        if optimInfo["algorithm"] == "1":
+            paramResult = result[0]
+            lossFuncValResult = result[1]
+        else:
+            paramResult = result.x
+            lossFuncValResult = result.fun
+        print(paramResult)
+        print(lossFuncValResult)
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
         #Nonlin_Solver()
         #path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
         #Single_Loss_Function(experimentSet.experiments[0])
@@ -240,15 +304,25 @@ class Operator:
         #res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, 0.52 ,12000,  8000, debugPrint=True, debugGraph=True)
         # C:\Users\Adam\ChroMo\docu\LossFunctionSingleExperiment
         # C:\Users\Adam\ChroMo\docu\LossFunctionExperimentSet
-        path = "C:\\Users\\Adam\\ChroMo\\docu\\LossFunctionExperimentSet"
-        experimentSet = self.Load_Experiment_Set(path)
+
+        '''for experiment in experimentSet.experiments:
+            head, tail = os.path.split(experiment.metadata.path)
+            print(tail)
+            print(experiment.experimentCondition.feedTime)
+            for component in experiment.experimentComponents:
+                head, tail = os.path.split(experiment.metadata.path)
+                filename, extesion = os.path.splitext(tail)
+                filepath = head + "\\" + filename + "_" + component.name + "_preprocessed.csv"
+                component.concentrationTime.to_csv(filepath, index=False, compression=None)
+            '''
+
         #Solver_Analysis(experimentSet, ["Glc", "Sac", "ManOH"], [[0.2, 10, 10], [0.2, 10, 10], [0.2, 10, 10]], "Lin")
         '''solution = Solution()
         for exp in experimentSet.experiments:
             for comp in exp.experimentComponents:
                 solution.Add_Result(comp.name, comp.experiment.metadata.path, random.random(), random.random(), random.random())
         solution.Export_To_CSV("C:\\Users\\Adam\\ChroMo\\testSolution.csv")'''
-        experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
+        '''experimentSetCopy = Deep_Copy_ExperimentSet(experimentSet)
         experimentSetGauss = Fit_Gauss(experimentSetCopy)
         experimentSetCompCond = self.Cluster_By_Condition2(experimentSetGauss)
         experimentSetCor2 = Ret_Time_Cor(experimentSetGauss, experimentSetCompCond)
@@ -260,6 +334,7 @@ class Operator:
         experimentClusterComp = self.Cluster_By_Component(experimentSetCor2)
         Loss_Function_Analysis(experimentClusterComp, component='Glc', ystart=0, yend=76, ystep=1.5, xstart=0, xend=201, xstep=4, porosityStart=0.4, porosityStep=0.2, lossFunctionChoice="Squares", logScale=True)
         Loss_Function_Analysis(experimentClusterComp, component='Glc', ystart=0, yend=76, ystep=1.5, xstart=0, xend=401, xstep=8, porosityStart=0.6, porosityStep=0.2, lossFunctionChoice="Squares", logScale=True)
+        '''
         #experimentClusterCompCond = self.Cluster_By_Condition2(experimentSetCopy)
         #experimentSetCopy = Ret_Time_Cor(experimentSetCopy, experimentClusterCompCond)
         #experimentSetCopy = Mass_Balance_Cor(experimentSetCopy, experimentSetCopy)
@@ -363,13 +438,11 @@ class Operator:
             feedVolume = float(df.iat[3, 1])
             deadVolume = float(df.iat[4, 1])
             columnNames = df.iloc[[7]].to_numpy()[0]
-            print(columnNames)
             feedConcentrations = df.iloc[[6]].replace(',','.', regex=True).to_numpy()[0][1:]
             df.drop([0, 1, 2, 3, 4, 5, 6, 7], axis=0, inplace=True)
             df.columns = columnNames
             while(not isinstance(df.columns[-1], str) ):
                 df.drop(columns=df.columns[-1],  axis=1,  inplace=True)
-            print(df.columns)
             df = df.replace(',','.', regex=True).astype(float)
             experiment = Experiment()
             experiment.metadata.date = date
