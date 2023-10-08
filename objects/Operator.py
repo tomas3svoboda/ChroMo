@@ -230,6 +230,7 @@ class Operator:
 
     @timeit
     def Start_For_Testing(self):
+
         # !!!!!!!!!!!!! Tady vyplň !!!!!!!!!!!!!!!
         path = "C:\\Users\\Adam\\ChroMo\\docu\\LossFunctionExperimentSet"
         experimentSet = self.Load_Experiment_Set(path)
@@ -239,12 +240,14 @@ class Operator:
         porosity_bounds = (0.1, 0.9)
         K_init_gal = 3
         K_bounds_gal = (0.1, 500)
-        D_init_gal = 5
-        D_bounds_gal = (0.1, 500)
+        A_init_gal = 2
+        A_bounds_gal = (0.1, 100)
+        B_gal = 0.0007
         K_init_man = 3
         K_bounds_man = (0.1, 500)
-        D_init_man = 5
-        D_bounds_man = (0.1, 500)
+        A_init_man = 2
+        A_bounds_man = (0.1, 100)
+        B_man = 0.0007
         loss_function_type = 'Squares' # 'Simple', 'LogSimple', 'LogSquares'
         solver = 'Lin' # 'Nonlin
         factor = 1
@@ -275,9 +278,10 @@ class Operator:
         # optimInfo["settings"]["f_min"] = 0
 
 
-        params = [porosity, K_init_gal, D_init_gal, K_init_man, D_init_man]
-        bnds = [porosity_bounds, K_bounds_gal, D_bounds_gal, K_bounds_man, D_bounds_man]
-        args = (loss_function_type, experimentCluster, solver, factor, spacialDiff, timeDiff, time)
+        params = [porosity, K_init_gal, A_init_gal, K_init_man, A_init_man]
+        B = [B_man, B_gal]
+        bnds = [porosity_bounds, K_bounds_gal, A_bounds_gal, K_bounds_man, A_bounds_man]
+        args = (B, loss_function_type, experimentCluster, solver, factor, spacialDiff, timeDiff, time)
 
         result = handle_Optim_Settings(Multi_Loss_Function_Wrapper, params, args, bnds, optimInfo)
         if optimInfo["algorithm"] == "1":
