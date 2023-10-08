@@ -43,7 +43,8 @@ def Lev2_Loss_Function(params, experimentCluster, fixedParams, lossFunction ='Si
         flowRate = experimentCluster[0].experiment.experimentCondition.flowRate
         diameter = experimentCluster[0].experiment.experimentCondition.columnDiameter
         flowSpeed = (flowRate * 1000 / 3600) / ((math.pi * (diameter ** 2) / 4) * fixedParams[0])
-        disperCoef = ((fixedParams[1] * diameter * flowSpeed) / (1 + flowSpeed)) + fixedParams[2]
+        #disperCoef = ((fixedParams[1] * diameter * flowSpeed) / (1 + flowSpeed)) + fixedParams[2]
+        disperCoef = (1/fixedParams[1]) * length * flowSpeed + fixedParams[2]
         if solver == "Lin":
             params2 = [fixedParams[0], params[0], disperCoef]
         elif solver == "Nonlin":
@@ -55,7 +56,8 @@ def Lev2_Loss_Function(params, experimentCluster, fixedParams, lossFunction ='Si
         flowRate = experimentCluster[0].experiment.experimentCondition.flowRate
         diameter = experimentCluster[0].experiment.experimentCondition.columnDiameter
         flowSpeed = (flowRate * 1000 / 3600) / ((math.pi * (diameter ** 2) / 4) * fixedParams[0])
-        disperCoef = ((params[1] * diameter * flowSpeed) / (1 + flowSpeed)) + fixedParams[1]
+        #disperCoef = ((params[1] * diameter * flowSpeed) / (1 + flowSpeed)) + fixedParams[1]
+        disperCoef = (1/params[1]) * length * flowSpeed + fixedParams[1]
         if solver == "Lin":
             params2 = [fixedParams[0], params[0], disperCoef]
         elif solver == "Nonlin":
