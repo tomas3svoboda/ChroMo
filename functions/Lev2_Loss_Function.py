@@ -66,6 +66,7 @@ def Lev2_Loss_Function(params, experimentCluster, fixedParams, lossFunction ='Si
         raise Exception("unknown optimization type " + optimType)
     sum = 0
     for comp in experimentCluster:
+        print(comp.name)
         head, tail = os.path.split(comp.experiment.metadata.path)
         if not optimId in gl.lossFunctionProgress:
             gl.lossFunctionProgress[optimId] = {}
