@@ -26,6 +26,10 @@ def Web_Server():
     """Class implementing all the web server functionalities."""
     matplotlib.use('Agg')
 
+    SOLVER_TIME = 10800
+    SOLVER_TIME_DIFF = 3000
+    SOLVER_SPACIAL_DIFF = 30
+
     plotFileCounter = 1
     numberOfRunningOptims = 0
     experimentSet = {}
@@ -411,11 +415,11 @@ def Web_Server():
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
         if not "spacialDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["spacialDiff"] = SOLVER_SPACIAL_DIFF
         if not "timeDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["timeDiff"] = SOLVER_TIME_DIFF
         if not "time" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["time"] = 10800
+            formInfos[flask_login.current_user.id]["time"] = SOLVER_TIME
         formInfo = formInfos[flask_login.current_user.id]
         if not flask_login.current_user.id in experimentSet:
             fetchExperimentData()
@@ -440,11 +444,11 @@ def Web_Server():
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
         if not "spacialDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["spacialDiff"] = SOLVER_SPACIAL_DIFF
         if not "timeDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["timeDiff"] = SOLVER_TIME_DIFF
         if not "time" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["time"] = 10800
+            formInfos[flask_login.current_user.id]["time"] = SOLVER_TIME
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["gauss"] = bool(request.form.get("gaussTest"))
         formInfo["retCorr"] = bool(request.form.get("retCorrTest"))
@@ -499,11 +503,11 @@ def Web_Server():
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
         if not "spacialDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["spacialDiff"] = SOLVER_SPACIAL_DIFF
         if not "timeDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["timeDiff"] = SOLVER_TIME_DIFF
         if not "time" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["time"] = 10800
+            formInfos[flask_login.current_user.id]["time"] = SOLVER_TIME
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["gauss"] = bool(request.form.get("gaussTest"))
         formInfo["retCorr"] = bool(request.form.get("retCorrTest"))
@@ -532,11 +536,11 @@ def Web_Server():
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
         if not "spacialDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["spacialDiff"] = SOLVER_SPACIAL_DIFF
         if not "timeDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["timeDiff"] = SOLVER_TIME_DIFF
         if not "time" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["time"] = 10800
+            formInfos[flask_login.current_user.id]["time"] = SOLVER_TIME
         formInfo = formInfos[flask_login.current_user.id]
         if not flask_login.current_user.id in experimentSet:
             fetchExperimentData()
@@ -604,11 +608,11 @@ def Web_Server():
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
         if not "spacialDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["spacialDiff"] = SOLVER_SPACIAL_DIFF
         if not "timeDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["timeDiff"] = SOLVER_TIME_DIFF
         if not "time" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["time"] = 10800
+            formInfos[flask_login.current_user.id]["time"] = SOLVER_TIME
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["gauss"] = bool(request.form.get("gaussTest"))
         formInfo["retCorr"] = bool(request.form.get("retCorrTest"))
@@ -646,11 +650,11 @@ def Web_Server():
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
         if not "spacialDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["spacialDiff"] = SOLVER_SPACIAL_DIFF
         if not "timeDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["timeDiff"] = SOLVER_TIME_DIFF
         if not "time" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["time"] = 10800
+            formInfos[flask_login.current_user.id]["time"] = SOLVER_TIME
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["gauss"] = bool(request.form.get("gaussTest"))
         formInfo["retCorr"] = bool(request.form.get("retCorrTest"))
@@ -688,11 +692,11 @@ def Web_Server():
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
         if not "spacialDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["spacialDiff"] = SOLVER_SPACIAL_DIFF
         if not "timeDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["timeDiff"] = SOLVER_TIME_DIFF
         if not "time" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["time"] = 10800
+            formInfos[flask_login.current_user.id]["time"] = SOLVER_TIME
         formInfo = formInfos[flask_login.current_user.id]
         if not flask_login.current_user.id in experimentSet:
             fetchExperimentData()
@@ -709,11 +713,11 @@ def Web_Server():
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
         if not "spacialDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["spacialDiff"] = SOLVER_SPACIAL_DIFF
         if not "timeDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["timeDiff"] = SOLVER_TIME_DIFF
         if not "time" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["time"] = 10800
+            formInfos[flask_login.current_user.id]["time"] = SOLVER_TIME
         formInfo = formInfos[flask_login.current_user.id]
         formInfo["expName"] = str(request.form.get("expName"))
         formInfo["gauss"] = bool(request.form.get("gauss"))
@@ -1144,11 +1148,11 @@ def Web_Server():
         if not flask_login.current_user.id in formInfos:
             formInfos[flask_login.current_user.id] = {}
         if not "spacialDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+            formInfos[flask_login.current_user.id]["spacialDiff"] = SOLVER_SPACIAL_DIFF
         if not "timeDiff" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+            formInfos[flask_login.current_user.id]["timeDiff"] = SOLVER_TIME_DIFF
         if not "time" in formInfos[flask_login.current_user.id]:
-            formInfos[flask_login.current_user.id]["time"] = 10800
+            formInfos[flask_login.current_user.id]["time"] = SOLVER_TIME
         formInfo = formInfos[flask_login.current_user.id]
         return render_template('SolverSettings.html', formInfo=formInfo, user = flask_login.current_user.id)
 
@@ -1263,11 +1267,11 @@ def Web_Server():
                 if not flask_login.current_user.id in formInfos:
                     formInfos[flask_login.current_user.id] = {}
                 if not "spacialDiff" in formInfos[flask_login.current_user.id]:
-                    formInfos[flask_login.current_user.id]["spacialDiff"] = 30
+                    formInfos[flask_login.current_user.id]["spacialDiff"] = SOLVER_SPACIAL_DIFF
                 if not "timeDiff" in formInfos[flask_login.current_user.id]:
-                    formInfos[flask_login.current_user.id]["timeDiff"] = 3000
+                    formInfos[flask_login.current_user.id]["timeDiff"] = SOLVER_TIME_DIFF
                 if not "time" in formInfos[flask_login.current_user.id]:
-                    formInfos[flask_login.current_user.id]["time"] = 10800
+                    formInfos[flask_login.current_user.id]["time"] = SOLVER_TIME
                 return render_template('Index.html', user = flask_login.current_user.id)
             return render_template('Index.html')
         username = request.form['username']
