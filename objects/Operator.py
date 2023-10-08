@@ -283,6 +283,7 @@ class Operator:
         bnds = [porosity_bounds, K_bounds_gal, A_bounds_gal, K_bounds_man, A_bounds_man]
         args = (B, loss_function_type, experimentCluster, solver, factor, spacialDiff, timeDiff, time)
 
+
         result = handle_Optim_Settings(Multi_Loss_Function_Wrapper, params, args, bnds, optimInfo)
         if optimInfo["algorithm"] == "1":
             paramResult = result[0]
