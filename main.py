@@ -5,7 +5,7 @@ import os
 if __name__ == '__main__':
     operator = Operator()
 
-    # path to directory with experiment filesggit
+    # path to directory with experiment files
     path = "C:\\Users\\Adam\\ChroMo\\docu\\LossFunctionExperimentSet"
     experimentSet = operator.Load_Experiment_Set(path)
     fit_gauss = True
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     fix_porosity = False
 
     # number of params in lvl1_dict and lvl2_dict has to match optim_type, fix_porosity and solver options combination
-    operator.Web_Start(experimentSet,
+    result = operator.Web_Start(experimentSet,
                       fit_gauss,
                       ret_time_corr,
                       mass_bal_corr,
@@ -46,3 +46,4 @@ if __name__ == '__main__':
                       optim_type,
                       fix_porosity
                       )
+    print(result)
