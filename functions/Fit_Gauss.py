@@ -9,7 +9,7 @@ def Fit_Gauss(experimentSetGauss):
     """Defines a typical gaussian function, of independent variable x,
     amplitude a, position b, width parameter c, and erf parameter d.
     """
-    print('Fitting Gauss started!')
+    #print('Fitting Gauss started!')
 
     # ---------------------Start of external code-------------------------------
     def gaussian(x, a, b, c, d):

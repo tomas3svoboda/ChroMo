@@ -4,7 +4,7 @@ import functions.global_ as gl
 def Bilevel_Optim(experimentSetCor3, experimentClustersComp, Lvl1ParamDict, Lvl2ParamDict, lossFunction, factor,
                   solver, spacialDiff=30, timeDiff=3000, time=10800, optimId=1, lvl1optim=None, lvl2optim=None, optimType=None, fixporosity=False):
     """Starts bilevel optimization"""
-    print("Calling Bilevel_Optim!")
+    #print("Calling Bilevel_Optim!")
 
     # Initialize dictionaries to store computation parameters, ranges, and loss function values
     gl.lvl2ParamDict[optimId] = {}

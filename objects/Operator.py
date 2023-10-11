@@ -299,9 +299,6 @@ class Operator:
             bnds = [K_bounds_gal, K_bounds_man]
             args = (B, loss_function_type, experimentCluster, solver, factor, spacialDiff, timeDiff, time, porosity, [A_init_gal, A_init_man])
 
-
-
-
         result = handle_Optim_Settings(Multi_Loss_Function_Wrapper, params, args, bnds, optimInfo)
         if optimInfo["algorithm"] == "1":
             paramResult = result[0]
