@@ -3,10 +3,12 @@ from functions.WebServerStuff.Web_Server import Web_Server
 import os
 
 if __name__ == '__main__':
+    Web_Server()
+
     operator = Operator()
 
     # path to directory with experiment files
-    path = "C:\\Users\\Adam\\ChroMo\\docu\\LossFunctionExperimentSet"
+    path = "C:\\Users\\asunh\\PycharmProjects\\ChroMo\\docu\\LossFunctionExperimentSet"
     experimentSet = operator.Load_Experiment_Set(path)
     fit_gauss = True
     ret_time_corr = True

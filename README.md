@@ -51,6 +51,9 @@ Application was tested on [MongoDB Community Server 6.0](https://www.mongodb.com
 5. Install requirements `pip install -r requirements.txt`.
 6. Run application `python main.py`.
 
+To run calculations without web interface, remove Web_Server() from main function.
+This will run calculation automatically with variables defined inside the main function, which you can change.
+
 ## Usage
 
 Locally run application can be accessed with browser on address `localhost:6969`.
