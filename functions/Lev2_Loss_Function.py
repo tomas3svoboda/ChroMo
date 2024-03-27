@@ -11,7 +11,18 @@ Loss Function options:
     'LogSimple' - Single_Loss_Function_LogSimple
     'LogSquares' - Single_Loss_Function_LogSquares
 """
-def Lev2_Loss_Function(params, experimentCluster, fixedParams, lossFunction ='Simple', factor = 1, solver ="Lin", spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, optimType=None, fixporosity=False):
+def Lev2_Loss_Function(params,
+                       experimentCluster,
+                       fixedParams,
+                       lossFunction ='Simple',
+                       factor = 1,
+                       solver ="Lin",
+                       spacialDiff = 30,
+                       timeDiff = 3000,
+                       time = 10800,
+                       optimId=1,
+                       optimType=None,
+                       fixporosity=False):
     """Loss function for level 2 optimization.
     Part of the parameter estimation workflow.
     """
@@ -38,36 +49,7 @@ def Lev2_Loss_Function(params, experimentCluster, fixedParams, lossFunction ='Si
                 params2 = [fixedParams[0], params[0], params[1], params[2]]
             else:
                 raise Exception("unknown solver " + solver)
-    elif optimType == "calcDisper":
-        # CALCULATE DISPERSION
-        flowRate = experimentCluster[0].experiment.experimentCondition.flowRate
-        diameter = experimentCluster[0].experiment.experimentCondition.columnDiameter
-        length = experimentCluster[0].experiment.experimentCondition.columnLength
-        flowSpeed = (flowRate * 1000 / 3600) / ((math.pi * (diameter ** 2) / 4) * fixedParams[0])
-        #disperCoef = ((fixedParams[1] * diameter * flowSpeed) / (1 + flowSpeed)) + fixedParams[2]
-        disperCoef = (1/fixedParams[1]) * length * flowSpeed + fixedParams[2]
-        if solver == "Lin":
-            params2 = [fixedParams[0], params[0], disperCoef]
-        elif solver == "Nonlin":
-            params2 = [fixedParams[0], params[0], disperCoef, params[1]]
-        else:
-            raise Exception("unknown solver " + solver)
-    elif optimType == "calcDisper2":
-        # CALCULATE DISPERSION
-        flowRate = experimentCluster[0].experiment.experimentCondition.flowRate
-        diameter = experimentCluster[0].experiment.experimentCondition.columnDiameter
-        length = experimentCluster[0].experiment.experimentCondition.columnLength
-        flowSpeed = (flowRate * 1000 / 3600) / ((math.pi * (diameter ** 2) / 4) * fixedParams[0])
-        #disperCoef = ((params[1] * diameter * flowSpeed) / (1 + flowSpeed)) + fixedParams[1]
-        disperCoef = (1/params[1]) * length * flowSpeed + fixedParams[1]
-        if solver == "Lin":
-            params2 = [fixedParams[0], params[0], disperCoef]
-        elif solver == "Nonlin":
-            params2 = [fixedParams[0], params[0], disperCoef, params[2]]
-        else:
-            raise Exception("unknown solver " + solver)
-    else:
-        raise Exception("unknown optimization type " + optimType)
+
     sum = 0
     for comp in experimentCluster:
         head, tail = os.path.split(comp.experiment.metadata.path)
@@ -77,6 +59,34 @@ def Lev2_Loss_Function(params, experimentCluster, fixedParams, lossFunction ='Si
             gl.lossFunctionProgress[optimId][comp.name] = {}
         if not tail in gl.lossFunctionProgress[optimId][comp.name]:
             gl.lossFunctionProgress[optimId][comp.name][tail] = []
+
+        if optimType == "calcDisper":
+            # CALCULATE DISPERSION
+            flowRate = comp.experiment.experimentCondition.flowRate
+            diameter = comp.experiment.experimentCondition.columnDiameter
+            length = experimentCluster[0].experiment.experimentCondition.columnLength
+            flowSpeed = (flowRate * 1000 / 3600) / ((math.pi * (diameter ** 2) / 4) * fixedParams[0])
+            #disperCoef = ((fixedParams[1] * diameter * flowSpeed) / (1 + flowSpeed)) + fixedParams[2]
+            disperCoef = (1/fixedParams[1]) * length * flowSpeed + fixedParams[2]
+            if solver == "Lin":
+                params2 = [fixedParams[0], params[0], disperCoef]
+            elif solver == "Nonlin":
+                params2 = [fixedParams[0], params[0], disperCoef, params[1]]
+            else:
+                raise Exception("unknown solver " + solver)
+        elif optimType == "calcDisper2":
+            # CALCULATE DISPERSION
+            flowRate = comp.experiment.experimentCondition.flowRate
+            diameter = comp.experiment.experimentCondition.columnDiameter
+            length = comp.experiment.experimentCondition.columnLength
+            flowSpeed = (flowRate * 1000 / 3600) / ((math.pi * (diameter ** 2) / 4) * fixedParams[0])
+            #disperCoef = ((params[1] * diameter * flowSpeed) / (1 + flowSpeed)) + fixedParams[1]
+            disperCoef = (1/params[1]) * length * flowSpeed + fixedParams[1]
+            if solver == "Lin":
+                params2 = [fixedParams[0], params[0], disperCoef]
+            elif solver == "Nonlin":
+                params2 = [fixedParams[0], params[0], disperCoef, params[2]]
+
         res = Single_Loss_Function_Choice(lossFunction, params2, comp, solver, factor, spacialDiff, timeDiff, time)
         if not optimId in gl.index:
             gl.index[optimId] = 0

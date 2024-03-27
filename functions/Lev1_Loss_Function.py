@@ -8,7 +8,18 @@ import time as t
 import datetime
 
 
-def Lev1_Loss_Function(lvl1Params, experimentClustersComp, lossFunction, factor, solver, spacialDiff = 30, timeDiff = 3000, time = 10800, optimId=1, lvl2optim=None, optimType=None, fixporosity=False):
+def Lev1_Loss_Function(lvl1Params,
+                       experimentClustersComp,
+                       lossFunction,
+                       factor,
+                       solver,
+                       spacialDiff = 30,
+                       timeDiff = 3000,
+                       time = 10800,
+                       optimId=1,
+                       lvl2optim=None,
+                       optimType=None,
+                       fixporosity=False):
     """Loss function for level 1 optimization.
     Part of the parameter estimation workflow.
     """

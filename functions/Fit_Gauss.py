@@ -3,6 +3,7 @@ import numpy as np
 from scipy.integrate import quad
 from scipy.optimize import leastsq
 from scipy.special import erf
+from scipy.interpolate import interp1d
 from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 
 def Fit_Gauss(experimentSetGauss):
@@ -38,34 +39,23 @@ def Fit_Gauss(experimentSetGauss):
             max_conc = max(data_set[:, 1])
             max_conc_index = data_set[:, 1].tolist().index(max_conc)
 
-    # Multiplier based on absolute values of concentrations ensures proper function of external code below
+            # Multiplier based on absolute values of concentrations ensures proper function of external code below
 
-            if max_conc < max_time / 2:
-                mutiplier = 5
-                data_set[:, 1] = 5 * data_set[:, 1]
-                max_conc = 5 * max_conc
-            elif max_conc < max_time / 5:
-                mutiplier = 10
-                data_set[:, 1] = 10 * data_set[:, 1]
-                max_conc = 10 * max_conc
-            elif max_conc < max_time / 50:
-                mutiplier = 100
-                data_set[:, 1] = 100 * data_set[:, 1]
-                max_conc = 100 * max_conc
-            elif max_conc < max_time / 500:
-                mutiplier = 1000
-                data_set[:, 1] = 1000 * data_set[:, 1]
-                max_conc = 1000 * max_conc
-            elif max_conc < max_time / 5000:
-                mutiplier = 10000
-                data_set[:, 1] = 10000 * data_set[:, 1]
-                max_conc = 10000 * max_conc
-            elif max_conc < max_time / 50000:
-                mutiplier = 100000
-                data_set[:, 1] = 100000 * data_set[:, 1]
-                max_conc = 100000 * max_conc
-            else:
-                mutiplier = 1
+            # Initialize multiplier
+            multiplier = 1
+
+            # Define the scaling thresholds
+            scaling_factors = [5, 10, 100, 1000, 10000, 100000]
+
+            # Loop through scaling factors in reverse (to start with the largest)
+            for factor in reversed(scaling_factors):
+                if max_conc < max_time / (factor * 10):
+                    multiplier = factor
+                    break
+
+            # Apply the multiplier to the dataset and max_conc
+            data_set[:, 1] *= multiplier
+            max_conc *= multiplier
 
             init = data_set[max_conc_index, 0] + ((data_set[max_conc_index, 0]-data_set[max_conc_index-1, 0])/3)
             initials = [[max_conc, init, 0.4, 0.0]]
@@ -82,28 +72,56 @@ def Fit_Gauss(experimentSetGauss):
             areas = dict()
             for i in range(n_value):
                 areas[i] = quad(gaussian, data_set[0, 0], data_set[-1, 0], args=(const[4*i], const[4*i+1], const[4*i+2], const[4*i+3]))[0]
-
             #---------------------------- End of External code--------------------------
 
-            time = (np.linspace(0, max_time, 60))
+            # Assuming GaussSum, const, n_value, and multiplier are defined
+            # Assuming comp.name is defined and comp is an object that has a 'name' attribute
 
-            # This chunk of code assures more dense concentration/time data during the peak is being eluted and
-            # less dense during concentration around 0 coming out of column
+            # Initial time array
+            time = np.linspace(0, max_time, 60)
+            gauss_data = GaussSum(time, const, n_value) / multiplier
 
-            gauss_data = GaussSum(time, const, n_value)/mutiplier
-            time_red = (np.linspace(0, max_time, 30))
-            n = 0
-            for i in gauss_data:
-                if i > (max_conc/60):
-                    time_red = np.append(time_red, (time[n]))
-                n += 1
+            # Identify the peak index and the value
+            peak_index = gauss_data.argmax()
+            peak_value = gauss_data[peak_index]
 
-            np.sort(time)
+            # Thresholds for peak detection
+            peak_start_threshold = 0.05 * peak_value  # Adjust this as needed for the start of the peak
+            peak_end_threshold = 0.05 * peak_value    # Adjust this as needed for the end of the peak
 
+            # Find where the peak starts and ends
+            rising_edge_index = np.where(gauss_data > peak_start_threshold)[0][0]
+            falling_edge_index = np.where(gauss_data > peak_end_threshold)[0][-1]
+
+            # Allocate time points for three density levels
+            densest_points = 20  # More points at the peak
+            intermediate_points = 15  # Intermediate number of points for the falling edge
+            less_dense_points = 5  # Few points for the baseline
+
+            # Generate time points for each region
+            time_densest = np.linspace(time[rising_edge_index], time[peak_index], densest_points)
+            time_intermediate = np.linspace(time[peak_index], time[falling_edge_index], intermediate_points)
+            time_less_dense_start = np.linspace(time[0], time[rising_edge_index], less_dense_points, endpoint=False)
+            time_less_dense_end = np.linspace(time[falling_edge_index], time[-1], less_dense_points, endpoint=False)
+
+            # Combine and sort the time arrays
+            time_red = np.sort(np.concatenate((time_less_dense_start, time_densest, time_intermediate, time_less_dense_end)))
+
+            # Remove potential duplicate time points
+            time_red = np.unique(time_red)
+
+            # Interpolate to find concentration values at new time points using the original GaussSum function
             comp_name = comp.name
-            result = pd.DataFrame({'Time': time_red, comp_name: ((GaussSum(time_red, const, n_value))/mutiplier)})
+            result = pd.DataFrame({
+                'Time': time_red,
+                comp_name: (GaussSum(time_red, const, n_value) / multiplier)
+            })
+
+            # Sort by time and adjust units if necessary
             result = result.sort_values(by=['Time'])
-            result['Time'] *= 60
+            result['Time'] *= 60  # Convert to seconds if needed
+
+            # The DataFrame 'result' now has time points with the specified three levels of density
 
             #-----------------temporary solution---------------------
 

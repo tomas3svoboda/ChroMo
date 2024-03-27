@@ -62,60 +62,34 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
     x = np.linspace(0, length, Nx)  # Preparation of space vector
     dx = length / Nx  # Calculating space step [mm]
 
-    # Define the time for which dense grid will be used considering feed time in comparison with total time
-    # If feed time is more than 1/2 of total time, then denser feed does not make sense
-    if feedTime > (time/2):
-        denserFeed = False  # denser feed does not make sense
-    elif feedTime > (time/4):
-        dense_time = feedTime + (feedTime*0.1)
-    elif feedTime > (time/8):
-        dense_time = feedTime + (feedTime*0.5)
-    elif feedTime > (time/40):
-        dense_time = feedTime + (feedTime*2.5)
-    elif feedTime > (time/80):
-        dense_time = feedTime + (feedTime*5)
-    else:
-        dense_time = feedTime + (feedTime*10)
+    denseSparseRatio = 0.5  # define ratio between dense and sparse steps
 
-    if denserFeed:
+    dense_steps = int(Nt * denseSparseRatio)  # Determine number of dense steps
+    sparse_steps = Nt - dense_steps  # Determine number of sparse steps
 
-        dense_steps = int(Nt * denseSparseRatio)  # Determine number of dense steps
-        sparse_steps = Nt - dense_steps  # Determine number of sparse steps
+    dense_time = feedTime + feedTime * ((time/feedTime)/20) # formula for calculating time of dense steps
 
-        # Create time vector with varying step sizes
-        t_dense = np.linspace(0, dense_time, dense_steps)  # Dense grid
-        t_sparse = np.linspace(dense_time, time, sparse_steps)  # Sparse grid
-        t = np.concatenate((t_dense, t_sparse))  # Combined time vector
-        dt_dense = t_dense[1] - t_dense[0]  # Time step size for dense grid
-        dt_sparse = t_sparse[1] - t_sparse[0]  # Time step size for sparse grid
+    # Create time vector with varying step sizes
+    t_dense = np.linspace(0, dense_time, dense_steps)  # Dense grid
+    t_sparse = np.linspace(dense_time, time, sparse_steps)  # Sparse grid
+    t = np.concatenate((t_dense, t_sparse))  # Combined time vector
+    dt_dense = t_dense[1] - t_dense[0] # Time step size for dense grid
+    dt_sparse = t_sparse[1] - t_sparse[0] # Time step size for sparse grid
 
-        # Constructing pulse injection feed vector
-        feedSteps = int(feedTime // dt_dense)  # Whole number of feed iterations
-        feed = np.zeros(Nt)  # Initialize feed vector
+    # Constructing pulse injection feed vector
+    feedSteps = int(feedTime // dt_dense)  # Whole number of feed iterations
+    feed = np.zeros(Nt)  # Initialize feed vector
 
-        # Set feed concentration values
-        for i in range(dense_steps):
-            if i <= feedSteps:
-                feed[i] = feedConc
-            else:
-                feed[i] = 0
-    else:
-        t = np.linspace(0, time, Nt)  # Preparation of time vector
-        dt = time / Nt  # Calculating time step [mm]
-
-        # Feed preparation
-        feedSteps = int(feedTime // dt)  # Whole number of feed iterations
-        feedTimeAprox = feedTime % dt  # aproximation of division
-        # Rounding iteration step based on defined feed parameters
-        if feedTimeAprox >= dt / 2:
-            feedSteps += 1
-        # Constructing pulse injection feed vector
-        feed = np.linspace(0, time, Nt)
-        for i in range(0, Nt):
-            if i <= feedSteps:
-                feed[i] = feedConc
-            else:
-                feed[i] = 0
+    # Set feed concentration values
+    for i in range(dense_steps):
+        if i == 0:
+            feed[i] = feedConc/2
+        elif i <= feedSteps:
+            feed[i] = feedConc
+        elif i == feedSteps+1:
+            feed[i] = feedConc/2
+        else:
+            feed[i] = 0
 
     # Preparation of the solution matrix
     c = np.zeros((Nt, Nx))
@@ -129,6 +103,10 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
     # of nonlinear algebraic equations. The solution of this system is that c1
     # which corresponds to vector f filled with zeros. c1 is unknown next time step.
     # c0 is previous calculated time step. For time 0 c0 in zeros (initial condition)
+
+    dx_squared = dx ** 2
+    dx_twice = dx * 2
+
     @jit(nopython=True)
     def function(c1,
                  c0,
@@ -148,10 +126,10 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
                             (((langmuirConst * c0[i] + 1) ** 2) * porosity) + 1)
                 denominator1 = ((1 - porosity) * saturCoef * langmuirConst) / (
                             (((langmuirConst * c1[i] + 1) ** 2) * porosity) + 1)
-                secondDer0 = (c0[i - 1] - 2 * c0[i] + c0[i + 1]) / (dx ** 2)
-                secondDer1 = (c1[i - 1] - 2 * c1[i] + c1[i + 1]) / (dx ** 2)
-                firstDer0 = (c0[i + 1] - c0[i - 1]) / (dx * 2)
-                firstDer1 = (c1[i + 1] - c1[i - 1]) / (dx * 2)
+                secondDer0 = (c0[i - 1] - 2 * c0[i] + c0[i + 1]) / (dx_squared)
+                secondDer1 = (c1[i - 1] - 2 * c1[i] + c1[i + 1]) / (dx_squared)
+                firstDer0 = (c0[i + 1] - c0[i - 1]) / (dx_twice)
+                firstDer1 = (c1[i + 1] - c1[i - 1]) / (dx_twice)
                 timeDer = (c1[i] - c0[i]) / dt
                 disperElem = ((disperCoef / denominator0 * secondDer0) + (disperCoef / denominator1 * secondDer1)) / 2
                 convElem = ((flowSpeed / denominator0 * firstDer0) + (flowSpeed / denominator1 * firstDer1)) / 2
@@ -179,7 +157,7 @@ def Nonlin_Solver(flowRate = 500,       # Volume flowrate in [mL/h]
             else:
                 dt = dt_sparse
 
-        options = {'fatol': 6e-4, 'jac_options': {'method': 'gmres'}}
+        options = {'fatol': 6e-4, 'jac_options': {'method': 'lgmres'}}
 
         sol = optimize.root(fun=function,
                             x0=c[i - 1, :],
