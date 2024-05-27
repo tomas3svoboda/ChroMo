@@ -1,80 +1,100 @@
 # Import necessary modules
 from functions.Deep_Copy_ExperimentSet import Deep_Copy_ExperimentSet
 from functions.Handle_File_Creation import Handle_File_Creation
+from scipy.integrate import simps
+import scipy.optimize
 import numpy as np
-import pandas as pd
-import scipy
 import os
 
+def calculate_component_mass(comp, feed_time, flow_rate):
+    """Calculate mass fed and mass eluted for a component."""
+    concentrations = comp.concentrationTime.iloc[:, 1].to_numpy()
+    times = comp.concentrationTime.iloc[:, 0].to_numpy()
+    # Calculate mass eluted using numerical integration in mg
+    output_mass = simps(concentrations, times) * flow_rate / 3600 # Convert flow rate from per hour to per second
+    # Calculate mass fed in mg
+    feed_mass = feed_time * comp.feedConcentration * flow_rate / 3600
+    return output_mass, feed_mass
+
+def calculate_relative_uncertainty(tau_optim, tau_new, width, n_comp):
+    if width > 0 and n_comp > 0:
+        print(abs(tau_optim - tau_new) / (np.sqrt(n_comp)))
+        return abs(tau_optim - tau_new) / (width * np.sqrt(n_comp))
+    return 0
 
 def Mass_Balance_Cor(experimentSetCor2, writeToFile=False):
-    """Function implementing mass balance correction on experiment set data."""
-    # Create a deep copy of the input experiment set to avoid modifying the original data
     experimentSetCor3 = Deep_Copy_ExperimentSet(experimentSetCor2)
+    print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+    print('Mass balance correction started...')
+    '''for exp in experimentSetCor3.experiments:
+        for comp in exp.experimentComponents:
+            print(str(exp.metadata.description) + ', ' + str(comp.name))'''
 
-    # If writeToFile is True, create a file to write the output to
     if writeToFile:
         filePath = experimentSetCor2.metadata.path + "\\Mass_Correction.txt"
         file = Handle_File_Creation(filePath)
 
-    # Loop over all experiments in the input experiment set and the deep copied version
     for exp2, exp3 in zip(experimentSetCor2.experiments, experimentSetCor3.experiments):
+        initial_feed_time = exp2.experimentCondition.feedTime * 3600
+        flow_rate = exp2.experimentCondition.flowRate
+        num_components = len(exp2.experimentComponents)
 
-        # Record the initial feed time for the experiment
-        initialFeedTime = exp2.experimentCondition.feedTime
+        def Loss_Func(feed_time):
+            output_sum = 0
+            for comp in exp2.experimentComponents:
+                output_mass, feed_mass = calculate_component_mass(comp, feed_time, flow_rate)
+                output_sum += abs(output_mass - feed_mass)
+            return output_sum
 
-        # Define a function to minimize the mass balance error by adjusting the feed time
-        def Loss_Func(feedTime):
+        # result = scipy.optimize.minimize_scalar(Loss_Func, bounds=(initial_feed_time - (initial_feed_time / 2), initial_feed_time + (initial_feed_time / 2)), method='bounded')
+        result = scipy.optimize.minimize_scalar(Loss_Func, bounds=(initial_feed_time - (initial_feed_time / 1000), initial_feed_time + (initial_feed_time * 10)), method='bounded')
+        new_feed_time = result.x
 
-            # Initialize a variable to track the total difference between the mass of input and output components
-            outputSum = 0.0
+        for comp2, comp3 in zip(exp2.experimentComponents, exp3.experimentComponents):
+            concentration_time_data = {'Time': comp2.concentrationTime.iloc[:, 0], 'Concentration': comp2.concentrationTime.iloc[:, 1]}
+            width = comp2.inflectionWidth
 
-            # Loop over all components in the experiment
-            for comp2, comp3 in zip(exp2.experimentComponents, exp3.experimentComponents):
+            def objective_function(tau, feed_concentration, flow_rate, concentration_data, times):
+                """Objective function to minimize: absolute difference between mass fed and mass eluted."""
+                mass_fed = tau * feed_concentration * flow_rate / 3600 # convert h to s
+                mass_eluted = simps(concentration_data, times) * flow_rate / 3600  # Convert flow rate from mL/h to mL/sec if time is in seconds
+                return abs(mass_fed - mass_eluted)
 
-                # Retrieve the concentration-time data for the current component in both experiments
-                df2 = comp2.concentrationTime
+            times = concentration_time_data['Time']
+            concentrations = concentration_time_data['Concentration']
+            '''res_tau_optim = scipy.optimize.minimize_scalar(
+                            objective_function,
+                            args=(new_feed_time, flow_rate, concentrations, times),
+                            method='Brent'  # Brent's method does not require bounds
+                            )
+            
+            tau_optim = res_tau_optim.x'''
+            tau_optim = (simps(concentrations, times)) / (comp2.feedConcentration)
+            uncertainty_score = calculate_relative_uncertainty(tau_optim, new_feed_time, width, num_components)
 
-                # Find the maximum concentration of the component in the experiment
-                peakVal = float(df2[comp2.name].loc[df2[comp2.name].idxmax()])
+            #print(str(uncertainty_score))
+            #print('-----preprocessing score before: ' + str(comp3.preprocessingScore))
+            comp3.preprocessingScore += uncertainty_score  # Update preprocessingScore
 
-                # Skip the component if the final concentration is greater than 1/10 of the maximum concentration, indicating incomplete reaction or adsorption
-                if float(df2[comp2.name].iat[-1]) > peakVal / 10 or float(
-                        df2[comp2.name].iat[-2]) > peakVal / 10 or float(df2[comp2.name].iat[-3]) > peakVal / 10:
-                    continue
+            # ZERO RESIDUALS____________________________________________________________________________________________
+            # Assuming experimentComp is defined
+            df = comp3.concentrationTime
+            # Model predictions are zero
+            zeros_interpolated = np.zeros_like(df.iloc[:, 1].to_numpy())
+            # Compute squared error sum using experimental data normalized by max outlet concentration and weighted by uncertainty score
+            zero_err_sum = np.sum((df.iloc[:, 1].to_numpy() - zeros_interpolated)**2) / (df[comp3.name].max() ** 2) / comp3.preprocessingScore / np.sqrt(len(df[comp3.name]))
+            comp3.zeroSumOfResiduals = zero_err_sum
+            #print('Zero peak objective: ' + str(zero_err_sum))
+            #___________________________________________________________________________________________________________
 
-                # Calculate the mass of the component in the output stream using trapezoidal integration of the concentration-time curve
-                trapzRes = np.trapz(x=df2.iloc[:, 0].to_numpy(), y=df2.iloc[:, 1].to_numpy())
-                comp_output_mass = trapzRes * exp2.experimentCondition.flowRate / 3600  # [mg]
+            if writeToFile:
+                experimentName = os.path.splitext(os.path.basename(exp3.metadata.path))[0]
+                file.write(f"Experiment: {experimentName}, Component: {comp3.name}, Original Feed Time: {initial_feed_time:.2f}s, New Feed Time: {new_feed_time:.2f}s, Uncertainty Score: {uncertainty_score:.4f}\n")
 
-                # Calculate the mass of the component in the input stream using the current feed time and feed concentration
-                comp_feed_mass = feedTime * comp2.feedConcentration * exp2.experimentCondition.flowRate  # feedTime in [h], result in [mg]
+        exp3.experimentCondition.originalFeedTime = initial_feed_time / 3600
+        exp3.experimentCondition.feedTime = new_feed_time / 3600
 
-                # Add the difference between the input and output masses to the total difference
-                outputSum += abs(comp_output_mass - comp_feed_mass)
-
-            # Return the total difference between the input and output masses
-            return outputSum
-
-        # Minimize the mass balance error using the Loss_Func function and the initial feed time as the starting point
-        newFeedTime = scipy.optimize.minimize_scalar(Loss_Func, bounds=(
-        initialFeedTime - (initialFeedTime / 2), initialFeedTime + (initialFeedTime / 2)), method='bounded')
-
-        # If writeToFile is True, write the results of the mass balance correction to the output file
-        if writeToFile:
-            head, tail = os.path.split(exp3.metadata.path)
-            experimentName, extesion = os.path.splitext(tail)
-            file.write("Experiment: " + experimentName + ", Original Feed Time: " + str(exp3.experimentCondition.feedTime*3600) + "s, New Feed Time: " + str(newFeedTime.x*3600) + "s\n")
-
-        # Save original feed time
-        exp3.experimentCondition.originalFeedTime = exp3.experimentCondition.feedTime
-
-        # Save calculated new feed time
-        exp3.experimentCondition.feedTime = newFeedTime.x
-
-    # If writeToFile is True, close output file
     if writeToFile:
         file.close()
 
-    # Return experiment set with adjusted feed times
     return experimentSetCor3

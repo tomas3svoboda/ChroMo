@@ -1,31 +1,16 @@
 from functions.Handle_File_Creation import Handle_File_Creation
 import pandas as pd
 from scipy.optimize import minimize
-import numpy as np
 import os
 import math
-
-def calculate_theoretical_shifts(component, avg_peak_times, num_experiments):
-    original_peak_time = component.concentrationTime.iloc[component.concentrationTime[component.name].idxmax(), 0]
-    avg_peak_time = avg_peak_times[component.name]
-    # Calculate the peak width using the inflection points method
-    peak_width = component.inflectionWidth
-    if num_experiments > 1 and peak_width > 0:
-        abs_difference = abs(original_peak_time - avg_peak_time)
-        relative_shift = abs_difference / (peak_width * np.sqrt(num_experiments))
-    else:
-        relative_shift = 0
-        print('No retention time shift score can be assigned!')
-    return relative_shift
 
 
 def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold=0, writeToFile=False):
     """Function implementing retention time correction on experiment set data."""
-    print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-    print('Retention time correction started...')
     # If writeToFile flag is set, create a file to write output to
     if writeToFile:
         filePath = experimentSet.metadata.path + "\\Time_Shifts.txt"
+        print(filePath)
         file = Handle_File_Creation(filePath)
 
     # Calculate maximum negative shifts for each experiment to not lose non-zero values
@@ -71,13 +56,6 @@ def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold=0, writeToFile=
                 peakTimeSum += peakTime
             peakTimeAvg = peakTimeSum / len(value2)
             avgPeakTimes[key2] = peakTimeAvg
-            for comp in value2:
-                theoretical_shift = calculate_theoretical_shifts(comp, avgPeakTimes, len(value2))
-                #print(str(theoretical_shift))
-                #print('comp:' + str(comp.name) + ';  RELATIVE THEORETICAL SHIFT: ' + str(theoretical_shift) + '; numb of exp in CLUSTER: ' + str(len(value2)))
-                #print('-----preprocessing score before: ' + str(comp.preprocessingScore))
-                comp.preprocessingScore += theoretical_shift
-                #print('-----preprocessing score after: ' + str(comp.preprocessingScore))
         initalGuess = list()
         bounds = list()
         for exp in value[0]:

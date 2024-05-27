@@ -14,13 +14,24 @@ def Single_Loss_Function_Squares(params, experimentComp, solver, factor, spacial
     f = interp1d(time, modelCurve, fill_value="extrapolate")
     modelCurveInterpolated = f(df.iloc[:, 0].to_numpy())
     tmpErrSum = 0
-    max = 0
+    max_a = 0
+    max_b = 0
+
     for a, b in zip(df.iloc[:, 1].to_numpy(), modelCurveInterpolated):
         err = ((a-b)**2)
         tmpErrSum += err
-        if (factor == 2 or factor == 3) and a > max:
-            max = a
+        '''if (factor == 2 or factor == 3) and b > max_b:
+            max_b = b'''
+        if (factor == 2 or factor == 3) and a > max_a:
+            max_a = a
+
+    '''if max_a > max_b:
+        max = max_a
+    else:
+        max = max_b'''
+    max = max_a
     errSum += tmpErrSum
+
     if factor == 1:
         errSum = errSum/1
     elif factor == 2:
@@ -35,4 +46,12 @@ def Single_Loss_Function_Squares(params, experimentComp, solver, factor, spacial
         errSum = errSum/(experimentComp.experiment.experimentCondition.feedVolume * experimentComp.feedConcentration)
     elif factor == 7:
         errSum = errSum/((experimentComp.experiment.experimentCondition.feedVolume * experimentComp.feedConcentration)**2)
+
+    # Division square root of the number of elements
+    errSum = errSum / np.sqrt(len(df[experimentComp.name]))
+
+    # WEIGHTING BY PREPROCESSING SCORE
+    if experimentComp.preprocessingScore > 0:
+        errSum = errSum / experimentComp.preprocessingScore
+
     return errSum

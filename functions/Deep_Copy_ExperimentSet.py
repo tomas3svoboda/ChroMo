@@ -25,6 +25,7 @@ def Deep_Copy_ExperimentSet(experimentSet):
             newExperimentComponent.name = experimentComponent.name
             newExperimentComponent.feedConcentration = experimentComponent.feedConcentration
             newExperimentComponent.experiment = newExperiment
+            newExperimentComponent.preprocessingScore = experimentComponent.preprocessingScore
             newExperiment.experimentComponents.append(newExperimentComponent)
         newExperimentSet.experiments.append(newExperiment)
     return newExperimentSet

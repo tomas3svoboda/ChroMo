@@ -441,7 +441,7 @@ class Operator:
         experimentSet.experiments.append(experiment)
 
 
-    def Load_Experiment_Set(self, path):
+    '''def Load_Experiment_Set(self, path):
         experimentSet = ExperimentSet()
         experimentSet.metadata.path = path
         experimentSet.metadata.date = datetime.date.today().strftime("%m/%d/%Y")
@@ -449,7 +449,7 @@ class Operator:
         for file in filenames:
             if not (file.endswith(".xlsx") or file.endswith(".xls") or file.endswith(".csv")):
                 continue
-            df = pd.read_excel(path + "\\" + file)
+            df = pd.read_excel(path + '/' + file)
             description = df.iat[0, 3]
             date = df.iat[2, 3]
             columnLength = float(df.iat[0, 1])
@@ -479,6 +479,54 @@ class Operator:
                 experimentComponent.concentrationTime['Time'] = experimentComponent.concentrationTime['Time'].apply(lambda x: x*60)
                 experimentComponent.concentrationTime.reset_index(inplace=True, drop=True)
                 experimentComponent.name = columnNames[1+index]
+                experimentComponent.feedConcentration = float(feedConcentrations[index])
+                experimentComponent.experiment = experiment
+                experiment.experimentComponents.append(experimentComponent)
+            experimentSet.experiments.append(experiment)
+        return experimentSet'''
+
+    def Load_Experiment_Set(self, path):
+        experimentSet = ExperimentSet()
+        experimentSet.metadata.path = path
+        experimentSet.metadata.date = datetime.date.today().strftime("%m/%d/%Y")
+        filenames = next(os.walk(path), (None, None, []))[2]
+        for file in filenames:
+            if not (file.endswith(".xlsx") or file.endswith(".xls") or file.endswith(".csv")):
+                continue
+            if file.startswith("~$"):
+                print(f"Skipping temporary file: {file}")
+                continue
+            print(f"Loading file: {file}")
+            df = pd.read_excel(os.path.join(path, file))
+            description = df.iat[0, 3]
+            date = df.iat[2, 3]
+            columnLength = float(df.iat[0, 1])
+            columnDiameter = float(df.iat[1, 1])
+            flowRate = float(df.iat[2, 1])
+            feedVolume = float(df.iat[3, 1])
+            deadVolume = float(df.iat[4, 1])
+            columnNames = df.iloc[[7]].to_numpy()[0]
+            feedConcentrations = df.iloc[[6]].replace(',','.', regex=True).to_numpy()[0][1:]
+            df.drop([0, 1, 2, 3, 4, 5, 6, 7], axis=0, inplace=True)
+            df.columns = columnNames
+            while not isinstance(df.columns[-1], str):
+                df.drop(columns=df.columns[-1], axis=1, inplace=True)
+            df = df.replace(',', '.', regex=True).astype(float)
+            experiment = Experiment()
+            experiment.metadata.date = date
+            experiment.metadata.description = description
+            experiment.metadata.path = os.path.join(path, file)
+            experiment.experimentCondition.flowRate = float(flowRate)
+            experiment.experimentCondition.feedVolume = float(feedVolume)
+            experiment.experimentCondition.deadVolume = float(deadVolume)
+            experiment.experimentCondition.columnLength = float(columnLength)
+            experiment.experimentCondition.columnDiameter = float(columnDiameter)
+            for index in range(df.columns[1:].size):
+                experimentComponent = ExperimentComponent()
+                experimentComponent.concentrationTime = df.iloc[:, [0, 1 + index]].astype(float)
+                experimentComponent.concentrationTime['Time'] = experimentComponent.concentrationTime['Time'].apply(lambda x: x * 60)
+                experimentComponent.concentrationTime.reset_index(inplace=True, drop=True)
+                experimentComponent.name = columnNames[1 + index]
                 experimentComponent.feedConcentration = float(feedConcentrations[index])
                 experimentComponent.experiment = experiment
                 experiment.experimentComponents.append(experimentComponent)
@@ -601,9 +649,9 @@ class Operator:
         return False
 
     """
-    Calculates if exp2 is close to exp1 with tolerance(default 0.05)
+    Calculates if exp2 is close to exp1 with tolerance(default 0.01)
     """
-    def Cluster_Match_Exp(self, exp1, exp2, tolerance = 0.1):
+    def Cluster_Match_Exp(self, exp1, exp2, tolerance = 0.01):
         cond1 = exp1.experimentCondition
         cond2 = exp2.experimentCondition
         if(abs(cond1.flowRate - cond2.flowRate) < tolerance * cond1.flowRate and

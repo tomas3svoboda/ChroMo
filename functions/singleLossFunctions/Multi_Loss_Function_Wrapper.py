@@ -1,8 +1,19 @@
 from functions.singleLossFunctions.Single_Loss_Function_Choice import Single_Loss_Function_Choice
+
 import math
 
 
-def Multi_Loss_Function_Wrapper(params, B, choice, experimentCluster, solver = 'Lin', factor = 1, spacialDiff = 30, timeDiff = 3000, time = 10800, fixedPorosity = 0, fixedA = []):
+def Multi_Loss_Function_Wrapper(params, # model parameters
+                                B, # fixed diffusion coefficient - used with Bodenstein number to calculate dispersion coefficient
+                                choice, # choice of loss function
+                                experimentCluster, # data
+                                solver = 'Lin', # solver selection
+                                factor = 3, # normalization factor
+                                spacialDiff = 30, # number of spacial differences
+                                timeDiff = 3000, # number of time differences
+                                time = 10800, # time span in seconds
+                                fixedPorosity = 0, # fixed porosity value
+                                fixedA = []): # Bodenstein number - is recalculated to dispersion coefficient
     """Function allowing to choose between loss function based on choice parameter
     Choices:
     'Simple' - Single_Loss_Function_Simple
