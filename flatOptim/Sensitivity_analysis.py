@@ -144,11 +144,11 @@ experimentCluster_preprocessed = operator_instance.Cluster_By_Component(experime
 
 # Example usage:
 porosity = 0.3752
-B = [32, 32]  # Example Bodenstein numbers for two experiments
-langmuirConst_range = (0.266608, 0.266610)
-saturCoef_range = (9.650525, 9.650527)
-steps_langmuirConst = 2
-steps_saturCoef = 2
+B = [17, 17]  # Example Bodenstein numbers for two experiments
+langmuirConst_range = (0.01, 1.01)
+saturCoef_range = (5.0, 45.0)
+steps_langmuirConst = 20
+steps_saturCoef = 40
 choice = 'Squares'  # Example loss function choice
 solver = 'Nonlin'
 factor = 3
@@ -156,7 +156,7 @@ spacialDiff = 30
 timeDiff = 3000
 total_time = 10800
 output_file = 'sensitivity_analysis_results.xlsx'
-component_names = ['Suc']  # Name of the component to analyze
+component_names = ['Suc', 'Glu']  # Name of the component to analyze
 
 # Perform sensitivity analysis and save results to Excel
 for comp_name in component_names:
