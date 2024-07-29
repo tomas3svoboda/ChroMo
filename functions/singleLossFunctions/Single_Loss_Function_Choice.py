@@ -24,6 +24,8 @@ def Single_Loss_Function_Choice(choice, params, experimentComp, solver = 'Lin', 
             res = Single_Loss_Function_LogSimple(params, experimentComp, solver, factor, spacialDiff, timeDiff, time)
         elif choice == 'LogSquares':
             res = Single_Loss_Function_LogSquares(params, experimentComp, solver, factor, spacialDiff, timeDiff, time)
+        elif choice == 'ZERO':
+            res = Single_Loss_Function_Squares(params, experimentComp, solver, factor, spacialDiff, timeDiff, time)
         else:
             raise Exception('Unknown Loss function in Single_Loss_Function_Choice')
         return res

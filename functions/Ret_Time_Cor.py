@@ -90,6 +90,8 @@ def Ret_Time_Cor(experimentSet, experimentClustersExp, threshold=0, writeToFile=
                 df = comp.concentrationTime
                 df.iloc[:, 0] += res.x[idx]
                 df.drop(df[df['Time'] < 0].index, inplace=True)
+
+                #df.to_excel(comp.name + exp.metadata.description + '.xlsx', index=False)
             exp.shift = res.x[idx]
             if writeToFile:
                 head2, tail2 = os.path.split(exp.metadata.path)

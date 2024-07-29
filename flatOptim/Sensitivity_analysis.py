@@ -130,11 +130,11 @@ operator_instance = Operator()
 
 #this parts loads experiment set from the folder, creates all the data handling objects and also does preprocessing
 
-path = 'C:/UserData/z004d8nt/Documents/VSCHT/001_Paper_JChA/Paper1_Data/Suc_Glu_GE_Copy'
+path = 'C:/UserData/z004d8nt/Documents/VSCHT/001_Paper_JChA/Paper1_Data/Suc_Glu_GE'
 experimentSet = operator_instance.Load_Experiment_Set(path)  #create object of the set of experiments
 experimentCluster = operator_instance.Cluster_By_Component(experimentSet).clusters  # creates new object where components are clustered together
 print('Starting preprocessing')
-experimentSet_preprocessed = operator_instance.Preprocess(experimentSet, True, True, True, 0.01)  # does preprocessing
+experimentSet_preprocessed = operator_instance.Preprocess(experimentSet, False, False, False, 0.01)  # does preprocessing
 print('Preprocessing done')
 experimentCluster_preprocessed = operator_instance.Cluster_By_Component(experimentSet_preprocessed).clusters  # creates new object where components are clustered together
 
@@ -142,21 +142,23 @@ experimentCluster_preprocessed = operator_instance.Cluster_By_Component(experime
 #chromatogram itself and information about the experiment setup, namely feed volume and concentration, column lenght,
 #column diameter, flow rate, and commentary'''
 
-# Example usage:
+# Define params and grid:
 porosity = 0.3752
 B = [17, 17]  # Example Bodenstein numbers for two experiments
-langmuirConst_range = (0.01, 1.01)
-saturCoef_range = (5.0, 45.0)
-steps_langmuirConst = 20
-steps_saturCoef = 40
+langmuirConst_range = (0.11, 0.142)
+saturCoef_range = (10, 36)
+#steps_langmuirConst = 40
+#steps_saturCoef = 40
+steps_langmuirConst = 5
+steps_saturCoef = 53
 choice = 'Squares'  # Example loss function choice
 solver = 'Nonlin'
 factor = 3
 spacialDiff = 30
 timeDiff = 3000
 total_time = 10800
-output_file = 'sensitivity_analysis_results.xlsx'
-component_names = ['Suc', 'Glu']  # Name of the component to analyze
+output_file = 'sensitivity_analysis_noPP_Glu2.xlsx'
+component_names = ['Glu']  # Name of the component to analyze
 
 # Perform sensitivity analysis and save results to Excel
 for comp_name in component_names:

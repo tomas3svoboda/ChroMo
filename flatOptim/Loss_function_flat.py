@@ -6,6 +6,7 @@ from scipy.interpolate import interp1d
 import time
 import pandas as pd
 from datetime import timedelta
+import numpy as np
 
 
 class LossFunctionWrapper:
@@ -23,11 +24,11 @@ class LossFunctionWrapper:
             columns += [f'L_{name}' for name in component_names] + [f'S_{name}' for name in component_names]
         self.details_df = pd.DataFrame(columns=columns)
 
-    def __call__(self, params, component_names_all, flow_rates, diameters, lengths, feed_volumes, concentrations, chromatograms):
+    def __call__(self, params, component_names_all, flow_rates, diameters, lengths, feed_volumes, concentrations, chromatograms, uncertainties):
         if self.is_linear:
-            value = Lin_loss_function_flat(params, component_names_all, flow_rates, diameters, lengths, feed_volumes, concentrations, chromatograms)
+            value = Lin_loss_function_flat(params, component_names_all, flow_rates, diameters, lengths, feed_volumes, concentrations, chromatograms, uncertainties)
         else:
-            value = Nonlin_loss_function_flat(params, component_names_all, flow_rates, diameters, lengths, feed_volumes, concentrations, chromatograms)
+            value = Nonlin_loss_function_flat(params, component_names_all, flow_rates, diameters, lengths, feed_volumes, concentrations, chromatograms, uncertainties)
 
         # Update the running minimum objective value if the current value is lower
         self.min_objective_value = min(self.min_objective_value, value)
@@ -47,7 +48,7 @@ class LossFunctionWrapper:
 
         return value
 
-def Lin_loss_function_flat(params, component_names_all, flow_rates, diameters, lengths, feed_volumes, concentrations, chromatograms):
+def Lin_loss_function_flat(params, component_names_all, flow_rates, diameters, lengths, feed_volumes, concentrations, chromatograms, uncertainties):
     dispCorrelParam = params[-1]  # Universal dispersion parameter at the end
     porosity = 0.3752
     results = []
@@ -90,11 +91,11 @@ def Lin_loss_function_flat(params, component_names_all, flow_rates, diameters, l
             tmpErrSum += err
             if a > max:
                 max = a
-        tmpErrSum = tmpErrSum/(max**2)
+        tmpErrSum = tmpErrSum/(max**2)/(uncertainties[i] * np.sqrt(df.shape[0]))
         errSum += tmpErrSum
     return errSum
 
-def Nonlin_loss_function_flat(params, component_names_all, flow_rates, diameters, lengths, feed_volumes, concentrations, chromatograms):
+def Nonlin_loss_function_flat(params, component_names_all, flow_rates, diameters, lengths, feed_volumes, concentrations, chromatograms, uncertainties):
     dispCorrelParam = params[-1]  # Universal dispersion parameter at the end
     porosity = 0.3752
     errSum = 0
@@ -142,7 +143,7 @@ def Nonlin_loss_function_flat(params, component_names_all, flow_rates, diameters
             tmpErrSum += err
             if a > max:
                 max = a
-        tmpErrSum = tmpErrSum/(max**2)
+        tmpErrSum = tmpErrSum/(max**2)/(uncertainties[i] * np.sqrt(df.shape[0]))
         errSum += tmpErrSum
     return errSum
 

@@ -200,6 +200,7 @@ def Fit_Gauss(experimentSetGauss):
             # Identify the peak index and the value
             peak_index = high_res_gauss_data.argmax()
             peak_value = high_res_gauss_data[peak_index]
+            peak_time = high_res_time[peak_index]
 
             # Thresholds for peak detection
             peak_start_threshold = 0.05 * peak_value  # Adjust this as needed for the start of the peak
@@ -292,6 +293,7 @@ def Fit_Gauss(experimentSetGauss):
 
             # The DataFrame 'result' now has time points with the specified three levels of density
             comp.concentrationTime = result
+            print(comp.concentrationTime.shape[0])
 
             # PEAK WIDTH__________________________________________________________________________________________
             '''high_res_concentarionTime = pd.DataFrame({
@@ -313,7 +315,7 @@ def Fit_Gauss(experimentSetGauss):
             #uncertainty = np.var(res) / (max_abs_value ** 2)
             #uncertainty = np.std(res) / np.var(res)
 
-            print(str(uncertainty))
+            #print(str(uncertainty))
             #print('Exp, comp:' + str(exp.metadata.description) + ', ' + str(comp.name) + '; FIT GAUSS UNCERTAINTY VALUE: ' + str(uncertainty))
             comp.preprocessingScore = uncertainty
             #print('-----preprocessing score after: ' + str(comp.preprocessingScore))

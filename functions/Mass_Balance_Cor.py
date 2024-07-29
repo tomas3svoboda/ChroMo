@@ -18,7 +18,7 @@ def calculate_component_mass(comp, feed_time, flow_rate):
 
 def calculate_relative_uncertainty(tau_optim, tau_new, width, n_comp):
     if width > 0 and n_comp > 0:
-        print(abs(tau_optim - tau_new) / (np.sqrt(n_comp)))
+        #print(abs(tau_optim - tau_new) / (np.sqrt(n_comp)))
         return abs(tau_optim - tau_new) / (width * np.sqrt(n_comp))
     return 0
 
@@ -84,6 +84,8 @@ def Mass_Balance_Cor(experimentSetCor2, writeToFile=False):
             # Compute squared error sum using experimental data normalized by max outlet concentration and weighted by uncertainty score
             zero_err_sum = np.sum((df.iloc[:, 1].to_numpy() - zeros_interpolated)**2) / (df[comp3.name].max() ** 2) / comp3.preprocessingScore / np.sqrt(len(df[comp3.name]))
             comp3.zeroSumOfResiduals = zero_err_sum
+            max_index = df[comp3.name].idxmax()
+            print(df.loc[max_index, 'Time'])
             #print('Zero peak objective: ' + str(zero_err_sum))
             #___________________________________________________________________________________________________________
 

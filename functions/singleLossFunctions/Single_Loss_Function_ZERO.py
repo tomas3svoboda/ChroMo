@@ -10,6 +10,8 @@ def Single_Loss_Function_Squares(params, experimentComp, solver, factor, spacial
     df = experimentComp.concentrationTime
     model = Solver_Choice(solver, params, experimentComp, spacialDiff, timeDiff, time)
     modelCurve = model[0][:, -1]
+    # replace model curve by ZEROS!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    modelCurve = np.zeros(modelCurve.shape)
     time = model[1]
     f = interp1d(time, modelCurve, fill_value="extrapolate")
     modelCurveInterpolated = f(df.iloc[:, 0].to_numpy())
@@ -52,7 +54,6 @@ def Single_Loss_Function_Squares(params, experimentComp, solver, factor, spacial
 
     # WEIGHTING BY PREPROCESSING SCORE
     if experimentComp.preprocessingScore > 0:
-        #print('NUMBER OF POINTS: ' + str(experimentComp.concentrationTime.shape[0]))
-        errSum = errSum / (experimentComp.preprocessingScore * np.sqrt(experimentComp.concentrationTime.shape[0]))
+        errSum = errSum / experimentComp.preprocessingScore
 
     return errSum

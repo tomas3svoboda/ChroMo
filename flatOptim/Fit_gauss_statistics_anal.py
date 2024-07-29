@@ -10,7 +10,7 @@ operator_instance = Operator()
 
 #this parts loads experiment set from the folder, creates all the data handling objects and also does preprocessing
 
-path = 'C:/UserData/z004d8nt/Documents/VSCHT/001_Paper_JChA/Paper1_Data/Suc_Glu_GE_Copy/'
+path = 'C:/UserData/z004d8nt/Documents/VSCHT/001_Paper_JChA/Paper1_Data/Suc_Glu_GE/'
 experimentSet = operator_instance.Load_Experiment_Set(path)  #create object of the set of experiments
 experimentCluster = operator_instance.Cluster_By_Component(experimentSet).clusters  # creates new object where components are clustered together
 print('Starting preprocessing')
@@ -61,7 +61,7 @@ flow_rates_per_min = np.array(flow_rates) / 60
 # Extracting the Time and A columns as numpy arrays
 dead_times = np.array(dead_volumes) / flow_rates_per_min
 
-chromatogram = chromatograms[11]
+chromatogram = chromatograms[12]
 
 print('Number of available chromatograms: ' + str(len(chromatograms)))
 
@@ -165,7 +165,7 @@ output_samples = np.array([gaussian(time, *params) for params in param_samples])
 lower_percentile = np.percentile(output_samples, 2.5, axis=0)
 upper_percentile = np.percentile(output_samples, 97.5, axis=0)
 
-plt.figure(figsize=(10, 6))
+'''plt.figure(figsize=(10, 6))
 plt.plot(time, concentration, 'b-', label='Original Data')
 plt.plot(time, fitted_concentration, 'r--', label='Fitted Curve')
 plt.fill_between(time, lower_percentile, upper_percentile, color='gray', alpha=0.2, label='95% Confidence Area')
@@ -173,6 +173,43 @@ plt.legend()
 plt.xlabel('Time (min)')
 plt.ylabel('Concentration (scaled)')
 plt.title('Fitted Curve with 95% Confidence Area')
+plt.show()'''
+
+# Set the font to Times New Roman and increase font size for better readability
+plt.rcParams['font.family'] = 'Times New Roman'
+plt.rcParams['font.size'] = 14  # Adjust the font size as needed
+
+# Create a figure and axis with a specific size suitable for fitting three plots on an A4 sheet
+plt.figure(figsize=(6, 4))
+
+# Plot the original data as red squares
+plt.plot(time, concentration, 'rs', label='Original Data')
+
+# Plot the fitted curve as a solid blue line
+plt.plot(time, fitted_concentration, 'b-', linewidth=2, label='Fitted Curve')
+
+# Fill the area between the lower and upper percentiles
+plt.fill_between(time, lower_percentile, upper_percentile, color='gray', alpha=0.2, label='95% Confidence Area')
+
+# Add a legend with best location
+#plt.legend(loc='best', fontsize=12)  # Increase legend font size
+
+# Remove the grid
+plt.grid(False)
+
+# Label the axes
+plt.xlabel('Time (min)', fontsize=16)  # Increase label font size
+plt.ylabel('Concentration [g/L]', fontsize=16)  # Increase label font size
+
+# Increase the size of tick labels
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+
+# Set the limits for axes to start at 0 and end at 180 for the x-axis
+plt.xlim(0, 180)
+plt.ylim(min(lower_percentile), max(upper_percentile))
+
+# Display the plot
 plt.show()
 
 # Calculate deviations
