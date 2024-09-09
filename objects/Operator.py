@@ -232,7 +232,7 @@ class Operator:
     def Start_For_Testing(self):
 
         # !!!!!!!!!!!!! Tady vyplň !!!!!!!!!!!!!!!
-        path = "C:\\Users\\Adam\\ChroMo\\docu\\LossFunctionExperimentSet"
+        path = "C:\\Users\\Adam\\ChroMo\\data\\LossFunctionExperimentSet"
         experimentSet = self.Load_Experiment_Set(path)
         experimentSet = self.Preprocess(experimentSet, True, True, True, 0.005)
         experimentCluster = self.Cluster_By_Component(experimentSet)
@@ -313,7 +313,7 @@ class Operator:
 
 
         #Nonlin_Solver()
-        #path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\docu\\TestExperimentSet1"
+        #path = "C:\\Users\\z004d8nt\\PycharmProjects\\ChoMo\\data\\TestExperimentSet1"
         #Single_Loss_Function(experimentSet.experiments[0])
         #experimentSetCopy = Fit_Gauss(experimentSetCopy)
         #Compare_ExperimentSets(experimentSet, experimentSetCopy)
@@ -322,8 +322,8 @@ class Operator:
         #cond = experimentSetCopy.experiments[0].experimentCondition
         #print(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration)
         #res = Lin_Solver(cond.flowRate, cond.columnLength, cond.columnDiameter, cond.feedVolume, comp.feedConcentration, 0.52 ,12000,  8000, debugPrint=True, debugGraph=True)
-        # C:\Users\Adam\ChroMo\docu\LossFunctionSingleExperiment
-        # C:\Users\Adam\ChroMo\docu\LossFunctionExperimentSet
+        # C:\Users\Adam\ChroMo\data\LossFunctionSingleExperiment
+        # C:\Users\Adam\ChroMo\data\LossFunctionExperimentSet
 
         '''for experiment in experimentSet.experiments:
             head, tail = os.path.split(experiment.metadata.path)

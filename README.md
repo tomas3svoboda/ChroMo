@@ -60,7 +60,7 @@ Locally run application can be accessed with browser on address `localhost:6969`
 
 First you'll need to create an account and log in.
 
-After logging in, you will be redirected to page where you upload the files with the experimental data. Example file can be found [here](docu/TestExperimentSet1/TestExperiment1.xlsx).
+After logging in, you will be redirected to page where you upload the files with the experimental data. Example file can be found [here](data/Suc_Glu_GE).
 
 Then you can choose between "Loss Function Analysis", "Manual Estimator" and "Optimization".
 

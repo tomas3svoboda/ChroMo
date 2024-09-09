@@ -41,7 +41,7 @@ def Web_Server():
 
 
     BASE_FOLDER = os.getcwd()
-    UPLOAD_FOLDER = BASE_FOLDER + '/docu/TestUploadFolder'
+    UPLOAD_FOLDER = BASE_FOLDER + '/data/TestUploadFolder'
 
     ALLOWED_EXTENSIONS = {'xlsx', 'xls', 'csv'}
 
@@ -1180,7 +1180,7 @@ def Web_Server():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(api.config['UPLOAD_FOLDER']  + '/' + flask_login.current_user.id, filename))
-            jsonString = Serialize_File_To_JSON(BASE_FOLDER + "/docu/TestUploadFolder/" + flask_login.current_user.id + "/" + filename)
+            jsonString = Serialize_File_To_JSON(BASE_FOLDER + "/data/TestUploadFolder/" + flask_login.current_user.id + "/" + filename)
             newExperiment = DBExperiment(uniquename=flask_login.current_user.id + "/" + filename, name=filename, experiment=jsonString)
             try:
                 with db_mutex:

@@ -8,7 +8,7 @@ if __name__ == '__main__':
     operator = Operator()
 
     # path to directory with experiment files
-    path = "C:\\Users\\asunh\\PycharmProjects\\ChroMo\\docu\\LossFunctionExperimentSet"
+    path = "C:\\Users\\asunh\\PycharmProjects\\ChroMo\\data\\LossFunctionExperimentSet"
     experimentSet = operator.Load_Experiment_Set(path)
     fit_gauss = True
     ret_time_corr = True
