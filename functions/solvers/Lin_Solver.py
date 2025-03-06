@@ -126,8 +126,8 @@ def data_struct_prep(length, Nx, Nt, feedTime, feedConc, time):
     """
     #___________________________________________________
     # Spatial discretization configuration
-    p_dense = 0.6  # percentage of the points in the dense segment
-    dense_space_ratio = 0.2  # fraction of the column length for the dense segment
+    p_dense = 0.5  # percentage of the points in the dense segment
+    dense_space_ratio = 0.4  # fraction of the column length for the dense segment
 
     # Calculate number of points and lengths for dense and sparse segments
     Nx_dense = int(round(Nx * p_dense))
@@ -146,7 +146,7 @@ def data_struct_prep(length, Nx, Nt, feedTime, feedConc, time):
 
     #___________________________________________________
     # Time discretization
-    denseSparseRatio = 0.8
+    denseSparseRatio = 0.7
     dense_steps = int(Nt * denseSparseRatio)
     sparse_steps = Nt - dense_steps
     dense_time = feedTime + feedTime * ((time / feedTime) / 20)
@@ -227,7 +227,7 @@ def Lin_Solver(flowRate = 150,       # Volume flowrate in [mL/h]
     # ______________________________________
     # DATA STRUCTURES PREPARATION
 
-    x, dx_dense, dx_sparse, t, dt_dense, dt_sparse, feed, c0, Nx_dense,denseSparseRatio = data_struct_prep(length, Nx, Nt, feedTime, feedConc, time)
+    x, dx_dense, dx_sparse, t, dt_dense, dt_sparse, feed, c0, Nx_dense, denseSparseRatio = data_struct_prep(length, Nx, Nt, feedTime, feedConc, time)
     # Preparation of the solution matrix
     c = np.zeros((Nt, Nx))
 

@@ -54,8 +54,8 @@ def Nonlin_Solver(
     # DATA STRUCTURES PREPARATION
     # Configuration
     Nx_total = Nx  # Total number of spatial points
-    p_dense = 0.6  # percentage of the points are in the dense segment
-    dense_space_ratio = 0.1  # fraction of the column lenght for the dense segment
+    p_dense = 0.5  # percentage of the points are in the dense segment
+    dense_space_ratio = 0.4  # fraction of the column lenght for the dense segment
 
     # The desired number of points in the dense segment
     Nx_dense_desired = int(round(Nx_total * p_dense))
@@ -99,6 +99,17 @@ def Nonlin_Solver(
     feedSteps = int(feedTime // dt_dense)  # Whole number of feed iterations
     feed = np.zeros(Nt)  # Initialize feed vector
 
+    if debugPrint:
+        dense_dense = flowSpeed * dt_dense / dx[0]
+        dense_sparse = flowSpeed * dt_dense / dx[-1]
+        sparse_dense = flowSpeed * dt_sparse / dx[0]
+        sparse_sparse = flowSpeed * dt_sparse / dx[-1]
+        print("\nCourant-Friedrichs-Lewy Numbers Matrix:")
+        print(f"{'':>15} | {'Dense Grid':>12} | {'Sparse Grid':>12}")
+        print("-" * 40)
+        print(f"{'Dense Time Step':>10} | {dense_dense:12.6f} | {dense_sparse:12.6f}")
+        print(f"{'Sparse Time Step':>10} | {sparse_dense:12.6f} | {sparse_sparse:12.6f}")
+
     # Set feed concentration values (get rid of extremely fast changes of feed concentration)
     for i in range(dense_steps):
         if i == 0:
@@ -129,16 +140,9 @@ def Nonlin_Solver(
     # Preparation of the solution matrix
     c = np.zeros((Nt, Nx))
 
-    # ________________________________________________________________________
     # DISCRETIZATION
-
-    # Following procedure evaluates each non-linear algebraic function in the resulting
-    # system of equations. The solution of this system is that c1
-    # which corresponds to vector f filled with zeros. c1 is unknown next time step.
-    # c0 is previous calculated time step. For time 0 c0 in zeros (initial condition)
-
     @jit(nopython=True)
-    def function(c1,
+    def discretization(c1,
                  c0,
                  feedCur,
                  porosity,
@@ -156,15 +160,14 @@ def Nonlin_Solver(
             dx_squared_i = dx_i ** 2
             dx_twice_i = dx_i * 2
             if i == 0:  # Left boundary
-                f[0] = ((((c0[1] - c0[0]) / dx_i) + ((c1[1] - c1[0]) / dx_i)) / 2) - (flowSpeed/disperCoef * (c1[0] - feedCur))
+                f[0] = ((((c0[1] - c0[0]) / dx_i) + ((c1[1] - c1[0]) / dx_i)) / 2) - \
+                       (flowSpeed/disperCoef * (c1[0] - feedCur))
             elif i > 0 and i < Nx - 1:
-                '''denominator0 = ((1 - porosity) * saturCoef * langmuirConst) / (
-                            (((langmuirConst * c0[i] + 1) ** 2) * porosity) + 1)
-                denominator1 = ((1 - porosity) * saturCoef * langmuirConst) / (
-                            (((langmuirConst * c1[i] + 1) ** 2) * porosity) + 1)'''
                 epsilon = 1e-10  # A small number to prevent division by zero
-                denominator0 = ((1 - porosity) * saturCoef * langmuirConst) / ((((langmuirConst * c0[i] + 1) ** 2) * porosity) + epsilon)
-                denominator1 = ((1 - porosity) * saturCoef * langmuirConst) / ((((langmuirConst * c1[i] + 1) ** 2) * porosity) + epsilon)
+                denominator0 = ((1 - porosity) * saturCoef * langmuirConst) / \
+                               ((((langmuirConst * c0[i] + 1) ** 2) * porosity) + epsilon)
+                denominator1 = ((1 - porosity) * saturCoef * langmuirConst) / \
+                               ((((langmuirConst * c1[i] + 1) ** 2) * porosity) + epsilon)
                 secondDer0 = (c0[i - 1] - 2 * c0[i] + c0[i + 1]) / (dx_squared_i)
                 secondDer1 = (c1[i - 1] - 2 * c1[i] + c1[i + 1]) / (dx_squared_i)
                 firstDer0 = (c0[i + 1] - c0[i - 1]) / (dx_twice_i)
@@ -177,34 +180,34 @@ def Nonlin_Solver(
                 f[Nx - 1] = (((c0[Nx - 1] - c0[Nx - 2]) / dx_i) + ((c1[Nx - 1] - c1[Nx - 2]) / dx_i)) / 2
         return f
 
-
-    # ________________________________________________________________________
     # SOLUTION ALGORITHM
-
     residuals = np.zeros(Nt)  # Initialize a vector to store the residuals
-
     for i in range(1, Nt):
         if debugPrint:
             if i == 1:
-                print('\nSolution algorithm has been started:')
+                print('\nSolution algorithm has started:')
             if i % (Nt // 20) == 0:
                 print(str(i) + ' steps has been finished ... ' + str(Nt - i) + ' steps remain.')
-
         if i <= dense_steps:
             dt = dt_dense
         else:
             dt = dt_sparse
-
         options = {'col_deriv': True}
-
-        sol = optimize.root(fun=function,
+        sol = optimize.root(fun=discretization,
                             x0=c[i - 1, :],
                             method='hybr',
-                            args=(c[i - 1, :], feed[i], porosity, langmuirConst, saturCoef, disperCoef, flowSpeed, dt, dx),
+                            args=(c[i - 1, :],
+                                  feed[i],
+                                  porosity,
+                                  langmuirConst,
+                                  saturCoef,
+                                  disperCoef,
+                                  flowSpeed,
+                                  dt,
+                                  dx),
                             options=options
                             )
-
-        c[i, :] = sol.x
+        c[i, :] = sol.x # Save solution concentrations matrix
         residuals[i] = np.linalg.norm(sol.fun)  # Save the L2-norm of the residuals at each time step
     # ________________________________________________________________________
     # MASS BALANCE CHECK
@@ -292,6 +295,24 @@ def Nonlin_Solver(
         plt.xlabel('Time [s]')
         plt.ylabel('Residuals')
         plt.show()
+    '''------------------------------------------------------------------------------'''
+    # Create a DataFrame with Time, Concentration (last column), and Feed
+    sheet = pd.DataFrame({
+        'Time': [(x / 60) for x in t],
+        'Concentration_Last': c[:, -1],
+        'Feed': feed
+        })
+
+    # Debug: Print all function arguments
+    print("\n=== Nonlin_Solver: Input Parameters ===")
+    for key, value in locals().items():
+        print(f"{key}: {value}")
+    print("=======================================\n")
+
+    '''# Save to Excel
+    output_file = "genFit_feedConc" + str(round(feedConc)) + "_ disper" + str(round(disperCoef)) + "_flow" + str(round(flowRate)) + ".xlsx"
+    sheet.to_excel(output_file, index=False)'''
+    '''-------------------------------------------------------------------------------'''
     if full:
         return [c, t, feed, residuals, massDifferencePerc]
     return [c, t]

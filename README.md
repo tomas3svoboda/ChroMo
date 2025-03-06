@@ -1,8 +1,8 @@
-# ChroMo
-Chromatography model determination
+# ChroMo PE
+Chromatography model Parameter Estimator
 This program serves as demonstration of the new approach of chromatography model parameters determination described in paper that is curretly being prepared
 
-Diagram of the functions architecture: https://drive.google.com/file/d/12WWNgDYQipY8OY_eu51zKs-shQmxNdz2/view?usp=sharing
+Diagram of the architecture: https://drive.google.com/file/d/12WWNgDYQipY8OY_eu51zKs-shQmxNdz2/view?usp=sharing
 
 ---
 
@@ -17,9 +17,9 @@ Diagram of the functions architecture: https://drive.google.com/file/d/12WWNgDYQ
 
 ## Description
 
-This application can calculate model parameters of chromatography process based on experimental data.
+This application can calculate parameters of chromatography model based on experimental data.
 
-Equilibrium dispersion model with linear and lanqmuir isotherm are implemented so far.
+Equilibrium dispersion model with linear and Lanqmuir isotherm are implemented so far.
 
 Application is in development.
 
@@ -60,7 +60,7 @@ Locally run application can be accessed with browser on address `localhost:6969`
 
 First you'll need to create an account and log in.
 
-After logging in, you will be redirected to page where you upload the files with the experimental data. Example file can be found [here](data/Suc_Glu_GE).
+After logging in, you will be redirected to page where you upload the files with the experimental data. Example files can be found [here](data/Suc_Glu_GE).
 
 Then you can choose between "Loss Function Analysis", "Manual Estimator" and "Optimization".
 

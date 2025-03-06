@@ -143,21 +143,21 @@ experimentCluster_preprocessed = operator_instance.Cluster_By_Component(experime
 #column diameter, flow rate, and commentary'''
 
 # Define params and grid:
-porosity = 0.3752
-B = [17, 17]  # Example Bodenstein numbers for two experiments
-langmuirConst_range = (0.11, 0.142)
-saturCoef_range = (10, 36)
+porosity = 0.376
+B = [16.7, 16.7]  # Example Bodenstein numbers for two experiments
+langmuirConst_range = (0.1, 0.34)
+saturCoef_range = (11, 34)
 #steps_langmuirConst = 40
 #steps_saturCoef = 40
-steps_langmuirConst = 5
-steps_saturCoef = 53
+steps_langmuirConst = 40
+steps_saturCoef = 100
 choice = 'Squares'  # Example loss function choice
 solver = 'Nonlin'
-factor = 3
+factor = 3 #selects relativization method
 spacialDiff = 30
 timeDiff = 3000
 total_time = 10800
-output_file = 'sensitivity_analysis_noPP_Glu2.xlsx'
+output_file = 'Glu_noPP_convexity.xlsx'
 component_names = ['Glu']  # Name of the component to analyze
 
 # Perform sensitivity analysis and save results to Excel
