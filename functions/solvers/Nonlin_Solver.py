@@ -303,12 +303,6 @@ def Nonlin_Solver(
         'Feed': feed
         })
 
-    # Debug: Print all function arguments
-    print("\n=== Nonlin_Solver: Input Parameters ===")
-    for key, value in locals().items():
-        print(f"{key}: {value}")
-    print("=======================================\n")
-
     '''# Save to Excel
     output_file = "genFit_feedConc" + str(round(feedConc)) + "_ disper" + str(round(disperCoef)) + "_flow" + str(round(flowRate)) + ".xlsx"
     sheet.to_excel(output_file, index=False)'''

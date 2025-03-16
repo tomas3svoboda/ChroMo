@@ -134,7 +134,7 @@ path = 'C:/UserData/z004d8nt/Documents/VSCHT/001_Paper_JChA/Paper1_Data/Suc_Glu_
 experimentSet = operator_instance.Load_Experiment_Set(path)  #create object of the set of experiments
 experimentCluster = operator_instance.Cluster_By_Component(experimentSet).clusters  # creates new object where components are clustered together
 print('Starting preprocessing')
-experimentSet_preprocessed = operator_instance.Preprocess(experimentSet, False, False, False, 0.01)  # does preprocessing
+experimentSet_preprocessed = operator_instance.Preprocess(experimentSet, True, True, True, 0.01)  # does preprocessing
 print('Preprocessing done')
 experimentCluster_preprocessed = operator_instance.Cluster_By_Component(experimentSet_preprocessed).clusters  # creates new object where components are clustered together
 
@@ -142,27 +142,30 @@ experimentCluster_preprocessed = operator_instance.Cluster_By_Component(experime
 #chromatogram itself and information about the experiment setup, namely feed volume and concentration, column lenght,
 #column diameter, flow rate, and commentary'''
 
-# Define params and grid:
-porosity = 0.376
-B = [16.7, 16.7]  # Example Bodenstein numbers for two experiments
-langmuirConst_range = (0.1, 0.34)
-saturCoef_range = (11, 34)
-#steps_langmuirConst = 40
-#steps_saturCoef = 40
-steps_langmuirConst = 40
-steps_saturCoef = 100
-choice = 'Squares'  # Example loss function choice
-solver = 'Nonlin'
-factor = 3 #selects relativization method
-spacialDiff = 30
-timeDiff = 3000
-total_time = 10800
-output_file = 'Glu_noPP_convexity.xlsx'
-component_names = ['Glu']  # Name of the component to analyze
 
-# Perform sensitivity analysis and save results to Excel
-for comp_name in component_names:
-    sensitivity_results = sensitivity_analysis_to_excel(porosity,
+for Bo in [14]:
+    # Define params and grid:
+    porosity = 0.3752
+    #B = [7.4, 7.4]  # Example Bodenstein numbers for two experiments
+    B = [Bo, Bo]
+    langmuirConst_range = (0.1, 0.7)
+    saturCoef_range = (5, 45)
+    #steps_langmuirConst = 40
+    #steps_saturCoef = 40
+    steps_langmuirConst = 61
+    steps_saturCoef = 61
+    choice = 'Squares'  # Example loss function choice
+    solver = 'Nonlin'
+    factor = 3 #selects relativization method
+    spacialDiff = 30
+    timeDiff = 3000
+    total_time = 10800
+    output_file = 'Suc_heatmapping_Bo' + str(Bo) + '.xlsx'
+    component_names = ['Suc']  # Name of the component to analyze
+
+    # Perform sensitivity analysis and save results to Excel
+    for comp_name in component_names:
+        sensitivity_results = sensitivity_analysis_to_excel(porosity,
                                                     B,
                                                     langmuirConst_range,
                                                     saturCoef_range,

@@ -77,16 +77,16 @@ max outlet concetration squared giving no-unit final value scaled by feed conc''
 # define initial guess and boundaries
 
 # Suc/Glu separation
-K_Suc, K_Suc_bounds = 1.046, (0.0001, 45.06)
-K_Glu, K_Glu_bounds = 2.926, (0.0001, 45.06)
+K_Suc, K_Suc_bounds = 1.0458, (0.0001, 45.06)
+K_Glu, K_Glu_bounds = 2.9256, (0.0001, 45.06)
 disperCoef1, disperCoef_bounds1 = 1, (1, 266500)
 initial_guess_lin = [K_Suc,K_Glu,disperCoef1]
 bounds_lin = [K_Suc_bounds,K_Glu_bounds,disperCoef_bounds1]
 
 # Suc/Glu separation
-KL_Suc, Q_Suc, KL_Suc_bounds, Q_Suc_bounds = 0.0487, 38.96, (0.006, 100000.0), (0.00001, 342.3)
-KL_Glu, Q_Glu, KL_Glu_bounds, Q_Glu_bounds = 0.1005, 39.00, (0.022, 100000.0), (0.00001, 180.2)
-disperCoef2, disperCoef_bounds2 = 9.7, (1.0, 266500)
+KL_Suc, Q_Suc, KL_Suc_bounds, Q_Suc_bounds = 0.06, 6.68, (0.008, 100000.0), (0.00001, 342.3)
+KL_Glu, Q_Glu, KL_Glu_bounds, Q_Glu_bounds = 0.14, 24.15, (0.029, 100000.0), (0.00001, 180.2)
+disperCoef2, disperCoef_bounds2 = 10.23, (1.0, 266500)
 initial_guess_nonlin = [KL_Suc, Q_Suc, KL_Glu, Q_Glu, disperCoef2]
 bounds_nonlin = [KL_Suc_bounds, Q_Suc_bounds, KL_Glu_bounds, Q_Glu_bounds, disperCoef_bounds2]
 
@@ -95,7 +95,7 @@ start_time = time.time()
 print('Starting optimization')
 
 # BEGINNING OF LINEAR CASE ------------------------------------------
-wrapper = LossFunctionWrapper(component_names, is_linear=True)
+'''wrapper = LossFunctionWrapper(component_names, is_linear=True)
 result = minimize(wrapper,
                   initial_guess_lin,
                   args=(component_names_all, flow_rates, diameters, lengths, feed_volumes, concentrations, chromatograms, uncertainties),
@@ -105,12 +105,12 @@ result = minimize(wrapper,
                           'xatol': 1e-1,
                           'fatol': 1e-3},
                   bounds=bounds_lin
-                  )
+                  )'''
 
 # END OF LINEAR CASE ------------------------------------------
 
 # BEGINNING OF NONLINEAR CASE (uncomment)------------------------------------------
-'''wrapper = LossFunctionWrapper(component_names, is_linear=False)
+wrapper = LossFunctionWrapper(component_names, is_linear=False)
 result = minimize(wrapper,
                   initial_guess_nonlin,
                   args=(component_names_all, flow_rates, diameters, lengths, feed_volumes, concentrations, chromatograms, uncertainties),
@@ -120,7 +120,7 @@ result = minimize(wrapper,
                           'xatol': 1e-2,
                           'fatol': 1e-4},
                   bounds=bounds_nonlin
-                  )'''
+                  )
 # END OF NONLINEAR CASE (uncomment)------------------------------------------
 
 # Calculate elapsed time
@@ -132,7 +132,7 @@ print(f"Optimization took {formatted_elapsed_time}.")
 
 optimized_params = result.x
 # Save the updated DataFrame to CSV
-wrapper.details_df.to_csv('optimization_run_lin_Corrected_LAST.csv', index=False)
+wrapper.details_df.to_csv('optimization_run_nonlin_LAST_CFLCorr.csv', index=False)
 
 #print('Plotting results')
 #plot_component_results_lin(component_names, optimized_params, component_names_all, flow_rates, diameters, lengths, feed_volumes, concentrations, chromatograms)

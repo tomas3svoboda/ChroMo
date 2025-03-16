@@ -47,12 +47,13 @@ def Single_Loss_Function_Squares(params, experimentComp, solver, factor, spacial
     elif factor == 7:
         errSum = errSum/((experimentComp.experiment.experimentCondition.feedVolume * experimentComp.feedConcentration)**2)
 
-    # Division square root of the number of elements
-    errSum = errSum / np.sqrt(len(df[experimentComp.name]))
-
     # WEIGHTING BY PREPROCESSING SCORE
     if experimentComp.preprocessingScore > 0:
         #print('NUMBER OF POINTS: ' + str(experimentComp.concentrationTime.shape[0]))
         errSum = errSum / (experimentComp.preprocessingScore * np.sqrt(experimentComp.concentrationTime.shape[0]))
+        print(experimentComp.concentrationTime.shape[0])
+    else:
+    # Division square root of the number of elements
+    errSum = errSum / np.sqrt(len(df[experimentComp.name]))
 
     return errSum
