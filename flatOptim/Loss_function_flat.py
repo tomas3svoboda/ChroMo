@@ -91,7 +91,8 @@ def Lin_loss_function_flat(params, component_names_all, flow_rates, diameters, l
             tmpErrSum += err
             if a > max:
                 max = a
-        tmpErrSum = tmpErrSum/(max**2)/(uncertainties[i] * np.sqrt(df.shape[0]))
+        tmpErrSum = tmpErrSum/(max**2)
+        tmpErrSum = tmpErrSum/(uncertainties[i] * np.sqrt(df.shape[0]))
         errSum += tmpErrSum
     return errSum
 
@@ -143,7 +144,8 @@ def Nonlin_loss_function_flat(params, component_names_all, flow_rates, diameters
             tmpErrSum += err
             if a > max:
                 max = a
-        tmpErrSum = tmpErrSum/(max**2)/(uncertainties[i] * np.sqrt(df.shape[0]))
+        tmpErrSum = tmpErrSum/(max**2)
+        tmpErrSum = tmpErrSum/(uncertainties[i] * np.sqrt(df.shape[0]))
         errSum += tmpErrSum
     return errSum
 

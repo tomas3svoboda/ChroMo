@@ -57,7 +57,7 @@ def sensitivity_analysis_to_excel(porosity, B, langmuirConst_range, saturCoef_ra
                 diameter = experimentComp.experiment.experimentCondition.columnDiameter
                 length = experimentComp.experiment.experimentCondition.columnLength
                 flowSpeed = (flowRate * 1000 / 3600) / ((math.pi * (diameter ** 2) / 4) * porosity)
-                disperCoef = (1 / B[idx]) * length * flowSpeed + A
+                disperCoef = (1 / B) * length * flowSpeed + A
 
                 # Parameters for the component under analysis
                 params = [porosity, langmuirConst, disperCoef, saturCoef]
@@ -143,28 +143,27 @@ experimentCluster_preprocessed = operator_instance.Cluster_By_Component(experime
 #column diameter, flow rate, and commentary'''
 
 
-for Bo in [14]:
-    # Define params and grid:
-    porosity = 0.3752
-    #B = [7.4, 7.4]  # Example Bodenstein numbers for two experiments
-    B = [Bo, Bo]
-    langmuirConst_range = (0.1, 0.7)
-    saturCoef_range = (5, 45)
-    #steps_langmuirConst = 40
-    #steps_saturCoef = 40
-    steps_langmuirConst = 61
-    steps_saturCoef = 61
-    choice = 'Squares'  # Example loss function choice
-    solver = 'Nonlin'
-    factor = 3 #selects relativization method
-    spacialDiff = 30
-    timeDiff = 3000
-    total_time = 10800
-    output_file = 'Suc_heatmapping_Bo' + str(Bo) + '.xlsx'
-    component_names = ['Suc']  # Name of the component to analyze
+# Define params and grid:
+porosity = 0.3752
+#B = [7.4, 7.4]  # Example Bodenstein numbers for two experiments
+B = 9.69
+langmuirConst_range = (0.0075, 0.010)
+saturCoef_range = (342.3, 342.31)
+#steps_langmuirConst = 40
+#steps_saturCoef = 40
+steps_langmuirConst = 2
+steps_saturCoef = 2
+choice = 'Squares'  # Example loss function choice
+solver = 'Nonlin'
+factor = 3 #selects relativization method
+spacialDiff = 30
+timeDiff = 3000
+total_time = 10800
+output_file = 'Glu_detail3_Bo7_35.xlsx'
+component_names = ['Glu']  # Name of the component to analyze
 
-    # Perform sensitivity analysis and save results to Excel
-    for comp_name in component_names:
+# Perform sensitivity analysis and save results to Excel
+for comp_name in component_names:
         sensitivity_results = sensitivity_analysis_to_excel(porosity,
                                                     B,
                                                     langmuirConst_range,
