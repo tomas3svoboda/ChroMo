@@ -164,9 +164,9 @@ def Nonlin_Solver(
                        (flowSpeed/disperCoef * (c1[0] - feedCur))
             elif i > 0 and i < Nx - 1:
                 epsilon = 1e-10  # A small number to prevent division by zero
-                denominator0 = ((1 - porosity) * saturCoef * langmuirConst) / \
+                denominator0 = 1+((1 - porosity) * saturCoef * langmuirConst) / \
                                ((((langmuirConst * c0[i] + 1) ** 2) * porosity) + epsilon)
-                denominator1 = ((1 - porosity) * saturCoef * langmuirConst) / \
+                denominator1 = 1+((1 - porosity) * saturCoef * langmuirConst) / \
                                ((((langmuirConst * c1[i] + 1) ** 2) * porosity) + epsilon)
                 secondDer0 = (c0[i - 1] - 2 * c0[i] + c0[i + 1]) / (dx_squared_i)
                 secondDer1 = (c1[i - 1] - 2 * c1[i] + c1[i + 1]) / (dx_squared_i)
