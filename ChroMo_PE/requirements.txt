@@ -1,5 +1,6 @@
 autograd==1.5
-Flask>=3.1.3
+Flask>=3.1.3; python_version>='3.9'
+Flask>=3.0.3; python_version<'3.9'
 Flask_Login>=0.6.2
 ipython>=8.10.0
 matplotlib>=3.5.2
@@ -7,11 +8,13 @@ mongoengine>=0.26.0
 numpy>=1.23.1
 pandas>=1.4.3
 scipy>=1.10.0
-waitress>=3.0.1
-Werkzeug>=3.1.6
+waitress>=3.0.1; python_version>='3.9'
+waitress>=3.0.0; python_version<'3.9'
+Werkzeug>=3.1.6; python_version>='3.9'
+Werkzeug>=3.0.6; python_version<'3.9'
 numba>=0.58.1
 openpyxl>=3.1.2
-# transitive deps pinned for security
-Pillow>=12.2.0
-fonttools>=4.60.2
-Pygments>=2.20.0
+# Transitive deps — patched versions require Python >=3.9
+Pillow>=12.2.0; python_version>='3.9'
+fonttools>=4.60.2; python_version>='3.9'
+Pygments>=2.20.0; python_version>='3.9'
