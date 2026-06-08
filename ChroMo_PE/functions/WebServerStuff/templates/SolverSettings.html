@@ -1,0 +1,158 @@
+{% extends "Layout.html" %}
+{% block title %}Solver Settings{% endblock %}
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/form.css') }}">
+{% endblock %}
+{% block navbar %}
+<div class="w3-top">
+  <div class="w3-bar siemens-blue w3-card w3-left-align w3-large">
+    <a class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large" href="javascript:void(0);" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
+    <a href="{{ url_for('get_main_page') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white">Home</a>
+    <a href="{{ url_for('upload_file_page') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white">Start</a>
+    {% if user %}
+    <div class="w3-bar-item w3-button w3-hide-small w3-padding-large  w3-white bar-right">{{user}}</div>
+    <a href="{{ url_for('logout') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white bar-right">Logout</a>
+    <a href="{{ url_for('get_projects_result_list') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-white bar-right">Results</a>
+    <a href="#" class="w3-bar-item w3-button w3-hide-small w3-padding-large  w3-white bar-right">Solver Settings</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block body %}
+<div class="w3-row-padding w3-padding-64 w3-container">
+  <div class="w3-content">
+     <h1>Solver Settings</h1>
+     <p style="color:#555;">All solvers implement the <strong>Equilibrium Dispersive Model (EDM)</strong>. Choose the backend for each isotherm type independently.</p>
+     <div style="background:#f0f4ff;border-left:4px solid #1a5276;padding:14px 18px;margin-bottom:22px;border-radius:3px;font-size:0.9em;line-height:1.6;">
+         <strong>Numerical scheme overview</strong><br>
+         All solvers implement the same physical model — the <em>Equilibrium Dispersive Model (EDM)</em> — but discretise it differently:
+         <table style="width:100%;border-collapse:collapse;margin-top:10px;font-size:0.9em;">
+           <thead>
+             <tr style="background:#d6e4f7;">
+               <th style="padding:6px 10px;text-align:left;border:1px solid #b0c8e8;">Solver</th>
+               <th style="padding:6px 10px;text-align:left;border:1px solid #b0c8e8;">Method</th>
+               <th style="padding:6px 10px;text-align:left;border:1px solid #b0c8e8;">Spatial parameter</th>
+               <th style="padding:6px 10px;text-align:left;border:1px solid #b0c8e8;">Notes</th>
+             </tr>
+           </thead>
+           <tbody>
+             <tr style="background:#fff;">
+               <td style="padding:6px 10px;border:1px solid #b0c8e8;">ChroMo Python / C++</td>
+               <td style="padding:6px 10px;border:1px solid #b0c8e8;"><strong>FDM</strong> — Finite Difference<br>(Crank-Nicolson implicit)</td>
+               <td style="padding:6px 10px;border:1px solid #b0c8e8;"><em>Nx</em> = number of grid <strong>points</strong></td>
+               <td style="padding:6px 10px;border:1px solid #b0c8e8;">Approximates derivatives; needs ~50–200 points for smooth peaks</td>
+             </tr>
+             <tr style="background:#f7fbff;">
+               <td style="padding:6px 10px;border:1px solid #b0c8e8;">CADET</td>
+               <td style="padding:6px 10px;border:1px solid #b0c8e8;"><strong>FVM</strong> — Finite Volume</td>
+               <td style="padding:6px 10px;border:1px solid #b0c8e8;"><em>ncol</em> = number of volume <strong>cells</strong></td>
+               <td style="padding:6px 10px;border:1px solid #b0c8e8;">Integrates equations over cells — conservative by construction; 10 cells can match 30+ FDM points</td>
+             </tr>
+           </tbody>
+         </table>
+         <br>
+         <strong>⚠ Nx and ncol are not directly comparable.</strong>
+         A CADET run with <em>ncol = 10</em> typically achieves accuracy equivalent to or better than ChroMo FDM with <em>Nx = 30</em>.
+         Increasing Nx improves FDM accuracy but also increases computation time quadratically.
+         CADET's FVM converges faster — use 10–30 cells for most runs.
+     </div>
+
+     <form method=post enctype=multipart/form-data class="form-style-1">
+
+         <label for="linearSolver">Linear isotherm solver <div class="required">*</div></label>
+         <select id="linearSolver" name="linearSolver" oninput="solverSettingsChange()">
+             <option value="Lin">ChroMo EDM (Python)</option>
+             <option value="CADET_Lin">CADET</option>
+         </select><br><br>
+
+         <label for="nonlinearSolver">Nonlinear isotherm solver (Langmuir) <div class="required">*</div></label>
+         <select id="nonlinearSolver" name="nonlinearSolver" oninput="solverSettingsChange()">
+             <option value="Nonlin_Python">ChroMo EDM (Python)</option>
+             <option value="Nonlin_CPP_FAST" {% if not cpp_available %}disabled title="C++ library not built"{% endif %}>ChroMo EDM (C++ Fast)</option>
+             <option value="Nonlin_CPP" {% if not cpp_available %}disabled title="C++ library not built"{% endif %}>ChroMo EDM (C++ Dynamic)</option>
+             <option value="CADET_Nonlin">CADET</option>
+         </select>
+         {% if not cpp_available %}
+         <p style="color:#888;font-size:0.85em;">C++ EDM options unavailable — build the library with <code>make</code> in the ChroMo_PE folder first.</p>
+         {% endif %}<br>
+
+         <label for="time">Time [s] <div class="required">*</div></label>
+         <input type="number" id="time" name="time"><br>
+         <label for="spacialDiff">ChroMo FDM — Nx (spatial grid points) <div class="required">*</div></label>
+         <input type="number" id="spacialDiff" name="spacialDiff">
+         <p style="color:#888;font-size:0.82em;margin-top:2px;">Applies to ChroMo Python and C++ solvers only. Typical range: 30–200.</p><br>
+         <label for="timeDiff">Number of time differences <div class="required">*</div></label>
+         <input type="number" id="timeDiff" name="timeDiff"><br><br>
+
+         <div id="cadetSection" style="display:none;">
+             <label for="cadetInstallPath">CADET install path</label>
+             <input type="text" id="cadetInstallPath" name="cadetInstallPath" style="width:100%;" placeholder="e.g. C:/Users/yourname/cadet_bin  (leave blank to auto-detect)">
+             <p style="color:#888;font-size:0.85em;">Directory containing <code>bin/cadet-cli.exe</code>. Leave blank to let the app search common locations automatically.</p><br>
+             <label for="cadetNcol">CADET number of column cells (FVM) <div class="required">*</div></label>
+             <input type="number" id="cadetNcol" name="cadetNcol" min="5" step="1" placeholder="50">
+             <p style="color:#888;font-size:0.85em;">
+                 CADET uses <strong>Finite Volume Method</strong> — not the same as the FDM spatial differences above.
+                 FVM is significantly more accurate per cell; <strong>10 cells</strong> can match or exceed ChroMo FDM with 30 grid points.
+                 Try 5–10 for fast runs, 20–50 for high accuracy.
+             </p><br>
+             <h3>CADET — Molar Masses</h3>
+             <p style="color:#888;font-size:0.85em;">
+                 Required for mass ↔ molar unit conversion inside CADET.
+                 Set one value per component from your uploaded experiments.
+                 {% if not compList %}No experiments loaded yet — upload data first.{% endif %}
+             </p>
+             {% if compList %}
+             {% for comp in compList %}
+             <label for="{{comp}}MolarMass">Molar mass [g/mol] — <strong>{{comp}}</strong> <div class="required">*</div></label>
+             <input type="number" id="{{comp}}MolarMass" name="{{comp}}MolarMass" min="1" step="any"><br>
+             {% endfor %}
+             {% else %}
+             <p style="color:#c44;font-size:0.9em;">No components found. Upload experiment files first, then return here.</p>
+             {% endif %}<br>
+         </div>
+
+         <input type="submit" value="Save" class="w3-button siemens-blue w3-padding-large w3-large w3-margin-top">
+    </form>
+    </div>
+</div>
+<script type="text/javascript">
+    function solverSettingsChange(){
+        let lin = document.getElementById("linearSolver").value
+        let nonlin = document.getElementById("nonlinearSolver").value
+        let show = (lin == "CADET_Lin" || nonlin == "CADET_Nonlin")
+        document.getElementById("cadetSection").style.display = show ? "block" : "none"
+    }
+
+    {% if formInfo and formInfo['linearSolver'] %}
+        document.getElementById("linearSolver").value = "{{formInfo['linearSolver']}}"
+    {% endif %}
+    {% if formInfo and formInfo['nonlinearSolver'] %}
+        document.getElementById("nonlinearSolver").value = "{{formInfo['nonlinearSolver']}}"
+    {% endif %}
+    {% if formInfo and formInfo['spacialDiff'] %}
+        document.getElementById("spacialDiff").value = {{formInfo['spacialDiff']}}
+    {% endif %}
+    {% if formInfo and formInfo['timeDiff'] %}
+        document.getElementById("timeDiff").value = {{formInfo['timeDiff']}}
+    {% endif %}
+    {% if formInfo and formInfo['time'] %}
+        document.getElementById("time").value = {{formInfo['time']}}
+    {% endif %}
+    {% if formInfo and formInfo['cadetInstallPath'] %}
+        document.getElementById("cadetInstallPath").value = "{{formInfo['cadetInstallPath']}}"
+    {% endif %}
+    {% if formInfo and formInfo['cadetNcol'] %}
+        document.getElementById("cadetNcol").value = {{formInfo['cadetNcol']}}
+    {% endif %}
+    {% if compList %}
+    {% for comp in compList %}
+    {% if formInfo and formInfo[comp + 'MolarMass'] %}
+        document.getElementById("{{comp}}MolarMass").value = {{formInfo[comp + 'MolarMass']}}
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+
+    solverSettingsChange()
+</script>
+{% endblock %}

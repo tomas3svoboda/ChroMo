@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+.eggs/
+
+# C++ build artifacts
+build/
+*.o
+*.obj
+*.lib
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Logs and runtime output
+*.log
+*ekf_log*.csv
+smb_log_*.csv
+smb_enfine_log_*.csv
+log_archive/
+
+# Runtime outputs - SMB result files
+result*.csv
+delta_monitor*.csv
+
+# Virtual environment
+venv/
+env/
+.env
+
+# OS
+Thumbs.db
+.DS_Store

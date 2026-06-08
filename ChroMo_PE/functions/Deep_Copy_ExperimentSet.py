@@ -1,0 +1,31 @@
+from ChroMo_PE.objects.ExperimentSet import ExperimentSet
+from ChroMo_PE.objects.ExperimentComponent import ExperimentComponent
+from ChroMo_PE.objects.Experiment import Experiment
+
+def Deep_Copy_ExperimentSet(experimentSet):
+    """Function that creates a deep copy of experiment set"""
+    newExperimentSet = ExperimentSet()
+    newExperimentSet.metadata.path = experimentSet.metadata.path
+    newExperimentSet.metadata.date = experimentSet.metadata.date
+    newExperimentSet.metadata.description = experimentSet.metadata.description
+    for experiment in experimentSet.experiments:
+        newExperiment = Experiment()
+        newExperiment.shift = experiment.shift
+        newExperiment.metadata.date = experiment.metadata.date
+        newExperiment.metadata.description = experiment.metadata.description
+        newExperiment.metadata.path = experiment.metadata.path
+        newExperiment.experimentCondition.flowRate = experiment.experimentCondition.flowRate
+        newExperiment.experimentCondition.feedVolume = experiment.experimentCondition.feedVolume
+        newExperiment.experimentCondition.deadVolume = experiment.experimentCondition.deadVolume
+        newExperiment.experimentCondition.columnLength = experiment.experimentCondition.columnLength
+        newExperiment.experimentCondition.columnDiameter = experiment.experimentCondition.columnDiameter
+        for experimentComponent in experiment.experimentComponents:
+            newExperimentComponent = ExperimentComponent()
+            newExperimentComponent.concentrationTime = experimentComponent.concentrationTime.copy(deep=True)
+            newExperimentComponent.name = experimentComponent.name
+            newExperimentComponent.feedConcentration = experimentComponent.feedConcentration
+            newExperimentComponent.experiment = newExperiment
+            newExperimentComponent.preprocessingScore = experimentComponent.preprocessingScore
+            newExperiment.experimentComponents.append(newExperimentComponent)
+        newExperimentSet.experiments.append(newExperiment)
+    return newExperimentSet
