@@ -13,7 +13,7 @@ from operator import add
 import flask_login
 import pandas as pd
 import numpy as np
-from flask import Flask, flash, request, redirect, url_for, send_file, render_template, json
+from flask import Flask, flash, request, redirect, url_for, send_file, send_from_directory, render_template, json
 import mongoengine as me
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -772,7 +772,7 @@ def Web_Server():
             filename = "table" + str(plotFileCounter) + ".csv"
             plotFileCounter += 1
             progress[2].to_csv('functions/WebServerStuff/static/tables/' + filename, index=False)
-            return send_file('static/tables/' + filename)
+            return send_from_directory('static/tables', filename)
 
 
     @api.route('/projects/test', methods=['POST'])
@@ -1206,7 +1206,7 @@ def Web_Server():
                 df.to_csv('functions/WebServerStuff/static/tables/' + filename, index=False)
                 zipf.write('functions/WebServerStuff/static/tables/' + filename, filename)
             zipf.close()
-            return send_file("static/tables/" + zipname)
+            return send_from_directory('static/tables', zipname)
 
     @api.route('/projects/params/result/<id>/progress', methods=['GET'])
     @flask_login.login_required
