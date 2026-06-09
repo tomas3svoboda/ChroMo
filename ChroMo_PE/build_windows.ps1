@@ -5,14 +5,24 @@ $ErrorActionPreference = "Stop"
 
 $SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $BUILD_DIR  = Join-Path $SCRIPT_DIR "build"
-$PYBIND11_DIR = & "c:\Users\z004d8nt\PycharmProjects\DisertationTSV\venv\Scripts\python.exe" -c "import pybind11; print(pybind11.get_cmake_dir())"
+
+# Resolve Python: prefer venv adjacent to ChroMo_PE (../venv), else active python
+$VENV_PYTHON = Join-Path $SCRIPT_DIR "..\venv\Scripts\python.exe"
+if (Test-Path $VENV_PYTHON) {
+    $PYTHON_EXE = (Resolve-Path $VENV_PYTHON).Path
+} else {
+    $PYTHON_EXE = (Get-Command python).Source
+}
+Write-Host "Using Python: $PYTHON_EXE"
+$PYBIND11_DIR = & $PYTHON_EXE -c "import pybind11; print(pybind11.get_cmake_dir())"
 
 Write-Host "== Configuring with CMake (Visual Studio 17 2022, x64) =="
 New-Item -ItemType Directory -Force -Path $BUILD_DIR | Out-Null
 cmake -S $SCRIPT_DIR -B $BUILD_DIR `
       -G "Visual Studio 17 2022" -A x64 `
       -DCMAKE_BUILD_TYPE=Release `
-      "-Dpybind11_DIR=$PYBIND11_DIR"
+      "-Dpybind11_DIR=$PYBIND11_DIR" `
+      "-DPython_EXECUTABLE=$PYTHON_EXE"
 
 if (-not $?) { Write-Error "CMake configure failed"; exit 1 }
 
